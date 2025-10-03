@@ -130,70 +130,102 @@ def fetch_google_scholar_data(scholar_id: str) -> dict:
 
 def fetch_scopus_publications(author_id: str, limit: int = 10) -> List[dict]:
     """Fetch recent publications from SCOPUS"""
-    try:
-        url = f"https://www.scopus.com/authid/detail.uri?authorId={author_id}"
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    # For now, return mock data as SCOPUS requires authentication and has anti-bot protection
+    # In production, you would use SCOPUS API with proper credentials
+    mock_publications = [
+        {
+            'title': 'Microplastics and emerging contaminants in Selangor River Basin: Environmental forensics and risk assessment',
+            'authors': 'Ahmad Zaharin Aris, Mohd Harun Abdullah, Ahmed Mukhtar',
+            'journal': 'Science of The Total Environment',
+            'year': 2024,
+            'doi': '10.1016/j.scitotenv.2024.169891',
+            'citations': 15,
+            'scopus_id': 'SCOPUS_ID_1'
+        },
+        {
+            'title': 'Hydrochemical characterization and water quality assessment of riverine systems in tropical regions',
+            'authors': 'Ahmad Zaharin Aris, Hafizan Juahir, Sharifuddin M. Zain',
+            'journal': 'Environmental Monitoring and Assessment',
+            'year': 2024,
+            'doi': '10.1007/s10661-024-12234-x',
+            'citations': 8,
+            'scopus_id': 'SCOPUS_ID_2'
+        },
+        {
+            'title': 'Advanced analytical methods for endocrine disrupting compounds in aquatic environments',
+            'authors': 'Ahmad Zaharin Aris, Mohammad Firuzz Alam Siddiquee',
+            'journal': 'Analytical Chemistry',
+            'year': 2023,
+            'doi': '10.1021/acs.analchem.2023.12345',
+            'citations': 22,
+            'scopus_id': 'SCOPUS_ID_3'
+        },
+        {
+            'title': 'Environmental forensics applications in pollution source identification and apportionment',
+            'authors': 'Ahmad Zaharin Aris, Fatimah Md Yusoff, Hafizan Juahir',
+            'journal': 'Environmental Forensics',
+            'year': 2023,
+            'doi': '10.1080/15275922.2023.2187456',
+            'citations': 18,
+            'scopus_id': 'SCOPUS_ID_4'
+        },
+        {
+            'title': 'Geochemical baseline and risk assessment of heavy metals in sediments from Malaysian rivers',
+            'authors': 'Ahmad Zaharin Aris, Wan Mohd Khalik Wan Abdullah',
+            'journal': 'Marine Pollution Bulletin',
+            'year': 2023,
+            'doi': '10.1016/j.marpolbul.2023.114567',
+            'citations': 12,
+            'scopus_id': 'SCOPUS_ID_5'
+        },
+        {
+            'title': 'Sustainable treatment technologies for endocrine disrupting compounds in wastewater',
+            'authors': 'Ahmad Zaharin Aris, Nurul Huda Ahmad Ishak',
+            'journal': 'Journal of Cleaner Production',
+            'year': 2023,
+            'doi': '10.1016/j.jclepro.2023.136789',
+            'citations': 9,
+            'scopus_id': 'SCOPUS_ID_6'
+        },
+        {
+            'title': 'Multivariate analysis of water quality parameters in tropical river systems',
+            'authors': 'Ahmad Zaharin Aris, Hafizan Juahir, Azman Azid',
+            'journal': 'Ecological Indicators',
+            'year': 2022,
+            'doi': '10.1016/j.ecolind.2022.108934',
+            'citations': 25,
+            'scopus_id': 'SCOPUS_ID_7'
+        },
+        {
+            'title': 'Source identification and health risk assessment of heavy metals in urban river sediments',
+            'authors': 'Ahmad Zaharin Aris, Mohd Khairul Nizam Mohd Zain',
+            'journal': 'Environmental Geochemistry and Health',
+            'year': 2022,
+            'doi': '10.1007/s10653-022-01234-x',
+            'citations': 17,
+            'scopus_id': 'SCOPUS_ID_8'
+        },
+        {
+            'title': 'Chemometric approach for pollution source apportionment in river systems',
+            'authors': 'Ahmad Zaharin Aris, Fatimah Md Yusoff, Sharifuddin M. Zain',
+            'journal': 'Chemosphere',
+            'year': 2022,
+            'doi': '10.1016/j.chemosphere.2022.134567',
+            'citations': 31,
+            'scopus_id': 'SCOPUS_ID_9'
+        },
+        {
+            'title': 'Assessment of pharmaceutical residues in Malaysian river water using LC-MS/MS',
+            'authors': 'Ahmad Zaharin Aris, Ahmad Shakir Mohd Saudi',
+            'journal': 'Journal of Environmental Management',
+            'year': 2022,
+            'doi': '10.1016/j.jenvman.2022.115678',
+            'citations': 14,
+            'scopus_id': 'SCOPUS_ID_10'
         }
-        
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
-        
-        # For now, return mock data as SCOPUS requires authentication
-        # In production, you would use SCOPUS API with proper credentials
-        mock_publications = [
-            {
-                'title': 'Microplastics and emerging contaminants in Selangor River Basin: Environmental forensics and risk assessment',
-                'authors': 'Ahmad Zaharin Aris, Mohd Harun Abdullah, Ahmed Mukhtar',
-                'journal': 'Science of The Total Environment',
-                'year': 2024,
-                'doi': '10.1016/j.scitotenv.2024.169891',
-                'citations': 15,
-                'scopus_id': 'SCOPUS_ID_1'
-            },
-            {
-                'title': 'Hydrochemical characterization and water quality assessment of riverine systems in tropical regions',
-                'authors': 'Ahmad Zaharin Aris, Hafizan Juahir, Sharifuddin M. Zain',
-                'journal': 'Environmental Monitoring and Assessment',
-                'year': 2024,
-                'doi': '10.1007/s10661-024-12234-x',
-                'citations': 8,
-                'scopus_id': 'SCOPUS_ID_2'
-            },
-            {
-                'title': 'Advanced analytical methods for endocrine disrupting compounds in aquatic environments',
-                'authors': 'Ahmad Zaharin Aris, Mohammad Firuzz Alam Siddiquee',
-                'journal': 'Analytical Chemistry',
-                'year': 2023,
-                'doi': '10.1021/acs.analchem.2023.12345',
-                'citations': 22,
-                'scopus_id': 'SCOPUS_ID_3'
-            },
-            {
-                'title': 'Environmental forensics applications in pollution source identification and apportionment',
-                'authors': 'Ahmad Zaharin Aris, Fatimah Md Yusoff, Hafizan Juahir',
-                'journal': 'Environmental Forensics',
-                'year': 2023,
-                'doi': '10.1080/15275922.2023.2187456',
-                'citations': 18,
-                'scopus_id': 'SCOPUS_ID_4'
-            },
-            {
-                'title': 'Geochemical baseline and risk assessment of heavy metals in sediments from Malaysian rivers',
-                'authors': 'Ahmad Zaharin Aris, Wan Mohd Khalik Wan Abdullah',
-                'journal': 'Marine Pollution Bulletin',
-                'year': 2023,
-                'doi': '10.1016/j.marpolbul.2023.114567',
-                'citations': 12,
-                'scopus_id': 'SCOPUS_ID_5'
-            }
-        ]
-        
-        return mock_publications[:limit]
-        
-    except Exception as e:
-        print(f"Error fetching SCOPUS publications: {e}")
-        return []
+    ]
+    
+    return mock_publications[:limit]
 
 # Initialize default data
 async def initialize_default_data():
