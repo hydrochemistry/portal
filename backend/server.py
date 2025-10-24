@@ -700,7 +700,11 @@ async def upload_ris_file(file: UploadFile = File(...), current_user: User = Dep
 @api_router.get("/settings")
 async def get_site_settings():
     settings = await db.site_settings.find_one({})
-    return settings or {}
+    if settings:
+        # Remove MongoDB ObjectId which is not JSON serializable
+        settings.pop('_id', None)
+        return settings
+    return {}
 
 @api_router.put("/admin/settings")
 async def update_site_settings(settings: SiteSettings, current_user: User = Depends(get_admin_user)):
