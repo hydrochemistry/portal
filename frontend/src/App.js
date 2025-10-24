@@ -95,8 +95,21 @@ const ProtectedRoute = ({ children, requireAdmin = false, requireSuperAdmin = fa
 // Navigation Component
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [settings, setSettings] = useState({});
   const location = useLocation();
   const { user, logout, isAdmin } = useAuth();
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await axios.get(`${API}/settings`);
+        setSettings(response.data);
+      } catch (error) {
+        console.error('Error fetching settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const navItems = [
     { path: '/', label: 'Home', icon: <Beaker className="w-4 h-4" /> },
