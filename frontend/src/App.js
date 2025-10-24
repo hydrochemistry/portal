@@ -351,7 +351,7 @@ const HomePage = () => {
         setCitations(citationsRes.data);
         setRecentNews(newsRes.data);
         setFeaturedNews(featuredNewsRes.data);
-        setResearchHighlights(highlightsRes.data?.slice(0, 3) || []);
+        setResearchHighlights(Array.isArray(highlightsRes.data) ? highlightsRes.data.slice(0, 3) : []);
         setSupervisorProfile(settingsRes.data?.supervisor_profile || {});
       } catch (error) {
         console.error('Error fetching home data:', error);
