@@ -1,27 +1,44 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, File, UploadFile, Form
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 from pathlib import Path
-from pydantic import BaseModel, Field
-from typing import List, Optional
+from pydantic import BaseModel, Field, EmailStr
+from typing import List, Optional, Dict, Any
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import requests
 from bs4 import BeautifulSoup
 import re
 import asyncio
 from functools import lru_cache
+import bcrypt
+import jwt
+from PIL import Image
+import io
+import base64
+import rispy
+import json
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+
+# Security settings
+SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-here-change-in-production')
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
+
+# Create uploads directory
+uploads_dir = ROOT_DIR / 'uploads'
+uploads_dir.mkdir(exist_ok=True)
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -29,32 +46,135 @@ app = FastAPI()
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
-# Define Models
-class StatusCheck(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+# Security
+security = HTTPBearer()
 
-class StatusCheckCreate(BaseModel):
-    client_name: str
+# User Models
+class UserRole(str):
+    SUPER_ADMIN = "super_admin"
+    ADMIN = "admin"
+    USER = "user"
+
+class User(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    email: EmailStr
+    name: str
+    role: str = UserRole.USER
+    is_approved: bool = False
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    approved_by: Optional[str] = None
+    approved_at: Optional[datetime] = None
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    name: str
+    password: str
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    user: Dict[str, Any]
+
+# Content Models
+class SiteSettings(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    logo_url: Optional[str] = None
+    lab_name: str = "Hydrochemistry Research Group"
+    about_content: str = ""
+    supervisor_profile: Dict[str, Any] = {}
+    scopus_author_id: str = "22133247800"
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_by: str = ""
+
+class TeamMember(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    position: str
+    email: str
+    bio: str
+    photo_url: Optional[str] = None
+    scopus_id: Optional[str] = None
+    google_scholar: Optional[str] = None
+    orcid: Optional[str] = None
+    research_focus: Optional[str] = None
+    current_work: Optional[str] = None
+    is_supervisor: bool = False
+    order_index: int = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ResearchGrant(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    funding_amount: Optional[str] = None
+    start_year: int
+    end_year: int
+    funding_agency: str
+    description: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class Award(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    year: int
+    title: str
+    awarding_organization: str
+    description: Optional[str] = None
+    recipient: str = "Prof. Dr. Ahmad Zaharin Aris"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ResearchHighlight(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: str
+    image_url: Optional[str] = None
+    link_url: Optional[str] = None
+    is_featured: bool = False
+    order_index: int = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class StaticPublication(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    authors: str
+    journal: str
+    year: int
+    volume: Optional[str] = None
+    issue: Optional[str] = None
+    pages: Optional[str] = None
+    doi: Optional[str] = None
+    abstract: Optional[str] = None
+    keywords: List[str] = []
+    publication_type: str = "journal_article"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class NewsArticle(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str
     content: str
     author: str
+    image_url: Optional[str] = None
+    is_featured: bool = False
+    is_published: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_by: str = ""
 
-class NewsArticleCreate(BaseModel):
-    title: str
-    content: str
-    author: str
-
-class NewsArticleUpdate(BaseModel):
-    title: Optional[str] = None
+class PageContent(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    page_name: str  # 'team', 'research', 'publications', 'news'
+    header_image_url: Optional[str] = None
     content: Optional[str] = None
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+# Existing models (keeping for compatibility)
+class StatusCheck(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    client_name: str
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class Publication(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -72,16 +192,6 @@ class CitationMetrics(BaseModel):
     i10_index: int
     last_updated: datetime
 
-class TeamMember(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str
-    position: str
-    email: str
-    bio: str
-    image_url: Optional[str] = None
-    google_scholar: Optional[str] = None
-    orcid: Optional[str] = None
-
 class ResearchArea(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str
@@ -89,7 +199,106 @@ class ResearchArea(BaseModel):
     keywords: List[str]
     image_url: Optional[str] = None
 
-# Data fetching functions
+# Utility functions
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+def verify_password(password: str, hashed: str) -> bool:
+    return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    try:
+        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+    except jwt.PyJWTError:
+        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+    
+    user = await db.users.find_one({"email": email})
+    if user is None:
+        raise HTTPException(status_code=401, detail="User not found")
+    if not user.get("is_approved") or not user.get("is_active"):
+        raise HTTPException(status_code=401, detail="User not approved or inactive")
+    
+    return User(**user)
+
+async def get_admin_user(current_user: User = Depends(get_current_user)):
+    if current_user.role not in [UserRole.ADMIN, UserRole.SUPER_ADMIN]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return current_user
+
+async def get_super_admin_user(current_user: User = Depends(get_current_user)):
+    if current_user.role != UserRole.SUPER_ADMIN:
+        raise HTTPException(status_code=403, detail="Super admin access required")
+    return current_user
+
+def resize_image(image_data: bytes, max_width: int = 800, max_height: int = 600, quality: int = 85) -> bytes:
+    """Resize image while maintaining aspect ratio"""
+    try:
+        image = Image.open(io.BytesIO(image_data))
+        
+        # Convert to RGB if necessary
+        if image.mode in ('RGBA', 'LA', 'P'):
+            background = Image.new('RGB', image.size, (255, 255, 255))
+            if image.mode == 'P':
+                image = image.convert('RGBA')
+            background.paste(image, mask=image.split()[-1] if image.mode == 'RGBA' else None)
+            image = background
+        
+        # Calculate new dimensions
+        width, height = image.size
+        ratio = min(max_width/width, max_height/height)
+        
+        if ratio < 1:
+            new_width = int(width * ratio)
+            new_height = int(height * ratio)
+            image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+        
+        # Save to bytes
+        output = io.BytesIO()
+        image.save(output, format='JPEG', quality=quality, optimize=True)
+        return output.getvalue()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Image processing failed: {str(e)}")
+
+def parse_ris_file(file_content: str) -> List[dict]:
+    """Parse RIS file and extract publication data"""
+    try:
+        entries = rispy.loads(file_content)
+        publications = []
+        
+        for entry in entries:
+            pub = {
+                'title': entry.get('title', [''])[0] if entry.get('title') else '',
+                'authors': ', '.join(entry.get('authors', [])),
+                'journal': entry.get('journal_name', [''])[0] if entry.get('journal_name') else '',
+                'year': int(entry.get('year', [0])[0]) if entry.get('year') and entry.get('year')[0] else 0,
+                'volume': entry.get('volume', [''])[0] if entry.get('volume') else '',
+                'issue': entry.get('number', [''])[0] if entry.get('number') else '',
+                'pages': entry.get('start_page', [''])[0] if entry.get('start_page') else '',
+                'doi': entry.get('doi', [''])[0] if entry.get('doi') else '',
+                'abstract': entry.get('abstract', [''])[0] if entry.get('abstract') else '',
+                'keywords': entry.get('keywords', []),
+                'publication_type': entry.get('type_of_reference', 'journal_article')
+            }
+            if pub['title']:  # Only add if title exists
+                publications.append(pub)
+        
+        return publications
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"RIS file parsing failed: {str(e)}")
+
 def fetch_google_scholar_data(scholar_id: str) -> dict:
     """Fetch citation metrics from Google Scholar"""
     try:
@@ -128,10 +337,9 @@ def fetch_google_scholar_data(scholar_id: str) -> dict:
         'last_updated': datetime.now(timezone.utc)
     }
 
-def fetch_scopus_publications(author_id: str, limit: int = 10) -> List[dict]:
-    """Fetch recent publications from SCOPUS"""
-    # For now, return mock data as SCOPUS requires authentication and has anti-bot protection
-    # In production, you would use SCOPUS API with proper credentials
+def fetch_scopus_publications_api(author_id: str, limit: int = 10) -> List[dict]:
+    """Fetch publications from SCOPUS API (mock for now as we need API key)"""
+    # Mock data for now - in production, replace with actual SCOPUS API calls
     mock_publications = [
         {
             'title': 'Microplastics and emerging contaminants in Selangor River Basin: Environmental forensics and risk assessment',
@@ -231,6 +439,52 @@ def fetch_scopus_publications(author_id: str, limit: int = 10) -> List[dict]:
 async def initialize_default_data():
     """Initialize database with default research group data"""
     
+    # Create super admin user if not exists
+    existing_admin = await db.users.find_one({'email': 'zaharin@upm.edu.my'})
+    if not existing_admin:
+        admin_user = {
+            'id': str(uuid.uuid4()),
+            'email': 'zaharin@upm.edu.my',
+            'name': 'Prof. Dr. Ahmad Zaharin Aris',
+            'password_hash': hash_password('admin123'),  # Change this in production
+            'role': UserRole.SUPER_ADMIN,
+            'is_approved': True,
+            'is_active': True,
+            'created_at': datetime.now(timezone.utc)
+        }
+        await db.users.insert_one(admin_user)
+    
+    # Initialize site settings
+    existing_settings = await db.site_settings.find_one({})
+    if not existing_settings:
+        settings = {
+            'id': str(uuid.uuid4()),
+            'lab_name': 'Hydrochemistry Research Group',
+            'about_content': '''The Hydrochemistry Research Group at Universiti Putra Malaysia is a leading center for environmental chemistry research. Under the direction of Professor Dr. Ahmad Zaharin Aris, we focus on cutting-edge research in water quality, environmental forensics, and emerging contaminants.
+
+Our multidisciplinary approach combines analytical chemistry, environmental science, and sustainable technology to address critical environmental challenges facing our region and the world.''',
+            'supervisor_profile': {
+                'name': 'Prof. Dr. Ahmad Zaharin Aris',
+                'position': 'Professor & Director of I-AQUAS',
+                'short_cv': '''Professor Ahmad Zaharin Aris is a leading expert in hydrochemistry and environmental chemistry. He serves as the Director of the International Institute of Aquaculture and Aquatic Sciences (I-AQUAS) at UPM. His research focuses on environmental forensics, water quality assessment, and emerging contaminants in aquatic systems.
+
+He has published over 200 peer-reviewed articles and has been recognized internationally for his contributions to environmental science.''',
+                'education': [
+                    'Ph.D. in Environmental Chemistry, Universiti Putra Malaysia',
+                    'M.Sc. in Chemistry, Universiti Putra Malaysia', 
+                    'B.Sc. in Chemistry, Universiti Putra Malaysia'
+                ],
+                'experience': [
+                    'Professor, Faculty of Environmental Studies, UPM (2015-present)',
+                    'Associate Professor, Faculty of Environmental Studies, UPM (2010-2015)',
+                    'Senior Lecturer, Faculty of Environmental Studies, UPM (2005-2010)'
+                ]
+            },
+            'scopus_author_id': '22133247800',
+            'updated_at': datetime.now(timezone.utc)
+        }
+        await db.site_settings.insert_one(settings)
+    
     # Check if team members exist
     existing_members = await db.team_members.count_documents({})
     if existing_members == 0:
@@ -240,27 +494,36 @@ async def initialize_default_data():
                 'name': 'Prof. Dr. Ahmad Zaharin Aris',
                 'position': 'Professor & Director of I-AQUAS',
                 'email': 'zaharin@upm.edu.my',
-                'bio': 'Professor Ahmad Zaharin Aris is a leading expert in hydrochemistry and environmental chemistry. He serves as the Director of the International Institute of Aquaculture and Aquatic Sciences (I-AQUAS) at UPM. His research focuses on environmental forensics, water quality assessment, and emerging contaminants in aquatic systems.',
+                'bio': 'Professor Ahmad Zaharin Aris is a leading expert in hydrochemistry and environmental chemistry. He serves as the Director of the International Institute of Aquaculture and Aquatic Sciences (I-AQUAS) at UPM.',
+                'scopus_id': '22133247800',
                 'google_scholar': 'https://scholar.google.com/citations?user=7pUFcrsAAAAJ&hl=en',
-                'orcid': 'https://orcid.org/0000-0002-4827-0750'
+                'orcid': 'https://orcid.org/0000-0002-4827-0750',
+                'research_focus': 'Environmental forensics, hydrochemistry, emerging contaminants',
+                'current_work': 'Leading research on microplastics and endocrine disruptors in aquatic systems',
+                'is_supervisor': True,
+                'order_index': 1
             },
             {
                 'id': str(uuid.uuid4()),
                 'name': 'Dr. Hafizan Juahir',
                 'position': 'Associate Professor',
                 'email': 'hafizan@upm.edu.my',
-                'bio': 'Associate Professor specializing in environmental statistics and chemometrics. Research interests include multivariate analysis of environmental data and water quality modeling.',
-                'google_scholar': '',
-                'orcid': ''
+                'bio': 'Associate Professor specializing in environmental statistics and chemometrics.',
+                'research_focus': 'Multivariate analysis, water quality modeling',
+                'current_work': 'Developing statistical models for environmental data analysis',
+                'is_supervisor': False,
+                'order_index': 2
             },
             {
                 'id': str(uuid.uuid4()),
                 'name': 'Dr. Fatimah Md Yusoff',
                 'position': 'Senior Lecturer',
                 'email': 'fatimah@upm.edu.my',
-                'bio': 'Senior Lecturer with expertise in aquatic ecology and environmental impact assessment. Focus on the effects of pollutants on aquatic organisms and ecosystem health.',
-                'google_scholar': '',
-                'orcid': ''
+                'bio': 'Senior Lecturer with expertise in aquatic ecology and environmental impact assessment.',
+                'research_focus': 'Aquatic ecology, environmental impact assessment',
+                'current_work': 'Studying effects of pollutants on aquatic organisms',
+                'is_supervisor': False,
+                'order_index': 3
             }
         ]
         
@@ -304,72 +567,321 @@ async def initialize_default_data():
         
         await db.research_areas.insert_many(research_areas)
 
-# API Routes
-@api_router.get("/")
-async def root():
-    return {"message": "Hydrochemistry Research Group API"}
+# Authentication endpoints
+@api_router.post("/auth/register")
+async def register(user_data: UserCreate):
+    # Check if user already exists
+    existing_user = await db.users.find_one({'email': user_data.email})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Create new user
+    user_dict = user_data.dict()
+    user_dict['password_hash'] = hash_password(user_dict.pop('password'))
+    user_dict['id'] = str(uuid.uuid4())
+    user_dict['role'] = UserRole.USER
+    user_dict['is_approved'] = False
+    user_dict['is_active'] = True
+    user_dict['created_at'] = datetime.now(timezone.utc)
+    
+    await db.users.insert_one(user_dict)
+    
+    return {"message": "User registered successfully. Waiting for admin approval."}
 
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.dict()
-    status_obj = StatusCheck(**status_dict)
-    await db.status_checks.insert_one(status_obj.dict())
-    return status_obj
+@api_router.post("/auth/login", response_model=Token)
+async def login(user_data: UserLogin):
+    # Find user
+    user = await db.users.find_one({'email': user_data.email})
+    if not user or not verify_password(user_data.password, user['password_hash']):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    if not user.get('is_approved') or not user.get('is_active'):
+        raise HTTPException(status_code=401, detail="Account not approved or inactive")
+    
+    # Create access token
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user['email']}, expires_delta=access_token_expires
+    )
+    
+    user_data = {k: v for k, v in user.items() if k != 'password_hash'}
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": user_data
+    }
 
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    status_checks = await db.status_checks.find().to_list(1000)
-    return [StatusCheck(**status_check) for status_check in status_checks]
+# User management endpoints (Super Admin only)
+@api_router.get("/admin/users")
+async def get_pending_users(current_user: User = Depends(get_super_admin_user)):
+    users = await db.users.find({}).to_list(100)
+    return [{k: v for k, v in user.items() if k != 'password_hash'} for user in users]
 
-# News endpoints
-@api_router.post("/news", response_model=NewsArticle)
-async def create_news_article(article: NewsArticleCreate):
+@api_router.post("/admin/users/{user_id}/approve")
+async def approve_user(user_id: str, current_user: User = Depends(get_super_admin_user)):
+    result = await db.users.update_one(
+        {'id': user_id},
+        {
+            '$set': {
+                'is_approved': True,
+                'approved_by': current_user.id,
+                'approved_at': datetime.now(timezone.utc)
+            }
+        }
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"message": "User approved successfully"}
+
+@api_router.post("/admin/users/{user_id}/role")
+async def update_user_role(user_id: str, role: str, current_user: User = Depends(get_super_admin_user)):
+    if role not in [UserRole.USER, UserRole.ADMIN]:
+        raise HTTPException(status_code=400, detail="Invalid role")
+    
+    result = await db.users.update_one(
+        {'id': user_id},
+        {'$set': {'role': role}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"message": "User role updated successfully"}
+
+# File upload endpoints
+@api_router.post("/upload/image")
+async def upload_image(file: UploadFile = File(...), current_user: User = Depends(get_admin_user)):
+    if not file.content_type.startswith('image/'):
+        raise HTTPException(status_code=400, detail="File must be an image")
+    
+    # Read and resize image
+    content = await file.read()
+    resized_content = resize_image(content)
+    
+    # Save file
+    file_id = str(uuid.uuid4())
+    file_path = uploads_dir / f"{file_id}.jpg"
+    with open(file_path, 'wb') as f:
+        f.write(resized_content)
+    
+    # Return base64 encoded image for immediate use
+    image_base64 = base64.b64encode(resized_content).decode('utf-8')
+    image_url = f"data:image/jpeg;base64,{image_base64}"
+    
+    return {"url": image_url, "file_id": file_id}
+
+@api_router.post("/upload/ris")
+async def upload_ris_file(file: UploadFile = File(...), current_user: User = Depends(get_admin_user)):
+    if not file.filename.endswith('.ris'):
+        raise HTTPException(status_code=400, detail="File must be a RIS file")
+    
+    # Read and parse RIS file
+    content = await file.read()
+    content_str = content.decode('utf-8')
+    
+    publications = parse_ris_file(content_str)
+    
+    # Save publications to database
+    for pub_data in publications:
+        pub_dict = pub_data.copy()
+        pub_dict['id'] = str(uuid.uuid4())
+        pub_dict['created_at'] = datetime.now(timezone.utc)
+        
+        # Insert if not exists (check by title and year)
+        existing = await db.static_publications.find_one({
+            'title': pub_dict['title'],
+            'year': pub_dict['year']
+        })
+        if not existing:
+            await db.static_publications.insert_one(pub_dict)
+    
+    return {"message": f"Successfully parsed and saved {len(publications)} publications"}
+
+# Site settings endpoints
+@api_router.get("/settings")
+async def get_site_settings():
+    settings = await db.site_settings.find_one({})
+    return settings or {}
+
+@api_router.put("/admin/settings")
+async def update_site_settings(settings: SiteSettings, current_user: User = Depends(get_admin_user)):
+    settings_dict = settings.dict()
+    settings_dict['updated_at'] = datetime.now(timezone.utc)
+    settings_dict['updated_by'] = current_user.id
+    
+    await db.site_settings.replace_one({}, settings_dict, upsert=True)
+    return {"message": "Settings updated successfully"}
+
+# Team management endpoints
+@api_router.get("/team", response_model=List[TeamMember])
+async def get_team_members():
+    members = await db.team_members.find({}).sort('order_index', 1).to_list(100)
+    return [TeamMember(**member) for member in members]
+
+@api_router.post("/admin/team", response_model=TeamMember)
+async def create_team_member(member: TeamMember, current_user: User = Depends(get_admin_user)):
+    await db.team_members.insert_one(member.dict())
+    return member
+
+@api_router.put("/admin/team/{member_id}", response_model=TeamMember)
+async def update_team_member(member_id: str, member: TeamMember, current_user: User = Depends(get_admin_user)):
+    result = await db.team_members.replace_one({'id': member_id}, member.dict())
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Team member not found")
+    return member
+
+@api_router.delete("/admin/team/{member_id}")
+async def delete_team_member(member_id: str, current_user: User = Depends(get_admin_user)):
+    result = await db.team_members.delete_one({'id': member_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Team member not found")
+    return {"message": "Team member deleted successfully"}
+
+# Research grants endpoints
+@api_router.get("/research-grants", response_model=List[ResearchGrant])
+async def get_research_grants():
+    grants = await db.research_grants.find({}).sort('start_year', -1).to_list(100)
+    return [ResearchGrant(**grant) for grant in grants]
+
+@api_router.post("/admin/research-grants", response_model=ResearchGrant)
+async def create_research_grant(grant: ResearchGrant, current_user: User = Depends(get_admin_user)):
+    await db.research_grants.insert_one(grant.dict())
+    return grant
+
+@api_router.put("/admin/research-grants/{grant_id}", response_model=ResearchGrant)
+async def update_research_grant(grant_id: str, grant: ResearchGrant, current_user: User = Depends(get_admin_user)):
+    result = await db.research_grants.replace_one({'id': grant_id}, grant.dict())
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Research grant not found")
+    return grant
+
+@api_router.delete("/admin/research-grants/{grant_id}")
+async def delete_research_grant(grant_id: str, current_user: User = Depends(get_admin_user)):
+    result = await db.research_grants.delete_one({'id': grant_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Research grant not found")
+    return {"message": "Research grant deleted successfully"}
+
+# Awards endpoints
+@api_router.get("/awards", response_model=List[Award])
+async def get_awards():
+    awards = await db.awards.find({}).sort('year', -1).to_list(100)
+    return [Award(**award) for award in awards]
+
+@api_router.post("/admin/awards", response_model=Award)
+async def create_award(award: Award, current_user: User = Depends(get_admin_user)):
+    await db.awards.insert_one(award.dict())
+    return award
+
+@api_router.put("/admin/awards/{award_id}", response_model=Award)
+async def update_award(award_id: str, award: Award, current_user: User = Depends(get_admin_user)):
+    result = await db.awards.replace_one({'id': award_id}, award.dict())
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Award not found")
+    return award
+
+@api_router.delete("/admin/awards/{award_id}")
+async def delete_award(award_id: str, current_user: User = Depends(get_admin_user)):
+    result = await db.awards.delete_one({'id': award_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Award not found")
+    return {"message": "Award deleted successfully"}
+
+# Research highlights endpoints
+@api_router.get("/research-highlights", response_model=List[ResearchHighlight])
+async def get_research_highlights():
+    highlights = await db.research_highlights.find({}).sort([('is_featured', -1), ('order_index', 1)]).to_list(100)
+    return [ResearchHighlight(**highlight) for highlight in highlights]
+
+@api_router.post("/admin/research-highlights", response_model=ResearchHighlight)
+async def create_research_highlight(highlight: ResearchHighlight, current_user: User = Depends(get_admin_user)):
+    await db.research_highlights.insert_one(highlight.dict())
+    return highlight
+
+@api_router.put("/admin/research-highlights/{highlight_id}", response_model=ResearchHighlight)
+async def update_research_highlight(highlight_id: str, highlight: ResearchHighlight, current_user: User = Depends(get_admin_user)):
+    result = await db.research_highlights.replace_one({'id': highlight_id}, highlight.dict())
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Research highlight not found")
+    return highlight
+
+@api_router.delete("/admin/research-highlights/{highlight_id}")
+async def delete_research_highlight(highlight_id: str, current_user: User = Depends(get_admin_user)):
+    result = await db.research_highlights.delete_one({'id': highlight_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Research highlight not found")
+    return {"message": "Research highlight deleted successfully"}
+
+# Static publications endpoints
+@api_router.get("/static-publications", response_model=List[StaticPublication])
+async def get_static_publications(limit: int = 50):
+    publications = await db.static_publications.find({}).sort('year', -1).limit(limit).to_list(limit)
+    return [StaticPublication(**pub) for pub in publications]
+
+# News endpoints (enhanced)
+@api_router.post("/admin/news", response_model=NewsArticle)
+async def create_news_article(article: NewsArticle, current_user: User = Depends(get_admin_user)):
     article_dict = article.dict()
-    news_obj = NewsArticle(**article_dict)
-    await db.news.insert_one(news_obj.dict())
-    return news_obj
+    article_dict['created_by'] = current_user.id
+    await db.news.insert_one(article_dict)
+    return article
 
 @api_router.get("/news", response_model=List[NewsArticle])
 async def get_news_articles(limit: int = 10):
-    news_articles = await db.news.find().sort('created_at', -1).limit(limit).to_list(limit)
+    news_articles = await db.news.find({'is_published': True}).sort('created_at', -1).limit(limit).to_list(limit)
     return [NewsArticle(**article) for article in news_articles]
 
-@api_router.get("/news/{news_id}", response_model=NewsArticle)
-async def get_news_article(news_id: str):
-    article = await db.news.find_one({'id': news_id})
-    if not article:
-        raise HTTPException(status_code=404, detail="News article not found")
-    return NewsArticle(**article)
+@api_router.get("/news/featured")
+async def get_featured_news():
+    featured = await db.news.find_one({'is_featured': True, 'is_published': True}, sort=[('created_at', -1)])
+    return NewsArticle(**featured) if featured else None
 
-@api_router.put("/news/{news_id}", response_model=NewsArticle)
-async def update_news_article(news_id: str, update_data: NewsArticleUpdate):
-    article = await db.news.find_one({'id': news_id})
-    if not article:
+@api_router.put("/admin/news/{news_id}")
+async def update_news_article(news_id: str, article: NewsArticle, current_user: User = Depends(get_admin_user)):
+    article_dict = article.dict()
+    article_dict['updated_at'] = datetime.now(timezone.utc)
+    result = await db.news.replace_one({'id': news_id}, article_dict)
+    if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="News article not found")
-    
-    update_dict = {k: v for k, v in update_data.dict().items() if v is not None}
-    await db.news.update_one({'id': news_id}, {'$set': update_dict})
-    
-    updated_article = await db.news.find_one({'id': news_id})
-    return NewsArticle(**updated_article)
+    return article
 
-@api_router.delete("/news/{news_id}")
-async def delete_news_article(news_id: str):
+@api_router.delete("/admin/news/{news_id}")
+async def delete_news_article(news_id: str, current_user: User = Depends(get_admin_user)):
     result = await db.news.delete_one({'id': news_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="News article not found")
     return {"message": "News article deleted successfully"}
 
-# Citation metrics endpoint
+# Page content endpoints
+@api_router.get("/page-content/{page_name}")
+async def get_page_content(page_name: str):
+    content = await db.page_content.find_one({'page_name': page_name})
+    return PageContent(**content) if content else None
+
+@api_router.put("/admin/page-content/{page_name}")
+async def update_page_content(page_name: str, content: PageContent, current_user: User = Depends(get_admin_user)):
+    content_dict = content.dict()
+    content_dict['page_name'] = page_name
+    content_dict['updated_at'] = datetime.now(timezone.utc)
+    await db.page_content.replace_one({'page_name': page_name}, content_dict, upsert=True)
+    return {"message": "Page content updated successfully"}
+
+# Existing endpoints (keeping for compatibility)
+@api_router.get("/")
+async def root():
+    return {"message": "Hydrochemistry Research Group API"}
+
 @api_router.get("/citations", response_model=CitationMetrics)
 async def get_citation_metrics():
     scholar_data = fetch_google_scholar_data("7pUFcrsAAAAJ")
     return CitationMetrics(**scholar_data)
 
-# Publications endpoint
 @api_router.get("/publications", response_model=List[Publication])
 async def get_publications(limit: int = 10):
-    scopus_data = fetch_scopus_publications("22133247800", limit)
+    # Get SCOPUS author ID from settings
+    settings = await db.site_settings.find_one({}) or {}
+    scopus_id = settings.get('scopus_author_id', '22133247800')
+    
+    scopus_data = fetch_scopus_publications_api(scopus_id, limit)
     publications = []
     
     for pub_data in scopus_data:
@@ -379,25 +891,13 @@ async def get_publications(limit: int = 10):
     
     return publications
 
-# Team members endpoints
-@api_router.get("/team", response_model=List[TeamMember])
-async def get_team_members():
-    members = await db.team_members.find().to_list(100)
-    return [TeamMember(**member) for member in members]
-
-@api_router.post("/team", response_model=TeamMember)
-async def create_team_member(member: TeamMember):
-    await db.team_members.insert_one(member.dict())
-    return member
-
-# Research areas endpoints
 @api_router.get("/research-areas", response_model=List[ResearchArea])
 async def get_research_areas():
-    areas = await db.research_areas.find().to_list(100)
+    areas = await db.research_areas.find({}).to_list(100)
     return [ResearchArea(**area) for area in areas]
 
-@api_router.post("/research-areas", response_model=ResearchArea)
-async def create_research_area(area: ResearchArea):
+@api_router.post("/admin/research-areas", response_model=ResearchArea)
+async def create_research_area(area: ResearchArea, current_user: User = Depends(get_admin_user)):
     await db.research_areas.insert_one(area.dict())
     return area
 
