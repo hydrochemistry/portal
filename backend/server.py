@@ -617,7 +617,7 @@ async def login(user_data: UserLogin):
 @api_router.get("/admin/users")
 async def get_pending_users(current_user: User = Depends(get_super_admin_user)):
     users = await db.users.find({}).to_list(100)
-    return [{k: v for k, v in user.items() if k != 'password_hash'} for user in users]
+    return [{k: v for k, v in user.items() if k not in ['password_hash', '_id']} for user in users]
 
 @api_router.post("/admin/users/{user_id}/approve")
 async def approve_user(user_id: str, current_user: User = Depends(get_super_admin_user)):
