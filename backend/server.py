@@ -231,6 +231,8 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     if not user.get("is_approved") or not user.get("is_active"):
         raise HTTPException(status_code=401, detail="User not approved or inactive")
     
+    # Remove ObjectId for Pydantic model
+    user.pop('_id', None)
     return User(**user)
 
 async def get_admin_user(current_user: User = Depends(get_current_user)):
