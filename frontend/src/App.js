@@ -326,53 +326,7 @@ const AuthPage = () => {
   );
 };
 
-// Image Upload Component
-const ImageUpload = ({ onUpload, label = "Upload Image" }) => {
-  const [uploading, setUploading] = useState(false);
-
-  const onDrop = async (acceptedFiles) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
-
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const response = await axios.post(`${API}/upload/image`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-
-      onUpload(response.data.url);
-      toast.success('Image uploaded successfully!');
-    } catch (error) {
-      toast.error('Failed to upload image');
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ 
-    onDrop,
-    accept: { 'image/*': [] },
-    maxFiles: 1
-  });
-
-  return (
-    <div 
-      {...getRootProps()} 
-      className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-        isDragActive ? 'border-blue-400 bg-blue-50' : 'border-gray-300'
-      }`}
-    >
-      <input {...getInputProps()} />
-      <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
-      <p className="mt-2 text-sm text-gray-600">
-        {uploading ? 'Uploading...' : (isDragActive ? 'Drop the image here' : label)}
-      </p>
-    </div>
-  );
-};
+// Removed duplicate ImageUpload - using imported version
 
 // Home Page Component
 const HomePage = () => {
