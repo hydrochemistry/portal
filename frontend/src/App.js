@@ -1033,12 +1033,317 @@ const TeamManagementPanel = () => {
 };
 
 // Placeholder panels (simplified for now)
-const ResearchManagementPanel = () => (
-  <div className="text-center py-12">
-    <Settings className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-    <p className="text-gray-600">Research management panel coming soon...</p>
-  </div>
-);
+const ResearchManagementPanel = () => {
+  const [activeTab, setActiveTab] = useState('grants');
+  const [grants, setGrants] = useState([]);
+  const [awards, setAwards] = useState([]);
+  const [showGrantDialog, setShowGrantDialog] = useState(false);
+  const [showAwardDialog, setShowAwardDialog] = useState(false);
+  const [newGrant, setNewGrant] = useState({
+    title: '', funding_amount: '', start_year: new Date().getFullYear(),
+    end_year: new Date().getFullYear(), funding_agency: '', description: ''
+  });
+  const [newAward, setNewAward] = useState({
+    year: new Date().getFullYear(), title: '', awarding_organization: '', 
+    description: '', recipient: 'Prof. Dr. Ahmad Zaharin Aris'
+  });
+
+  useEffect(() => {
+    fetchGrants();
+    fetchAwards();
+  }, []);
+
+  const fetchGrants = async () => {
+    try {
+      const response = await axios.get(`${API}/research-grants`);
+      setGrants(response.data);
+    } catch (error) {
+      console.error('Error fetching grants:', error);
+    }
+  };
+
+  const fetchAwards = async () => {
+    try {
+      const response = await axios.get(`${API}/awards`);
+      setAwards(response.data);
+    } catch (error) {
+      console.error('Error fetching awards:', error);
+    }
+  };
+
+  const handleSaveGrant = async () => {
+    try {
+      await axios.post(`${API}/admin/research-grants`, newGrant);
+      toast.success('Research grant added successfully!');
+      setNewGrant({
+        title: '', funding_amount: '', start_year: new Date().getFullYear(),
+        end_year: new Date().getFullYear(), funding_agency: '', description: ''
+      });
+      setShowGrantDialog(false);
+      fetchGrants();
+    } catch (error) {
+      toast.error('Error adding research grant');
+    }
+  };
+
+  const handleSaveAward = async () => {
+    try {
+      await axios.post(`${API}/admin/awards`, newAward);
+      toast.success('Award added successfully!');
+      setNewAward({
+        year: new Date().getFullYear(), title: '', awarding_organization: '', 
+        description: '', recipient: 'Prof. Dr. Ahmad Zaharin Aris'
+      });
+      setShowAwardDialog(false);
+      fetchAwards();
+    } catch (error) {
+      toast.error('Error adding award');
+    }
+  };
+
+  const deleteGrant = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this grant?')) return;
+    try {
+      await axios.delete(`${API}/admin/research-grants/${id}`);
+      toast.success('Grant deleted successfully!');
+      fetchGrants();
+    } catch (error) {
+      toast.error('Error deleting grant');
+    }
+  };
+
+  const deleteAward = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this award?')) return;
+    try {
+      await axios.delete(`${API}/admin/awards/${id}`);
+      toast.success('Award deleted successfully!');
+      fetchAwards();
+    } catch (error) {
+      toast.error('Error deleting award');
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="grants">Research Grants</TabsTrigger>
+          <TabsTrigger value="awards">Awards</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="grants" className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h3 className="text-2xl font-bold">Research Grants</h3>
+            <Dialog open={showGrantDialog} onOpenChange={setShowGrantDialog}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Grant
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add Research Grant</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label>Title</Label>
+                    <Input
+                      value={newGrant.title}
+                      onChange={(e) => setNewGrant({...newGrant, title: e.target.value})}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Start Year</Label>
+                      <Input
+                        type="number"
+                        value={newGrant.start_year}
+                        onChange={(e) => setNewGrant({...newGrant, start_year: parseInt(e.target.value)})}
+                      />
+                    </div>
+                    <div>
+                      <Label>End Year</Label>
+                      <Input
+                        type="number"
+                        value={newGrant.end_year}
+                        onChange={(e) => setNewGrant({...newGrant, end_year: parseInt(e.target.value)})}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Funding Agency</Label>
+                    <Input
+                      value={newGrant.funding_agency}
+                      onChange={(e) => setNewGrant({...newGrant, funding_agency: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label>Funding Amount (Optional)</Label>
+                    <Input
+                      value={newGrant.funding_amount}
+                      onChange={(e) => setNewGrant({...newGrant, funding_amount: e.target.value})}
+                      placeholder="e.g., RM 500,000"
+                    />
+                  </div>
+                  <div>
+                    <Label>Description</Label>
+                    <Textarea
+                      value={newGrant.description}
+                      onChange={(e) => setNewGrant({...newGrant, description: e.target.value})}
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={() => setShowGrantDialog(false)}>Cancel</Button>
+                    <Button onClick={handleSaveGrant}>Add Grant</Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <div className="space-y-4">
+            {grants.map((grant) => (
+              <Card key={grant.id}>
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h4 className="text-lg font-semibold mb-2">{grant.title}</h4>
+                      <p className="text-gray-600 mb-2">{grant.description}</p>
+                      <div className="flex items-center space-x-4 text-sm text-gray-500">
+                        <span>Duration: {grant.start_year} - {grant.end_year}</span>
+                        <span>Agency: {grant.funding_agency}</span>
+                        {grant.funding_amount && <span>Amount: {grant.funding_amount}</span>}
+                      </div>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => deleteGrant(grant.id)}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            {grants.length === 0 && (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <DollarSign className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <p className="text-gray-600">No research grants added yet.</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="awards" className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h3 className="text-2xl font-bold">Awards</h3>
+            <Dialog open={showAwardDialog} onOpenChange={setShowAwardDialog}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Award
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add Award</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Year</Label>
+                      <Input
+                        type="number"
+                        value={newAward.year}
+                        onChange={(e) => setNewAward({...newAward, year: parseInt(e.target.value)})}
+                      />
+                    </div>
+                    <div>
+                      <Label>Recipient</Label>
+                      <Input
+                        value={newAward.recipient}
+                        onChange={(e) => setNewAward({...newAward, recipient: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Award Title</Label>
+                    <Input
+                      value={newAward.title}
+                      onChange={(e) => setNewAward({...newAward, title: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label>Awarding Organization</Label>
+                    <Input
+                      value={newAward.awarding_organization}
+                      onChange={(e) => setNewAward({...newAward, awarding_organization: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label>Description (Optional)</Label>
+                    <Textarea
+                      value={newAward.description}
+                      onChange={(e) => setNewAward({...newAward, description: e.target.value})}
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={() => setShowAwardDialog(false)}>Cancel</Button>
+                    <Button onClick={handleSaveAward}>Add Award</Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {awards.map((award) => (
+              <Card key={award.id}>
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center">
+                        <Award className="w-5 h-5 text-white" />
+                      </div>
+                      <Badge>{award.year}</Badge>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => deleteAward(award.id)}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <h4 className="font-semibold mb-2">{award.title}</h4>
+                  <p className="text-sm text-gray-600 mb-2">{award.awarding_organization}</p>
+                  <p className="text-sm text-gray-500 mb-2">Recipient: {award.recipient}</p>
+                  {award.description && (
+                    <p className="text-sm text-gray-600">{award.description}</p>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+            {awards.length === 0 && (
+              <Card className="md:col-span-2">
+                <CardContent className="p-12 text-center">
+                  <Award className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <p className="text-gray-600">No awards added yet.</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
 
 const HighlightsManagementPanel = () => (
   <div className="text-center py-12">
