@@ -862,7 +862,10 @@ async def delete_news_article(news_id: str, current_user: User = Depends(get_adm
 @api_router.get("/page-content/{page_name}")
 async def get_page_content(page_name: str):
     content = await db.page_content.find_one({'page_name': page_name})
-    return PageContent(**content) if content else None
+    if content:
+        content.pop('_id', None)
+        return PageContent(**content)
+    return None
 
 @api_router.put("/admin/page-content/{page_name}")
 async def update_page_content(page_name: str, content: PageContent, current_user: User = Depends(get_admin_user)):
