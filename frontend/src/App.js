@@ -215,8 +215,7 @@ const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [loading, setLoading] = useState(false);
-  const { login, register } = useAuth();
-  const [user] = useAuth();
+  const { login, register, user } = useAuth();
 
   // Redirect if already logged in
   if (user) {
