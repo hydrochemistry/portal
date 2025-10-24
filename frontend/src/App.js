@@ -566,11 +566,22 @@ const HomePage = () => {
                     )}
                     
                     {supervisorProfile.experience && (
-                      <div>
+                      <div className="mb-6">
                         <h4 className="font-semibold mb-3">Experience</h4>
                         <ul className="space-y-1">
                           {supervisorProfile.experience.map((exp, index) => (
                             <li key={index} className="text-gray-600">• {exp}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {supervisorProfile.awards && (
+                      <div>
+                        <h4 className="font-semibold mb-3">Awards & Recognition</h4>
+                        <ul className="space-y-1">
+                          {supervisorProfile.awards.map((award, index) => (
+                            <li key={index} className="text-gray-600">• {award}</li>
                           ))}
                         </ul>
                       </div>
