@@ -701,6 +701,477 @@ const HomePage = () => {
 // Existing components (keeping for compatibility) - Team, Research, Publications, News, Contact pages will be added in next message due to length
 // For now, keeping the basic structure
 
+// Admin Panel Component
+const AdminPanel = () => {
+  const { isSuperAdmin } = useAuth();
+  
+  return (
+    <ProtectedRoute requireAdmin={true}>
+      <div className="min-h-screen bg-gray-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Admin Panel</h1>
+            <p className="text-gray-600">Manage your research group website</p>
+          </div>
+
+          <Tabs defaultValue="settings" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-6">
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+              <TabsTrigger value="team">Team</TabsTrigger>
+              <TabsTrigger value="research">Research</TabsTrigger>
+              <TabsTrigger value="highlights">Highlights</TabsTrigger>
+              <TabsTrigger value="publications">Publications</TabsTrigger>
+              {isSuperAdmin() && <TabsTrigger value="users">Users</TabsTrigger>}
+            </TabsList>
+
+            <TabsContent value="settings">
+              <SiteSettingsPanel />
+            </TabsContent>
+            
+            <TabsContent value="team">
+              <TeamManagementPanel />
+            </TabsContent>
+            
+            <TabsContent value="research">
+              <ResearchManagementPanel />
+            </TabsContent>
+            
+            <TabsContent value="highlights">
+              <HighlightsManagementPanel />
+            </TabsContent>
+            
+            <TabsContent value="publications">
+              <PublicationsManagementPanel />
+            </TabsContent>
+            
+            {isSuperAdmin() && (
+              <TabsContent value="users">
+                <UserManagementPanel />
+              </TabsContent>
+            )}
+          </Tabs>
+        </div>
+      </div>
+    </ProtectedRoute>
+  );
+};
+
+// Site Settings Panel
+const SiteSettingsPanel = () => {
+  const [settings, setSettings] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await axios.get(`${API}/settings`);
+        setSettings(response.data);
+      } catch (error) {
+        console.error('Error fetching settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const handleSaveSettings = async () => {
+    setLoading(true);
+    try {
+      await axios.put(`${API}/admin/settings`, settings);
+      toast.success('Settings updated successfully!');
+    } catch (error) {
+      toast.error('Error updating settings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Lab Information</CardTitle>
+          <CardDescription>Basic information about your research group</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="lab_name">Lab Name</Label>
+            <Input
+              id="lab_name"
+              value={settings.lab_name || ''}
+              onChange={(e) => setSettings({...settings, lab_name: e.target.value})}
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="about_content">About Content</Label>
+            <Textarea
+              id="about_content"
+              value={settings.about_content || ''}
+              onChange={(e) => setSettings({...settings, about_content: e.target.value})}
+              className="min-h-32"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="scopus_id">SCOPUS Author ID</Label>
+            <Input
+              id="scopus_id"
+              value={settings.scopus_author_id || ''}
+              onChange={(e) => setSettings({...settings, scopus_author_id: e.target.value})}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Logo</CardTitle>
+          <CardDescription>Upload your research group logo</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ImageUpload 
+            onUpload={(url) => setSettings({...settings, logo_url: url})}
+            label="Upload Lab Logo"
+          />
+          {settings.logo_url && (
+            <div className="mt-4">
+              <img src={settings.logo_url} alt="Lab Logo" className="h-16 object-contain" />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Button onClick={handleSaveSettings} disabled={loading}>
+        {loading ? 'Saving...' : 'Save Settings'}
+      </Button>
+    </div>
+  );
+};
+
+// Team Management Panel
+const TeamManagementPanel = () => {
+  const [team, setTeam] = useState([]);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [editingMember, setEditingMember] = useState(null);
+  const [newMember, setNewMember] = useState({
+    name: '', position: '', email: '', bio: '', photo_url: '',
+    scopus_id: '', google_scholar: '', orcid: '', research_focus: '', 
+    current_work: '', is_supervisor: false, order_index: 0
+  });
+
+  useEffect(() => {
+    fetchTeam();
+  }, []);
+
+  const fetchTeam = async () => {
+    try {
+      const response = await axios.get(`${API}/team`);
+      setTeam(response.data);
+    } catch (error) {
+      console.error('Error fetching team:', error);
+    }
+  };
+
+  const handleSaveMember = async () => {
+    try {
+      if (editingMember) {
+        await axios.put(`${API}/admin/team/${editingMember.id}`, newMember);
+        toast.success('Team member updated!');
+      } else {
+        await axios.post(`${API}/admin/team`, newMember);
+        toast.success('Team member added!');
+      }
+      
+      resetForm();
+      fetchTeam();
+    } catch (error) {
+      toast.error('Error saving team member');
+    }
+  };
+
+  const resetForm = () => {
+    setNewMember({
+      name: '', position: '', email: '', bio: '', photo_url: '',
+      scopus_id: '', google_scholar: '', orcid: '', research_focus: '', 
+      current_work: '', is_supervisor: false, order_index: 0
+    });
+    setEditingMember(null);
+    setShowAddDialog(false);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Team Management</h2>
+        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+          <DialogTrigger asChild>
+            <Button onClick={resetForm}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Member
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{editingMember ? 'Edit' : 'Add'} Team Member</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Name</Label>
+                  <Input
+                    value={newMember.name}
+                    onChange={(e) => setNewMember({...newMember, name: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label>Position</Label>
+                  <Input
+                    value={newMember.position}
+                    onChange={(e) => setNewMember({...newMember, position: e.target.value})}
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label>Email</Label>
+                <Input
+                  type="email"
+                  value={newMember.email}
+                  onChange={(e) => setNewMember({...newMember, email: e.target.value})}
+                />
+              </div>
+              
+              <div>
+                <Label>Bio</Label>
+                <Textarea
+                  value={newMember.bio}
+                  onChange={(e) => setNewMember({...newMember, bio: e.target.value})}
+                />
+              </div>
+              
+              <div>
+                <Label>Photo</Label>
+                <ImageUpload 
+                  onUpload={(url) => setNewMember({...newMember, photo_url: url})}
+                  label="Upload member photo"
+                />
+                {newMember.photo_url && (
+                  <img src={newMember.photo_url} alt="Preview" className="w-20 h-20 rounded-full object-cover mt-2" />
+                )}
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Research Focus</Label>
+                  <Textarea
+                    value={newMember.research_focus}
+                    onChange={(e) => setNewMember({...newMember, research_focus: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label>Current Work</Label>
+                  <Textarea
+                    value={newMember.current_work}
+                    onChange={(e) => setNewMember({...newMember, current_work: e.target.value})}
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label>SCOPUS ID</Label>
+                  <Input
+                    value={newMember.scopus_id}
+                    onChange={(e) => setNewMember({...newMember, scopus_id: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label>Google Scholar</Label>
+                  <Input
+                    value={newMember.google_scholar}
+                    onChange={(e) => setNewMember({...newMember, google_scholar: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label>ORCID</Label>
+                  <Input
+                    value={newMember.orcid}
+                    onChange={(e) => setNewMember({...newMember, orcid: e.target.value})}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={newMember.is_supervisor}
+                  onCheckedChange={(checked) => setNewMember({...newMember, is_supervisor: checked})}
+                />
+                <Label>Is Supervisor</Label>
+              </div>
+              
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={resetForm}>Cancel</Button>
+                <Button onClick={handleSaveMember}>
+                  {editingMember ? 'Update' : 'Add'} Member
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {team.map((member) => (
+          <Card key={member.id}>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4 mb-4">
+                {member.photo_url ? (
+                  <img src={member.photo_url} alt={member.name} className="w-12 h-12 rounded-full object-cover" />
+                ) : (
+                  <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
+                    <User className="w-6 h-6 text-gray-600" />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <h3 className="font-semibold">{member.name}</h3>
+                  <p className="text-sm text-gray-600">{member.position}</p>
+                  {member.is_supervisor && <Badge className="mt-1">Supervisor</Badge>}
+                </div>
+                <div className="flex space-x-1">
+                  <Button 
+                    size="sm" 
+                    variant="ghost"
+                    onClick={() => {
+                      setEditingMember(member);
+                      setNewMember(member);
+                      setShowAddDialog(true);
+                    }}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 line-clamp-3">{member.bio}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Placeholder panels (simplified for now)
+const ResearchManagementPanel = () => (
+  <div className="text-center py-12">
+    <Settings className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+    <p className="text-gray-600">Research management panel coming soon...</p>
+  </div>
+);
+
+const HighlightsManagementPanel = () => (
+  <div className="text-center py-12">
+    <Star className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+    <p className="text-gray-600">Research highlights management panel coming soon...</p>
+  </div>
+);
+
+const PublicationsManagementPanel = () => (
+  <div className="space-y-6">
+    <Card>
+      <CardHeader>
+        <CardTitle>Upload EndNote Publications</CardTitle>
+        <CardDescription>Upload RIS file from EndNote to populate static publications</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <input 
+          type="file" 
+          accept=".ris" 
+          onChange={async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+              const response = await axios.post(`${API}/upload/ris`, formData);
+              toast.success(response.data.message);
+            } catch (error) {
+              toast.error('Error uploading RIS file');
+            }
+          }}
+          className="w-full p-3 border border-dashed border-gray-300 rounded-lg"
+        />
+        <p className="text-sm text-gray-500 mt-2">
+          Export your EndNote library as RIS format and upload here
+        </p>
+      </CardContent>
+    </Card>
+  </div>
+);
+
+const UserManagementPanel = () => {
+  const [users, setUsers] = useState([]);
+  
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get(`${API}/admin/users`);
+        setUsers(response.data);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+    fetchUsers();
+  }, []);
+
+  const approveUser = async (userId) => {
+    try {
+      await axios.post(`${API}/admin/users/${userId}/approve`);
+      toast.success('User approved!');
+      // Refresh users list
+      const response = await axios.get(`${API}/admin/users`);
+      setUsers(response.data);
+    } catch (error) {
+      toast.error('Error approving user');
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold">User Management</h2>
+      
+      <div className="space-y-4">
+        {users.map((user) => (
+          <Card key={user.id}>
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="font-semibold">{user.name}</h3>
+                  <p className="text-sm text-gray-600">{user.email}</p>
+                  <div className="flex items-center space-x-2 mt-2">
+                    <Badge variant={user.is_approved ? "default" : "secondary"}>
+                      {user.is_approved ? "Approved" : "Pending"}
+                    </Badge>
+                    <Badge variant="outline">{user.role}</Badge>
+                  </div>
+                </div>
+                
+                {!user.is_approved && (
+                  <Button onClick={() => approveUser(user.id)}>
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Approve
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 // Main App Component
 function App() {
   return (
@@ -714,7 +1185,12 @@ function App() {
                 <Navigation />
                 <Routes>
                   <Route path="/" element={<HomePage />} />
-                  {/* Other routes will be added */}
+                  <Route path="/team" element={<TeamPage />} />
+                  <Route path="/research" element={<ResearchPage />} />
+                  <Route path="/publications" element={<PublicationsPage />} />
+                  <Route path="/news" element={<NewsPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/admin" element={<AdminPanel />} />
                 </Routes>
               </>
             } />
