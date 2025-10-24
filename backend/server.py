@@ -794,7 +794,11 @@ async def delete_award(award_id: str, current_user: User = Depends(get_admin_use
 @api_router.get("/research-highlights", response_model=List[ResearchHighlight])
 async def get_research_highlights():
     highlights = await db.research_highlights.find({}).sort([('is_featured', -1), ('order_index', 1)]).to_list(100)
-    return [ResearchHighlight(**highlight) for highlight in highlights]
+    result = []
+    for highlight in highlights:
+        highlight.pop('_id', None)
+        result.append(ResearchHighlight(**highlight))
+    return result
 
 @api_router.post("/admin/research-highlights", response_model=ResearchHighlight)
 async def create_research_highlight(highlight: ResearchHighlight, current_user: User = Depends(get_admin_user)):
