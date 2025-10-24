@@ -350,7 +350,7 @@ const HomePage = () => {
         
         setCitations(citationsRes.data);
         setRecentNews(newsRes.data);
-        setFeaturedNews(featuredNewsRes.data);
+        setFeaturedNews(featuredNewsRes.data || null);
         setResearchHighlights(Array.isArray(highlightsRes.data) ? highlightsRes.data.slice(0, 3) : []);
         setSupervisorProfile(settingsRes.data?.supervisor_profile || {});
       } catch (error) {
