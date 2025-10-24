@@ -1,7 +1,16 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import '@/App.css';
+
+// Import components
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import TeamPage from '@/components/TeamPage';
+import ResearchPage from '@/components/ResearchPage';
+import PublicationsPage from '@/components/PublicationsPage';
+import NewsPage from '@/components/NewsPage';
+import ContactPage from '@/components/ContactPage';
+import ImageUpload from '@/components/ImageUpload';
 
 // Import shadcn components
 import { Button } from '@/components/ui/button';
@@ -17,7 +26,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
-import { useDropzone } from 'react-dropzone';
 
 // Icons from lucide-react
 import { 
