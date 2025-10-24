@@ -1345,12 +1345,238 @@ const ResearchManagementPanel = () => {
   );
 };
 
-const HighlightsManagementPanel = () => (
-  <div className="text-center py-12">
-    <Star className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-    <p className="text-gray-600">Research highlights management panel coming soon...</p>
-  </div>
-);
+const HighlightsManagementPanel = () => {
+  const [highlights, setHighlights] = useState([]);
+  const [showDialog, setShowDialog] = useState(false);
+  const [editingHighlight, setEditingHighlight] = useState(null);
+  const [newHighlight, setNewHighlight] = useState({
+    title: '', description: '', image_url: '', link_url: '', 
+    is_featured: false, order_index: 0
+  });
+
+  useEffect(() => {
+    fetchHighlights();
+  }, []);
+
+  const fetchHighlights = async () => {
+    try {
+      const response = await axios.get(`${API}/research-highlights`);
+      setHighlights(response.data);
+    } catch (error) {
+      console.error('Error fetching highlights:', error);
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      if (editingHighlight) {
+        await axios.put(`${API}/admin/research-highlights/${editingHighlight.id}`, newHighlight);
+        toast.success('Research highlight updated!');
+      } else {
+        await axios.post(`${API}/admin/research-highlights`, newHighlight);
+        toast.success('Research highlight added!');
+      }
+      
+      resetForm();
+      fetchHighlights();
+    } catch (error) {
+      toast.error('Error saving research highlight');
+    }
+  };
+
+  const deleteHighlight = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this research highlight?')) return;
+    try {
+      await axios.delete(`${API}/admin/research-highlights/${id}`);
+      toast.success('Research highlight deleted!');
+      fetchHighlights();
+    } catch (error) {
+      toast.error('Error deleting research highlight');
+    }
+  };
+
+  const resetForm = () => {
+    setNewHighlight({
+      title: '', description: '', image_url: '', link_url: '', 
+      is_featured: false, order_index: 0
+    });
+    setEditingHighlight(null);
+    setShowDialog(false);
+  };
+
+  const editHighlight = (highlight) => {
+    setEditingHighlight(highlight);
+    setNewHighlight(highlight);
+    setShowDialog(true);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Research Highlights Management</h2>
+        <Dialog open={showDialog} onOpenChange={setShowDialog}>
+          <DialogTrigger asChild>
+            <Button onClick={resetForm}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Research Highlight
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>{editingHighlight ? 'Edit' : 'Add'} Research Highlight</DialogTitle>
+              <DialogDescription>
+                Create research highlights to showcase on the homepage
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Title</Label>
+                <Input
+                  value={newHighlight.title}
+                  onChange={(e) => setNewHighlight({...newHighlight, title: e.target.value})}
+                  placeholder="Research highlight title"
+                />
+              </div>
+              
+              <div>
+                <Label>Description</Label>
+                <Textarea
+                  value={newHighlight.description}
+                  onChange={(e) => setNewHighlight({...newHighlight, description: e.target.value})}
+                  placeholder="Brief description of the research highlight"
+                />
+              </div>
+              
+              <div>
+                <Label>Image</Label>
+                <ImageUpload 
+                  onUpload={(url) => setNewHighlight({...newHighlight, image_url: url})}
+                  label="Upload highlight image"
+                />
+                {newHighlight.image_url && (
+                  <div className="mt-2">
+                    <img 
+                      src={newHighlight.image_url} 
+                      alt="Preview" 
+                      className="w-full h-32 object-cover rounded-lg"
+                    />
+                  </div>
+                )}
+              </div>
+              
+              <div>
+                <Label>Link URL (Optional)</Label>
+                <Input
+                  value={newHighlight.link_url}
+                  onChange={(e) => setNewHighlight({...newHighlight, link_url: e.target.value})}
+                  placeholder="https://example.com/research-details"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={newHighlight.is_featured}
+                    onCheckedChange={(checked) => setNewHighlight({...newHighlight, is_featured: checked})}
+                  />
+                  <Label>Featured on homepage</Label>
+                </div>
+                <div>
+                  <Label>Display Order</Label>
+                  <Input
+                    type="number"
+                    value={newHighlight.order_index}
+                    onChange={(e) => setNewHighlight({...newHighlight, order_index: parseInt(e.target.value)})}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={resetForm}>Cancel</Button>
+                <Button onClick={handleSave}>
+                  {editingHighlight ? 'Update' : 'Add'} Highlight
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {highlights.map((highlight) => (
+          <Card key={highlight.id} className="overflow-hidden">
+            {highlight.image_url && (
+              <div className="aspect-video">
+                <img 
+                  src={highlight.image_url} 
+                  alt={highlight.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+            <CardContent className="p-6">
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="font-semibold line-clamp-2">{highlight.title}</h3>
+                <div className="flex space-x-1">
+                  <Button 
+                    size="sm" 
+                    variant="ghost"
+                    onClick={() => editHighlight(highlight)}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="ghost"
+                    onClick={() => deleteHighlight(highlight.id)}
+                    className="text-red-600 hover:text-red-800"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <p className="text-gray-600 text-sm mb-4 line-clamp-3">{highlight.description}</p>
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center space-x-2">
+                  {highlight.is_featured && (
+                    <Badge variant="secondary">
+                      <Star className="w-3 h-3 mr-1" />
+                      Featured
+                    </Badge>
+                  )}
+                  <span className="text-gray-500">Order: {highlight.order_index}</span>
+                </div>
+                {highlight.link_url && (
+                  <a 
+                    href={highlight.link_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {highlights.length === 0 && (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <Star className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+            <p className="text-gray-600 mb-4">No research highlights added yet.</p>
+            <Button onClick={() => setShowDialog(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Your First Research Highlight
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+};
 
 const PublicationsManagementPanel = () => (
   <div className="space-y-6">
