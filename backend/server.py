@@ -837,7 +837,10 @@ async def get_news_articles(limit: int = 10):
 @api_router.get("/news/featured")
 async def get_featured_news():
     featured = await db.news.find_one({'is_featured': True, 'is_published': True}, sort=[('created_at', -1)])
-    return NewsArticle(**featured) if featured else None
+    if featured:
+        featured.pop('_id', None)
+        return NewsArticle(**featured)
+    return None
 
 @api_router.put("/admin/news/{news_id}")
 async def update_news_article(news_id: str, article: NewsArticle, current_user: User = Depends(get_admin_user)):
