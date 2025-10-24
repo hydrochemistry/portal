@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { Calendar, Plus, Edit, Trash2, Star, Image as ImageIcon } from 'lucide-react';
-import ImageUpload from './ImageUpload';
+import ImageUpload from '@/components/ImageUpload';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
