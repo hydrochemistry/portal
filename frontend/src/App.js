@@ -824,6 +824,115 @@ const SiteSettingsPanel = () => {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Principal Investigator Profile</CardTitle>
+          <CardDescription>Configure the supervisor profile displayed on the homepage</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="supervisor_name">Name</Label>
+              <Input
+                id="supervisor_name"
+                value={settings.supervisor_profile?.name || ''}
+                onChange={(e) => setSettings({
+                  ...settings, 
+                  supervisor_profile: {
+                    ...settings.supervisor_profile,
+                    name: e.target.value
+                  }
+                })}
+                placeholder="Prof. Dr. Ahmad Zaharin Aris"
+              />
+            </div>
+            <div>
+              <Label htmlFor="supervisor_position">Position</Label>
+              <Input
+                id="supervisor_position"
+                value={settings.supervisor_profile?.position || ''}
+                onChange={(e) => setSettings({
+                  ...settings, 
+                  supervisor_profile: {
+                    ...settings.supervisor_profile,
+                    position: e.target.value
+                  }
+                })}
+                placeholder="Professor & Principal Investigator"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <Label htmlFor="supervisor_cv">Short CV</Label>
+            <Textarea
+              id="supervisor_cv"
+              value={settings.supervisor_profile?.short_cv || ''}
+              onChange={(e) => setSettings({
+                ...settings, 
+                supervisor_profile: {
+                  ...settings.supervisor_profile,
+                  short_cv: e.target.value
+                }
+              })}
+              className="min-h-24"
+              placeholder="Brief professional summary..."
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="supervisor_education">Education (one per line)</Label>
+            <Textarea
+              id="supervisor_education"
+              value={settings.supervisor_profile?.education?.join('\n') || ''}
+              onChange={(e) => setSettings({
+                ...settings, 
+                supervisor_profile: {
+                  ...settings.supervisor_profile,
+                  education: e.target.value.split('\n').filter(line => line.trim())
+                }
+              })}
+              className="min-h-24"
+              placeholder="Ph.D. in Environmental Chemistry, University Name, Year&#10;M.Sc. in Chemistry, University Name, Year"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="supervisor_experience">Experience (one per line)</Label>
+            <Textarea
+              id="supervisor_experience"
+              value={settings.supervisor_profile?.experience?.join('\n') || ''}
+              onChange={(e) => setSettings({
+                ...settings, 
+                supervisor_profile: {
+                  ...settings.supervisor_profile,
+                  experience: e.target.value.split('\n').filter(line => line.trim())
+                }
+              })}
+              className="min-h-24"
+              placeholder="Professor, Department Name, University, Year-Present&#10;Associate Professor, Department Name, University, Year-Year"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="supervisor_awards">Awards & Recognition (one per line)</Label>
+            <Textarea
+              id="supervisor_awards"
+              value={settings.supervisor_profile?.awards?.join('\n') || ''}
+              onChange={(e) => setSettings({
+                ...settings, 
+                supervisor_profile: {
+                  ...settings.supervisor_profile,
+                  awards: e.target.value.split('\n').filter(line => line.trim())
+                }
+              })}
+              className="min-h-24"
+              placeholder="Excellence in Research Award, Organization, Year&#10;Best Paper Award, Conference Name, Year"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       <Button onClick={handleSaveSettings} disabled={loading}>
         {loading ? 'Saving...' : 'Save Settings'}
       </Button>
