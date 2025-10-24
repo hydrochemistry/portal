@@ -604,7 +604,8 @@ async def login(user_data: UserLogin):
         data={"sub": user['email']}, expires_delta=access_token_expires
     )
     
-    user_data = {k: v for k, v in user.items() if k != 'password_hash'}
+    # Remove ObjectId and password_hash for serialization
+    user_data = {k: v for k, v in user.items() if k not in ['password_hash', '_id']}
     
     return {
         "access_token": access_token,
