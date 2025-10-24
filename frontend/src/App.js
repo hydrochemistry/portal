@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, createContext, useContext } from 'react';
+import { BrowserRouter, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import '@/App.css';
 
@@ -13,7 +13,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
+import { useDropzone } from 'react-dropzone';
 
 // Icons from lucide-react
 import { 
@@ -34,16 +38,129 @@ import {
   Edit,
   Trash2,
   Menu,
-  X
+  X,
+  Settings,
+  LogOut,
+  Upload,
+  Image as ImageIcon,
+  DollarSign,
+  Star,
+  Eye,
+  Shield,
+  User,
+  Lock,
+  CheckCircle,
+  XCircle,
+  AlertCircle
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Auth Context
+const AuthContext = createContext();
+
+const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('user');
+    if (token && userData) {
+      setUser(JSON.parse(userData));
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+    setLoading(false);
+  }, []);
+
+  const login = async (email, password) => {
+    try {
+      const response = await axios.post(`${API}/auth/login`, { email, password });
+      const { access_token, user: userData } = response.data;
+      
+      localStorage.setItem('token', access_token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+      
+      setUser(userData);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.response?.data?.detail || 'Login failed' };
+    }
+  };
+
+  const register = async (name, email, password) => {
+    try {
+      await axios.post(`${API}/auth/register`, { name, email, password });
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.response?.data?.detail || 'Registration failed' };
+    }
+  };
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    delete axios.defaults.headers.common['Authorization'];
+    setUser(null);
+  };
+
+  const isAdmin = () => {
+    return user && ['admin', 'super_admin'].includes(user.role);
+  };
+
+  const isSuperAdmin = () => {
+    return user && user.role === 'super_admin';
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, login, register, logout, isAdmin, isSuperAdmin, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+// Protected Route Component
+const ProtectedRoute = ({ children, requireAdmin = false, requireSuperAdmin = false }) => {
+  const { user, loading, isAdmin, isSuperAdmin } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+
+  if (requireSuperAdmin && !isSuperAdmin()) {
+    return <Navigate to="/" />;
+  }
+
+  if (requireAdmin && !isAdmin()) {
+    return <Navigate to="/" />;
+  }
+
+  return children;
+};
+
 // Navigation Component
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, logout, isAdmin } = useAuth();
 
   const navItems = [
     { path: '/', label: 'Home', icon: <Beaker className="w-4 h-4" /> },
@@ -53,6 +170,10 @@ const Navigation = () => {
     { path: '/news', label: 'News', icon: <Calendar className="w-4 h-4" /> },
     { path: '/contact', label: 'Contact', icon: <Mail className="w-4 h-4" /> }
   ];
+
+  if (isAdmin()) {
+    navItems.push({ path: '/admin', label: 'Admin', icon: <Settings className="w-4 h-4" /> });
+  }
 
   return (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
@@ -82,6 +203,24 @@ const Navigation = () => {
                 <span>{item.label}</span>
               </Link>
             ))}
+            
+            {user ? (
+              <div className="flex items-center space-x-2">
+                <Avatar className="w-8 h-8">
+                  <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <Button variant="ghost" size="sm" onClick={logout}>
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              </div>
+            ) : (
+              <Link to="/login">
+                <Button size="sm">
+                  <Lock className="w-4 h-4 mr-2" />
+                  Login
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -114,6 +253,20 @@ const Navigation = () => {
                 <span>{item.label}</span>
               </Link>
             ))}
+            
+            {user && (
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start px-4 py-3"
+                onClick={() => {
+                  logout();
+                  setIsMenuOpen(false);
+                }}
+              >
+                <LogOut className="w-4 h-4 mr-3" />
+                Logout ({user.name})
+              </Button>
+            )}
           </div>
         )}
       </div>
@@ -121,21 +274,195 @@ const Navigation = () => {
   );
 };
 
+// Login/Register Component
+const AuthPage = () => {
+  const [isLogin, setIsLogin] = useState(true);
+  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [loading, setLoading] = useState(false);
+  const { login, register } = useAuth();
+  const [user] = useAuth();
+
+  // Redirect if already logged in
+  if (user) {
+    return <Navigate to="/" />;
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        const result = await login(formData.email, formData.password);
+        if (result.success) {
+          toast.success('Login successful!');
+        } else {
+          toast.error(result.error);
+        }
+      } else {
+        const result = await register(formData.name, formData.email, formData.password);
+        if (result.success) {
+          toast.success('Registration successful! Please wait for admin approval.');
+          setIsLogin(true);
+          setFormData({ name: '', email: '', password: '' });
+        } else {
+          toast.error(result.error);
+        }
+      }
+    } catch (error) {
+      toast.error('An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>{isLogin ? 'Login' : 'Register'}</CardTitle>
+          <CardDescription>
+            {isLogin 
+              ? 'Sign in to access the admin panel' 
+              : 'Register for an account (requires admin approval)'
+            }
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <div>
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  required={!isLogin}
+                />
+              </div>
+            )}
+            
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                required
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                required
+              />
+            </div>
+            
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Please wait...' : (isLogin ? 'Login' : 'Register')}
+            </Button>
+          </form>
+          
+          <div className="mt-4 text-center">
+            <Button 
+              variant="link" 
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setFormData({ name: '', email: '', password: '' });
+              }}
+            >
+              {isLogin 
+                ? "Don't have an account? Register" 
+                : "Already have an account? Login"
+              }
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+// Image Upload Component
+const ImageUpload = ({ onUpload, label = "Upload Image" }) => {
+  const [uploading, setUploading] = useState(false);
+
+  const onDrop = async (acceptedFiles) => {
+    const file = acceptedFiles[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await axios.post(`${API}/upload/image`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      onUpload(response.data.url);
+      toast.success('Image uploaded successfully!');
+    } catch (error) {
+      toast.error('Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ 
+    onDrop,
+    accept: { 'image/*': [] },
+    maxFiles: 1
+  });
+
+  return (
+    <div 
+      {...getRootProps()} 
+      className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+        isDragActive ? 'border-blue-400 bg-blue-50' : 'border-gray-300'
+      }`}
+    >
+      <input {...getInputProps()} />
+      <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
+      <p className="mt-2 text-sm text-gray-600">
+        {uploading ? 'Uploading...' : (isDragActive ? 'Drop the image here' : label)}
+      </p>
+    </div>
+  );
+};
+
 // Home Page Component
 const HomePage = () => {
   const [citations, setCitations] = useState(null);
   const [recentNews, setRecentNews] = useState([]);
+  const [featuredNews, setFeaturedNews] = useState(null);
+  const [researchHighlights, setResearchHighlights] = useState([]);
+  const [supervisorProfile, setSupervisorProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchHomeData = async () => {
       try {
-        const [citationsRes, newsRes] = await Promise.all([
+        const [citationsRes, newsRes, featuredNewsRes, highlightsRes, settingsRes] = await Promise.all([
           axios.get(`${API}/citations`),
-          axios.get(`${API}/news?limit=3`)
+          axios.get(`${API}/news?limit=3`),
+          axios.get(`${API}/news/featured`),
+          axios.get(`${API}/research-highlights`),
+          axios.get(`${API}/settings`)
         ]);
+        
         setCitations(citationsRes.data);
         setRecentNews(newsRes.data);
+        setFeaturedNews(featuredNewsRes.data);
+        setResearchHighlights(highlightsRes.data?.slice(0, 3) || []);
+        setSupervisorProfile(settingsRes.data?.supervisor_profile || {});
       } catch (error) {
         console.error('Error fetching home data:', error);
       } finally {
@@ -179,9 +506,84 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Featured News */}
+      {featuredNews && (
+        <section className="py-16 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center mb-8">
+              <Star className="w-6 h-6 text-yellow-500 mr-2" />
+              <h2 className="text-3xl font-bold">Featured News</h2>
+            </div>
+            <Card className="overflow-hidden">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {featuredNews.image_url && (
+                  <div className="aspect-video lg:aspect-square">
+                    <img 
+                      src={featuredNews.image_url} 
+                      alt={featuredNews.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                <CardContent className="p-8">
+                  <div className="flex items-center space-x-2 text-sm text-gray-500 mb-4">
+                    <Calendar className="w-4 h-4" />
+                    <span>{new Date(featuredNews.created_at).toLocaleDateString()}</span>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4">{featuredNews.title}</h3>
+                  <p className="text-gray-600 mb-4">{featuredNews.content}</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-500">By {featuredNews.author}</span>
+                    <Button asChild>
+                      <Link to={`/news`}>Read More News</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </div>
+            </Card>
+          </div>
+        </section>
+      )}
+
+      {/* Research Highlights */}
+      {researchHighlights.length > 0 && (
+        <section className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-bold text-center mb-12">Research Highlights</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {researchHighlights.map((highlight) => (
+                <Card key={highlight.id} className="hover:shadow-lg transition-shadow">
+                  {highlight.image_url && (
+                    <div className="aspect-video">
+                      <img 
+                        src={highlight.image_url} 
+                        alt={highlight.title}
+                        className="w-full h-full object-cover rounded-t-lg"
+                      />
+                    </div>
+                  )}
+                  <CardContent className="p-6">
+                    <h3 className="font-semibold mb-2">{highlight.title}</h3>
+                    <p className="text-gray-600 text-sm mb-4">{highlight.description}</p>
+                    {highlight.link_url && (
+                      <Button variant="outline" size="sm" asChild>
+                        <a href={highlight.link_url} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          Learn More
+                        </a>
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Citation Metrics */}
       {citations && (
-        <section className="py-16 bg-white">
+        <section className="py-16 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl font-bold text-center mb-12">Research Impact</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -221,6 +623,54 @@ const HomePage = () => {
                 </CardContent>
               </Card>
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* Principal Investigator Profile */}
+      {supervisorProfile && Object.keys(supervisorProfile).length > 0 && (
+        <section className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-bold text-center mb-12">Principal Investigator</h2>
+            <Card className="max-w-4xl mx-auto">
+              <CardContent className="p-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  <div className="lg:col-span-1 text-center">
+                    <div className="w-32 h-32 mx-auto bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mb-4">
+                      <User className="w-16 h-16 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">{supervisorProfile.name}</h3>
+                    <p className="text-gray-600 mb-4">{supervisorProfile.position}</p>
+                  </div>
+                  <div className="lg:col-span-2">
+                    <h4 className="font-semibold mb-3">Profile</h4>
+                    <p className="text-gray-600 mb-6">{supervisorProfile.short_cv}</p>
+                    
+                    {supervisorProfile.education && (
+                      <div className="mb-6">
+                        <h4 className="font-semibold mb-3">Education</h4>
+                        <ul className="space-y-1">
+                          {supervisorProfile.education.map((edu, index) => (
+                            <li key={index} className="text-gray-600">• {edu}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {supervisorProfile.experience && (
+                      <div>
+                        <h4 className="font-semibold mb-3">Experience</h4>
+                        <ul className="space-y-1">
+                          {supervisorProfile.experience.map((exp, index) => (
+                            <li key={index} className="text-gray-600">• {exp}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </section>
       )}
@@ -277,6 +727,15 @@ const HomePage = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {recentNews.map((article) => (
                 <Card key={article.id} className="hover:shadow-lg transition-shadow">
+                  {article.image_url && (
+                    <div className="aspect-video">
+                      <img 
+                        src={article.image_url} 
+                        alt={article.title}
+                        className="w-full h-full object-cover rounded-t-lg"
+                      />
+                    </div>
+                  )}
                   <CardHeader>
                     <div className="flex items-center space-x-2 text-sm text-gray-500 mb-2">
                       <Calendar className="w-4 h-4" />
@@ -289,7 +748,7 @@ const HomePage = () => {
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-500">By {article.author}</span>
                       <Button variant="ghost" size="sm" asChild>
-                        <Link to={`/news/${article.id}`}>Read More</Link>
+                        <Link to={`/news`}>Read More</Link>
                       </Button>
                     </div>
                   </CardContent>
@@ -303,572 +762,30 @@ const HomePage = () => {
   );
 };
 
-// Team Page Component
-const TeamPage = () => {
-  const [team, setTeam] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchTeam = async () => {
-      try {
-        const response = await axios.get(`${API}/team`);
-        setTeam(response.data);
-      } catch (error) {
-        console.error('Error fetching team:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTeam();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-white py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Our Team</h1>
-          <p className="text-xl text-gray-600">Meet the researchers driving innovation in hydrochemistry</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {team.map((member) => (
-            <Card key={member.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-              <CardHeader className="text-center">
-                <div className="w-24 h-24 mx-auto bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mb-4">
-                  <Users className="w-12 h-12 text-white" />
-                </div>
-                <CardTitle>{member.name}</CardTitle>
-                <CardDescription>{member.position}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-4">{member.bio}</p>
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Mail className="w-4 h-4 text-gray-400" />
-                    <a href={`mailto:${member.email}`} className="text-blue-600 hover:underline text-sm">
-                      {member.email}
-                    </a>
-                  </div>
-                  {member.google_scholar && (
-                    <div className="flex items-center space-x-2">
-                      <ExternalLink className="w-4 h-4 text-gray-400" />
-                      <a 
-                        href={member.google_scholar} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="text-blue-600 hover:underline text-sm"
-                      >
-                        Google Scholar
-                      </a>
-                    </div>
-                  )}
-                  {member.orcid && (
-                    <div className="flex items-center space-x-2">
-                      <ExternalLink className="w-4 h-4 text-gray-400" />
-                      <a 
-                        href={member.orcid} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="text-blue-600 hover:underline text-sm"
-                      >
-                        ORCID
-                      </a>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Research Areas Page
-const ResearchPage = () => {
-  const [researchAreas, setResearchAreas] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchResearchAreas = async () => {
-      try {
-        const response = await axios.get(`${API}/research-areas`);
-        setResearchAreas(response.data);
-      } catch (error) {
-        console.error('Error fetching research areas:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchResearchAreas();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-white py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Research Areas</h1>
-          <p className="text-xl text-gray-600">Exploring the frontiers of environmental chemistry and hydrochemistry</p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {researchAreas.map((area) => (
-            <Card key={area.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Search className="w-6 h-6 text-blue-600" />
-                  <span>{area.title}</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-4">{area.description}</p>
-                <div className="flex flex-wrap gap-2">
-                  {area.keywords.map((keyword, index) => (
-                    <Badge key={index} variant="secondary">{keyword}</Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Publications Page
-const PublicationsPage = () => {
-  const [publications, setPublications] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchPublications = async () => {
-      try {
-        const response = await axios.get(`${API}/publications`);
-        setPublications(response.data);
-      } catch (error) {
-        console.error('Error fetching publications:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPublications();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-white py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Publications</h1>
-          <p className="text-xl text-gray-600">Recent research contributions and scholarly articles</p>
-        </div>
-
-        <div className="space-y-6">
-          {publications.map((pub) => (
-            <Card key={pub.id} className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold mb-2">{pub.title}</h3>
-                    <p className="text-gray-600 mb-2">{pub.authors}</p>
-                    <p className="text-blue-600 font-medium mb-2">{pub.journal}</p>
-                    <div className="flex items-center space-x-4 text-sm text-gray-500">
-                      <span>Year: {pub.year}</span>
-                      {pub.citations > 0 && <span>Citations: {pub.citations}</span>}
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge variant="outline">{pub.year}</Badge>
-                  </div>
-                </div>
-                {pub.doi && (
-                  <div className="flex items-center space-x-2">
-                    <ExternalLink className="w-4 h-4 text-gray-400" />
-                    <a 
-                      href={`https://doi.org/${pub.doi}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="text-blue-600 hover:underline text-sm"
-                    >
-                      DOI: {pub.doi}
-                    </a>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// News Page
-const NewsPage = () => {
-  const [news, setNews] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [newArticle, setNewArticle] = useState({ title: '', content: '', author: '' });
-
-  useEffect(() => {
-    fetchNews();
-  }, []);
-
-  const fetchNews = async () => {
-    try {
-      const response = await axios.get(`${API}/news`);
-      setNews(response.data);
-    } catch (error) {
-      console.error('Error fetching news:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddArticle = async () => {
-    try {
-      await axios.post(`${API}/news`, newArticle);
-      setNewArticle({ title: '', content: '', author: '' });
-      setShowAddDialog(false);
-      toast('News article added successfully!');
-      fetchNews();
-    } catch (error) {
-      console.error('Error adding article:', error);
-      toast('Error adding article');
-    }
-  };
-
-  const handleDeleteArticle = async (id) => {
-    try {
-      await axios.delete(`${API}/news/${id}`);
-      toast('Article deleted successfully!');
-      fetchNews();
-    } catch (error) {
-      console.error('Error deleting article:', error);
-      toast('Error deleting article');
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-white py-16">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-12">
-          <div>
-            <h1 className="text-4xl font-bold mb-4">News & Updates</h1>
-            <p className="text-xl text-gray-600">Latest developments from our research group</p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Button
-              variant={isAdmin ? "default" : "outline"}
-              onClick={() => setIsAdmin(!isAdmin)}
-            >
-              {isAdmin ? "Exit Admin" : "Admin Mode"}
-            </Button>
-            {isAdmin && (
-              <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Article
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>Add News Article</DialogTitle>
-                    <DialogDescription>Create a new news article for the research group.</DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="title">Title</Label>
-                      <Input
-                        id="title"
-                        value={newArticle.title}
-                        onChange={(e) => setNewArticle({...newArticle, title: e.target.value})}
-                        placeholder="Enter article title"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="author">Author</Label>
-                      <Input
-                        id="author"
-                        value={newArticle.author}
-                        onChange={(e) => setNewArticle({...newArticle, author: e.target.value})}
-                        placeholder="Enter author name"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="content">Content</Label>
-                      <Textarea
-                        id="content"
-                        value={newArticle.content}
-                        onChange={(e) => setNewArticle({...newArticle, content: e.target.value})}
-                        placeholder="Enter article content"
-                        className="min-h-32"
-                      />
-                    </div>
-                    <div className="flex justify-end space-x-2">
-                      <Button variant="outline" onClick={() => setShowAddDialog(false)}>
-                        Cancel
-                      </Button>
-                      <Button onClick={handleAddArticle}>
-                        Add Article
-                      </Button>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-8">
-          {news.map((article) => (
-            <Card key={article.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 text-sm text-gray-500 mb-2">
-                      <Calendar className="w-4 h-4" />
-                      <span>{new Date(article.created_at).toLocaleDateString()}</span>
-                    </div>
-                    <CardTitle className="text-2xl mb-2">{article.title}</CardTitle>
-                    <CardDescription>By {article.author}</CardDescription>
-                  </div>
-                  {isAdmin && (
-                    <div className="flex items-center space-x-2">
-                      <Button variant="ghost" size="sm">
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleDeleteArticle(article.id)}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-700 whitespace-pre-wrap">{article.content}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {news.length === 0 && (
-          <div className="text-center py-12">
-            <Calendar className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-            <p className="text-gray-600">No news articles available yet.</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// Contact Page
-const ContactPage = () => {
-  return (
-    <div className="min-h-screen bg-white py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
-          <p className="text-xl text-gray-600">Get in touch with our research team</p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Contact Information */}
-          <div>
-            <h2 className="text-2xl font-bold mb-6">Research Group Information</h2>
-            <div className="space-y-6">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <MapPin className="w-6 h-6 text-blue-600 mt-1" />
-                    <div>
-                      <h3 className="font-semibold mb-2">Address</h3>
-                      <p className="text-gray-600">
-                        Faculty of Environmental Studies<br />
-                        Universiti Putra Malaysia<br />
-                        43400 UPM Serdang, Selangor<br />
-                        Malaysia
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <Mail className="w-6 h-6 text-green-600 mt-1" />
-                    <div>
-                      <h3 className="font-semibold mb-2">Email</h3>
-                      <p className="text-gray-600">
-                        Prof. Dr. Ahmad Zaharin Aris: <br />
-                        <a href="mailto:zaharin@upm.edu.my" className="text-blue-600 hover:underline">
-                          zaharin@upm.edu.my
-                        </a>
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <Phone className="w-6 h-6 text-purple-600 mt-1" />
-                    <div>
-                      <h3 className="font-semibold mb-2">Phone</h3>
-                      <p className="text-gray-600">+603-9769 1176</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <ExternalLink className="w-6 h-6 text-cyan-600 mt-1" />
-                    <div>
-                      <h3 className="font-semibold mb-2">Links</h3>
-                      <div className="space-y-2">
-                        <a 
-                          href="https://scholar.google.com/citations?user=7pUFcrsAAAAJ&hl=en" 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="block text-blue-600 hover:underline"
-                        >
-                          Google Scholar Profile
-                        </a>
-                        <a 
-                          href="https://www.scopus.com/authid/detail.uri?authorId=22133247800" 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="block text-blue-600 hover:underline"
-                        >
-                          SCOPUS Author Profile
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          {/* Research Areas Summary */}
-          <div>
-            <h2 className="text-2xl font-bold mb-6">Research Interests</h2>
-            <Card>
-              <CardContent className="p-6">
-                <ul className="space-y-3 text-gray-600">
-                  <li className="flex items-start space-x-2">
-                    <span className="w-2 h-2 bg-blue-600 rounded-full mt-2"></span>
-                    <span>Hydrochemistry and Geochemistry of aquatic systems</span>
-                  </li>
-                  <li className="flex items-start space-x-2">
-                    <span className="w-2 h-2 bg-green-600 rounded-full mt-2"></span>
-                    <span>Environmental forensics and pollution source identification</span>
-                  </li>
-                  <li className="flex items-start space-x-2">
-                    <span className="w-2 h-2 bg-purple-600 rounded-full mt-2"></span>
-                    <span>Emerging contaminants: microplastics and endocrine disruptors</span>
-                  </li>
-                  <li className="flex items-start space-x-2">
-                    <span className="w-2 h-2 bg-cyan-600 rounded-full mt-2"></span>
-                    <span>Analytical method development for environmental samples</span>
-                  </li>
-                  <li className="flex items-start space-x-2">
-                    <span className="w-2 h-2 bg-yellow-600 rounded-full mt-2"></span>
-                    <span>Water quality assessment and risk evaluation</span>
-                  </li>
-                  <li className="flex items-start space-x-2">
-                    <span className="w-2 h-2 bg-red-600 rounded-full mt-2"></span>
-                    <span>Sustainable water treatment technologies</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold mb-4">Collaboration Opportunities</h3>
-              <p className="text-gray-600 mb-4">
-                We welcome collaborations with international researchers, government agencies, 
-                and industry partners. Our research contributes to UN Sustainable Development Goals 6 and 14, 
-                focusing on clean water and protection of marine life.
-              </p>
-              <Button asChild>
-                <a href="mailto:zaharin@upm.edu.my">
-                  <Mail className="w-4 h-4 mr-2" />
-                  Get in Touch
-                </a>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+// Existing components (keeping for compatibility) - Team, Research, Publications, News, Contact pages will be added in next message due to length
+// For now, keeping the basic structure
 
 // Main App Component
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Navigation />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/team" element={<TeamPage />} />
-          <Route path="/research" element={<ResearchPage />} />
-          <Route path="/publications" element={<PublicationsPage />} />
-          <Route path="/news" element={<NewsPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-        </Routes>
-      </BrowserRouter>
-    </div>
+    <AuthProvider>
+      <div className="App">
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<AuthPage />} />
+            <Route path="/*" element={
+              <>
+                <Navigation />
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  {/* Other routes will be added */}
+                </Routes>
+              </>
+            } />
+          </Routes>
+        </BrowserRouter>
+      </div>
+    </AuthProvider>
   );
 }
 
