@@ -475,6 +475,68 @@ const HomePage = () => {
         </div>
       </section>
 
+
+      {/* Principal Investigator Section - Shows on Home */}
+      {settings.supervisor_profile && settings.supervisor_profile.name && settings.pi_home_display?.show_on_home && (
+        <section className="py-16 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-bold text-center mb-12">Principal Investigator</h2>
+            <Card className="max-w-4xl mx-auto">
+              <CardContent className="p-8">
+                <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
+                  {settings.pi_home_display?.show_photo && settings.supervisor_profile.photo_url && (
+                    <div className="flex-shrink-0">
+                      <img 
+                        src={settings.supervisor_profile.photo_url} 
+                        alt={settings.supervisor_profile.name}
+                        className="w-32 h-32 md:w-40 md:h-40 rounded-lg object-cover shadow-lg"
+                      />
+                    </div>
+                  )}
+                  <div className="flex-1 text-center md:text-left">
+                    {settings.pi_home_display?.show_name && (
+                      <h3 className="text-2xl font-bold mb-2">{settings.supervisor_profile.name}</h3>
+                    )}
+                    {settings.pi_home_display?.show_title && settings.supervisor_profile.title && (
+                      <p className="text-lg text-blue-600 mb-3">{settings.supervisor_profile.title}</p>
+                    )}
+                    {settings.pi_home_display?.show_bio && settings.supervisor_profile.bio && (
+                      <p className="text-gray-700 mb-4">{settings.supervisor_profile.bio}</p>
+                    )}
+                    {settings.pi_home_display?.show_research_interests && settings.supervisor_profile.research_interests && settings.supervisor_profile.research_interests.length > 0 && (
+                      <div className="mb-4">
+                        <h4 className="font-semibold mb-2">Research Interests</h4>
+                        <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                          {settings.supervisor_profile.research_interests.map((interest, idx) => (
+                            <Badge key={idx} variant="secondary">{interest}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {settings.pi_home_display?.show_contact && (
+                      <div className="flex flex-col space-y-2 items-center md:items-start">
+                        {settings.supervisor_profile.email && (
+                          <a href={`mailto:${settings.supervisor_profile.email}`} className="text-blue-600 hover:underline flex items-center gap-2">
+                            <Mail className="w-4 h-4" />
+                            {settings.supervisor_profile.email}
+                          </a>
+                        )}
+                      </div>
+                    )}
+                    <div className="mt-4">
+                      <Button asChild variant="outline">
+                        <Link to="/team">View Full Profile</Link>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+      )}
+
+
       {/* Featured Content - Publication and News Side by Side */}
       {(featuredPublication || featuredNews) && (
         <section className="py-16 bg-white">
