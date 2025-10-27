@@ -1816,6 +1816,15 @@ const PublicationsManagementPanel = () => {
     }
   };
 
+  const fetchStaticPublications = async () => {
+    try {
+      const response = await axios.get(`${API}/static-publications`);
+      setStaticPublications(response.data);
+    } catch (error) {
+      console.error('Error fetching static publications:', error);
+    }
+  };
+
   const fetchFeaturedPublication = async () => {
     try {
       const response = await axios.get(`${API}/featured-publication`);
