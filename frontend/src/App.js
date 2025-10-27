@@ -1919,15 +1919,25 @@ const HighlightsManagementPanel = () => {
 const PublicationsManagementPanel = () => {
   const [publications, setPublications] = useState([]);
   const [staticPublications, setStaticPublications] = useState([]);
+  const [books, setBooks] = useState([]);
+  const [intellectualProperties, setIntellectualProperties] = useState([]);
   const [featuredPub, setFeaturedPub] = useState(null);
   const [showFeaturedDialog, setShowFeaturedDialog] = useState(false);
   const [selectedPub, setSelectedPub] = useState(null);
   const [graphicalAbstract, setGraphicalAbstract] = useState('');
+  const [showBookDialog, setShowBookDialog] = useState(false);
+  const [showIPDialog, setShowIPDialog] = useState(false);
+  const [newBook, setNewBook] = useState({ title: '', authors: '', year: new Date().getFullYear(), publisher: '', link: '', cover_image_url: '' });
+  const [newIP, setNewIP] = useState({ type: 'Patent', title: '', year: new Date().getFullYear(), synopsis: '' });
+  const [editingBook, setEditingBook] = useState(null);
+  const [editingIP, setEditingIP] = useState(null);
 
   useEffect(() => {
     fetchPublications();
     fetchStaticPublications();
     fetchFeaturedPublication();
+    fetchBooks();
+    fetchIntellectualProperties();
   }, []);
 
   const fetchPublications = async () => {
@@ -1945,6 +1955,24 @@ const PublicationsManagementPanel = () => {
       setStaticPublications(response.data);
     } catch (error) {
       console.error('Error fetching static publications:', error);
+    }
+  };
+
+  const fetchBooks = async () => {
+    try {
+      const response = await axios.get(`${API}/books`);
+      setBooks(response.data);
+    } catch (error) {
+      console.error('Error fetching books:', error);
+    }
+  };
+
+  const fetchIntellectualProperties = async () => {
+    try {
+      const response = await axios.get(`${API}/intellectual-properties`);
+      setIntellectualProperties(response.data);
+    } catch (error) {
+      console.error('Error fetching intellectual properties:', error);
     }
   };
 
