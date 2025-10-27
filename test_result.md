@@ -141,15 +141,18 @@ backend:
 
   - task: "Static Publications Delete Endpoint"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added DELETE /admin/static-publications/{publication_id} endpoint. Needs testing."
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: Static publications delete endpoint working correctly. Successfully deleted publication and verified removal from list. Returns 404 for non-existent publications. Admin authentication required and enforced. DELETE /api/admin/static-publications/{id} fully functional."
 
   - task: "Featured Publication with Graphical Abstract"
     implemented: true
