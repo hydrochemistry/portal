@@ -1070,7 +1070,7 @@ const SiteSettingsPanel = () => {
       <Card>
         <CardHeader>
           <CardTitle>Principal Investigator Profile</CardTitle>
-          <CardDescription>Configure the supervisor profile displayed on the homepage</CardDescription>
+          <CardDescription>Full profile always appears on Team page. Use "PI Display on Homepage" below to control home page visibility.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
