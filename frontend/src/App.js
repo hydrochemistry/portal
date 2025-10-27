@@ -2157,10 +2157,10 @@ const PublicationsManagementPanel = () => {
   const [staticPublications, setStaticPublications] = useState([]);
   const [books, setBooks] = useState([]);
   const [intellectualProperties, setIntellectualProperties] = useState([]);
-  const [featuredPub, setFeaturedPub] = useState(null);
+  const [featuredPubs, setFeaturedPubs] = useState([]);
   const [showFeaturedDialog, setShowFeaturedDialog] = useState(false);
-  const [selectedPub, setSelectedPub] = useState(null);
-  const [graphicalAbstract, setGraphicalAbstract] = useState('');
+  const [editingFeatured, setEditingFeatured] = useState(null);
+  const [newFeatured, setNewFeatured] = useState({ title: '', authors: '', journal: '', year: new Date().getFullYear(), volume: '', issue: '', pages: '', doi: '', link: '', graphical_abstract: '' });
   const [showBookDialog, setShowBookDialog] = useState(false);
   const [showIPDialog, setShowIPDialog] = useState(false);
   const [newBook, setNewBook] = useState({ title: '', authors: '', year: new Date().getFullYear(), publisher: '', link: '', cover_image_url: '' });
@@ -2171,7 +2171,7 @@ const PublicationsManagementPanel = () => {
   useEffect(() => {
     fetchPublications();
     fetchStaticPublications();
-    fetchFeaturedPublication();
+    fetchFeaturedPublications();
     fetchBooks();
     fetchIntellectualProperties();
   }, []);
@@ -2191,6 +2191,44 @@ const PublicationsManagementPanel = () => {
       setStaticPublications(response.data);
     } catch (error) {
       console.error('Error fetching static publications:', error);
+    }
+  };
+
+  const fetchFeaturedPublications = async () => {
+    try {
+      const response = await axios.get(`${API}/featured-publications`);
+      setFeaturedPubs(response.data);
+    } catch (error) {
+      console.error('Error fetching featured publications:', error);
+    }
+  };
+
+  const saveFeaturedPub = async () => {
+    try {
+      if (editingFeatured) {
+        await axios.put(`${API}/admin/featured-publications/${editingFeatured.id}`, newFeatured);
+        toast.success('Featured publication updated!');
+      } else {
+        await axios.post(`${API}/admin/featured-publications`, newFeatured);
+        toast.success('Featured publication added!');
+      }
+      setShowFeaturedDialog(false);
+      setEditingFeatured(null);
+      setNewFeatured({ title: '', authors: '', journal: '', year: new Date().getFullYear(), volume: '', issue: '', pages: '', doi: '', link: '', graphical_abstract: '' });
+      fetchFeaturedPublications();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error saving publication');
+    }
+  };
+
+  const deleteFeaturedPub = async (id) => {
+    if (!window.confirm('Delete this featured publication?')) return;
+    try {
+      await axios.delete(`${API}/admin/featured-publications/${id}`);
+      toast.success('Featured publication deleted!');
+      fetchFeaturedPublications();
+    } catch (error) {
+      toast.error('Error deleting publication');
     }
   };
 
