@@ -2788,7 +2788,9 @@ const PublicationsManagementPanel = () => {
         </TabsContent>
 
       </Tabs>
-
+    </div>
+  );
+};
 
 const ResearchAreasManagementPanel = () => {
   const [areas, setAreas] = useState([]);
