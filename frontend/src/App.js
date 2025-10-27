@@ -847,6 +847,16 @@ const SiteSettingsPanel = () => {
           </div>
           
           <div>
+            <Label htmlFor="about_section_title">About Section Title</Label>
+            <Input
+              id="about_section_title"
+              value={settings.about_section_title || ''}
+              onChange={(e) => setSettings({...settings, about_section_title: e.target.value})}
+              placeholder="About Our Research Group"
+            />
+          </div>
+          
+          <div>
             <Label htmlFor="about_content">About Content</Label>
             <Textarea
               id="about_content"
@@ -854,6 +864,23 @@ const SiteSettingsPanel = () => {
               onChange={(e) => setSettings({...settings, about_content: e.target.value})}
               className="min-h-32"
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Hero Section</CardTitle>
+          <CardDescription>Configure the hero section display and content</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="show_hero_section"
+              checked={settings.show_hero_section !== false}
+              onCheckedChange={(checked) => setSettings({...settings, show_hero_section: checked})}
+            />
+            <Label htmlFor="show_hero_section">Show Hero Section on Homepage</Label>
           </div>
           
           <div>
@@ -863,7 +890,7 @@ const SiteSettingsPanel = () => {
               value={settings.hero_description || ''}
               onChange={(e) => setSettings({...settings, hero_description: e.target.value})}
               className="min-h-24"
-              placeholder="Advancing environmental science through innovative research..."
+              placeholder="Main description text for the hero section"
             />
           </div>
           
