@@ -1213,32 +1213,27 @@ async def delete_news_article(news_id: str, current_user: User = Depends(get_adm
     return {"message": "News article deleted successfully"}
 
 # Featured publication endpoints
-@api_router.get("/featured-publication")
-async def get_featured_publication():
-    featured = await db.featured_publications.find_one({'is_active': True}, sort=[('created_at', -1)])
-    if not featured:
-        # Return random publication if no featured one is set
-        publications = fetch_scopus_publications_api("22133247800", 10)
-        if publications:
-            import random
-            random_pub = random.choice(publications)
-            random_pub['graphical_abstract'] = None
-            return random_pub
-        return None
-    
-    featured.pop('_id', None)
-    return FeaturedPublication(**featured)
+@api_router.get("/featured-publications")
+async def get_featured_publications():
+    featured = await db.featured_publications.find({}).to_list(5)
+    return [FeaturedPublication(**f) for f in featured]
 
-@api_router.post("/admin/featured-publication", response_model=FeaturedPublication)
+@api_router.post("/admin/featured-publications", response_model=FeaturedPublication)
 async def create_featured_publication(publication: FeaturedPublication, current_user: User = Depends(get_admin_user)):
-    # Deactivate existing featured publications
-    await db.featured_publications.update_many({}, {'$set': {'is_active': False}})
+    # Check if already have 5 featured
+    count = await db.featured_publications.count_documents({})
+    if count >= 5:
+        raise HTTPException(status_code=400, detail="Maximum 5 featured publications allowed")
     
-    # Add new featured publication
     await db.featured_publications.insert_one(publication.dict())
     return publication
 
-@api_router.delete("/admin/featured-publication/{pub_id}")
+@api_router.put("/admin/featured-publications/{pub_id}", response_model=FeaturedPublication)
+async def update_featured_publication(pub_id: str, publication: FeaturedPublication, current_user: User = Depends(get_admin_user)):
+    await db.featured_publications.replace_one({'id': pub_id}, publication.dict())
+    return publication
+
+@api_router.delete("/admin/featured-publications/{pub_id}")
 async def delete_featured_publication(pub_id: str, current_user: User = Depends(get_admin_user)):
     result = await db.featured_publications.delete_one({'id': pub_id})
     if result.deleted_count == 0:
