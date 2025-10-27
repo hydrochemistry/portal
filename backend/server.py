@@ -163,6 +163,7 @@ class ResearchArea(BaseModel):
     description: str
     keywords: List[str] = []
     sdgs: List[int] = []  # SDG numbers 1-17
+    image_url: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class IntellectualProperty(BaseModel):
