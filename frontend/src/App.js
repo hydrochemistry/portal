@@ -105,7 +105,17 @@ const Navigation = () => {
     const fetchSettings = async () => {
       try {
         const response = await axios.get(`${API}/settings`);
-        setSettings(response.data);
+        const fetchedSettings = response.data;
+        
+        // Initialize about_cards if not present
+        if (!fetchedSettings.about_cards) {
+          fetchedSettings.about_cards = [
+            { title: 'Advanced Analytics', description: 'State-of-the-art analytical methods' },
+            { title: 'Education', description: 'Training the next generation' }
+          ];
+        }
+        
+        setSettings(fetchedSettings);
       } catch (error) {
         console.error('Error fetching settings:', error);
       }
