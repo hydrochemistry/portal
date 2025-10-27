@@ -126,6 +126,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ RE-TESTED (Year Sorting Fix): Scopus API publications are now correctly sorted by year in descending order. Retrieved 10 publications with years [2023, 2019, 2018, 2015, 2015, 2014, 2014, 2013, 2013, 2010] - properly sorted from most recent (2023) to oldest (2010). The client-side sorting implementation in server.py line 417 is working correctly. Year sorting issue has been resolved."
+      - working: true
+        agent: "testing"
+        comment: "✅ UPDATED API KEY VERIFICATION (New Key: 243a5aec8e28e6526d575ac45ca369ea): Scopus API integration fully functional with new API key. VERIFIED: 1) API returns real Scopus data (not mock), 2) Publications sorted by year descending (2023 first), 3) Author information retrieved correctly (first author per Scopus Search API limitation), 4) All required fields present (title, authors, journal, year, doi, citations, scopus_id). FIXED: Added dc:creator to field parameter to retrieve author information. LIMITATION: Scopus Search API only returns first author in dc:creator field - this is API design, not implementation issue. To get all authors would require Abstract Retrieval API calls for each publication (slower, more quota usage). Current implementation working as expected per Scopus API specifications."
 
   - task: "RIS File Upload Endpoint"
     implemented: true
