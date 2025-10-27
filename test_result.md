@@ -211,6 +211,21 @@ backend:
         agent: "testing"
         comment: "✅ TESTED: User management endpoints working perfectly. GET /api/admin/users retrieves all users (super admin only). POST /api/admin/users/{id}/approve successfully approves users. POST /api/admin/users/{id}/role?role=admin successfully changes user roles. Invalid roles rejected with 400. Non-existent users return 404. Super admin authentication enforced. Role endpoint accepts query parameter format correctly."
 
+  - task: "Settings Update Endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "user"
+        comment: "User reported 'Error updating settings' issue with PUT /api/admin/settings endpoint. Need to diagnose authentication, validation, or server errors."
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: Settings update endpoint working perfectly. Successfully tested complete workflow: 1) Super admin login successful, 2) GET /api/settings retrieves current settings, 3) PUT /api/admin/settings successfully updates settings (changed scopus_author_id), 4) Settings update verified and persists correctly, 5) Unauthorized access properly rejected with 403. SUCCESS RATE: 100% (5/5 tests passed). The reported 'Error updating settings' issue is NOT reproducible - endpoint functions correctly with proper authentication, validation, and data persistence."
+
 frontend:
   - task: "RIS File Upload UI"
     implemented: true
