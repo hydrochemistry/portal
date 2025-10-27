@@ -457,20 +457,38 @@ const HomePage = () => {
               </Button>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <Beaker className="w-12 h-12 mx-auto text-blue-600 mb-4" />
-                  <h3 className="font-semibold mb-2">Advanced Analytics</h3>
-                  <p className="text-sm text-gray-600">State-of-the-art analytical methods</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <GraduationCap className="w-12 h-12 mx-auto text-green-600 mb-4" />
-                  <h3 className="font-semibold mb-2">Education</h3>
-                  <p className="text-sm text-gray-600">Training the next generation</p>
-                </CardContent>
-              </Card>
+              {settings.about_cards && settings.about_cards.length > 0 ? (
+                settings.about_cards.map((card, idx) => (
+                  <Card key={idx}>
+                    <CardContent className="p-6 text-center">
+                      {idx === 0 ? (
+                        <Beaker className="w-12 h-12 mx-auto text-blue-600 mb-4" />
+                      ) : (
+                        <GraduationCap className="w-12 h-12 mx-auto text-green-600 mb-4" />
+                      )}
+                      <h3 className="font-semibold mb-2">{card.title}</h3>
+                      <p className="text-sm text-gray-600">{card.description}</p>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <>
+                  <Card>
+                    <CardContent className="p-6 text-center">
+                      <Beaker className="w-12 h-12 mx-auto text-blue-600 mb-4" />
+                      <h3 className="font-semibold mb-2">Advanced Analytics</h3>
+                      <p className="text-sm text-gray-600">State-of-the-art analytical methods</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-6 text-center">
+                      <GraduationCap className="w-12 h-12 mx-auto text-green-600 mb-4" />
+                      <h3 className="font-semibold mb-2">Education</h3>
+                      <p className="text-sm text-gray-600">Training the next generation</p>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
             </div>
           </div>
         </div>
