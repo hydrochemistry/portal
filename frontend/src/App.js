@@ -701,6 +701,7 @@ const AdminPanel = () => {
               <TabsTrigger value="research">Research</TabsTrigger>
               <TabsTrigger value="highlights">Highlights</TabsTrigger>
               <TabsTrigger value="publications">Publications</TabsTrigger>
+              <TabsTrigger value="research">Research Areas</TabsTrigger>
               {isSuperAdmin() && <TabsTrigger value="users">Users</TabsTrigger>}
             </TabsList>
 
