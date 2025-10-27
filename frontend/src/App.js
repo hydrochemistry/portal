@@ -2942,6 +2942,29 @@ const UserManagementPanel = () => {
                         </p>
                       </div>
                     )}
+
+                    {user.role !== 'super_admin' && (
+                      <div className="flex gap-2 mt-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => freezeUser(user.id, !user.is_frozen)}
+                          disabled={loading}
+                          className={user.is_frozen ? "border-orange-500 text-orange-600" : ""}
+                        >
+                          {user.is_frozen ? 'Unfreeze' : 'Freeze'}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => deleteUser(user.id)}
+                          disabled={loading}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>
