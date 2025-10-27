@@ -360,19 +360,22 @@ const HomePage = () => {
   useEffect(() => {
     const fetchHomeData = async () => {
       try {
-        const [citationsRes, newsRes, featuredNewsRes, highlightsRes, settingsRes] = await Promise.all([
+        const [citationsRes, newsRes, featuredNewsRes, highlightsRes, settingsRes, featuredPubRes] = await Promise.all([
           axios.get(`${API}/citations`),
           axios.get(`${API}/news?limit=3`),
           axios.get(`${API}/news/featured`),
           axios.get(`${API}/research-highlights`),
-          axios.get(`${API}/settings`)
+          axios.get(`${API}/settings`),
+          axios.get(`${API}/featured-publication`)
         ]);
         
         setCitations(citationsRes.data);
         setRecentNews(newsRes.data);
         setFeaturedNews(featuredNewsRes.data || null);
+        setFeaturedPublication(featuredPubRes.data || null);
         setResearchHighlights(Array.isArray(highlightsRes.data) ? highlightsRes.data.slice(0, 3) : []);
         setSupervisorProfile(settingsRes.data?.supervisor_profile || {});
+        setSettings(settingsRes.data || {});
       } catch (error) {
         console.error('Error fetching home data:', error);
       } finally {
