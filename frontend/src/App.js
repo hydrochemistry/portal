@@ -1293,9 +1293,7 @@ const SiteSettingsPanel = () => {
                 />
               </div>
             </div>
-          </div>
         </CardContent>
-
       </Card>
 
       <Button onClick={handleSaveSettings} disabled={loading}>
