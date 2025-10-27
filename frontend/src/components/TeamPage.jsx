@@ -11,14 +11,19 @@ const API = `${BACKEND_URL}/api`;
 
 const TeamPage = () => {
   const [team, setTeam] = useState([]);
+  const [settings, setSettings] = useState({});
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('active');
+  const [activeTab, setActiveTab] = useState('principal');
 
   useEffect(() => {
     const fetchTeam = async () => {
       try {
-        const response = await axios.get(`${API}/team`);
-        setTeam(response.data);
+        const [teamRes, settingsRes] = await Promise.all([
+          axios.get(`${API}/team`),
+          axios.get(`${API}/settings`)
+        ]);
+        setTeam(teamRes.data);
+        setSettings(settingsRes.data);
       } catch (error) {
         console.error('Error fetching team:', error);
       } finally {
@@ -29,9 +34,11 @@ const TeamPage = () => {
     fetchTeam();
   }, []);
 
-  // Separate active and alumni members
-  const activeMembers = team.filter(member => member.status !== 'alumni');
+  // Separate principal, active members and alumni
+  const principal = settings.supervisor_profile || {};
+  const activeMembers = team.filter(member => member.status !== 'alumni' && member.role !== 'Principal');
   const alumniMembers = team.filter(member => member.status === 'alumni');
+
 
   // Sort active members by role priority
   const rolePriority = {
