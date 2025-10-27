@@ -3013,12 +3013,6 @@ const ResearchAreasManagementPanel = () => {
   );
 };
 
-            </TabsContent>
-
-    </div>
-  );
-};
-
 const UserManagementPanel = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
