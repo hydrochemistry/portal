@@ -1795,6 +1795,7 @@ const HighlightsManagementPanel = () => {
 
 const PublicationsManagementPanel = () => {
   const [publications, setPublications] = useState([]);
+  const [staticPublications, setStaticPublications] = useState([]);
   const [featuredPub, setFeaturedPub] = useState(null);
   const [showFeaturedDialog, setShowFeaturedDialog] = useState(false);
   const [selectedPub, setSelectedPub] = useState(null);
@@ -1802,6 +1803,7 @@ const PublicationsManagementPanel = () => {
 
   useEffect(() => {
     fetchPublications();
+    fetchStaticPublications();
     fetchFeaturedPublication();
   }, []);
 
