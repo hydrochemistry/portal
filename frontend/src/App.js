@@ -2788,7 +2788,7 @@ const PublicationsManagementPanel = () => {
       </Tabs>
 
 
-            <TabsContent value="research">
+            <TabsContent value="research-areas">
               <ResearchAreasManagementPanel />
 
 
