@@ -240,6 +240,28 @@ const TeamPage = () => {
                           </div>
                         )}
 
+                        {principal.experience && principal.experience.length > 0 && (
+                          <div className="mb-4">
+                            <h3 className="font-semibold text-lg mb-2">Experience</h3>
+                            <ul className="list-disc list-inside space-y-1 text-gray-700">
+                              {principal.experience.map((exp, idx) => (
+                                <li key={idx}>{exp}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {principal.awards && principal.awards.length > 0 && (
+                          <div className="mb-4">
+                            <h3 className="font-semibold text-lg mb-2">Awards & Recognition</h3>
+                            <ul className="list-disc list-inside space-y-1 text-gray-700">
+                              {principal.awards.map((award, idx) => (
+                                <li key={idx}>{award}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
                         <div className="space-y-2 mt-4">
                           {principal.email && (
                             <div className="flex items-center space-x-2">
