@@ -231,16 +231,16 @@ frontend:
         comment: "Enhanced User Management Panel with role assignment dropdown. Super admins can now change user roles between 'user' and 'admin'. Includes better UI with role descriptions."
 
   - task: "Static Publications Management in Admin"
-    implemented: false
+    implemented: true
     working: "NA"
     file: "/app/frontend/src/App.js"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Need to add UI to view and delete uploaded static publications in admin panel."
+        comment: "Added 'Manage Uploaded Publications' card in EndNote Upload tab. Shows list of all uploaded publications with delete functionality. Refreshes list after upload or delete."
 
 metadata:
   created_by: "main_agent"
