@@ -267,22 +267,6 @@ const PublicationsPage = () => {
             </div>
           </TabsContent>
         </Tabs>
-            <div className="space-y-6">
-              {staticPublications.length > 0 ? (
-                staticPublications.map((pub) => (
-                  <PublicationCard key={pub.id} pub={pub} isStatic={true} />
-                ))
-              ) : (
-                <Card className="text-center py-12">
-                  <CardContent>
-                    <FileText className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                    <p className="text-gray-600">No publications available. Upload EndNote RIS file via admin panel.</p>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
       </div>
     </div>
   );
