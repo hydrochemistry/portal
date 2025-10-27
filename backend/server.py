@@ -860,6 +860,14 @@ async def get_static_publications(limit: int = 50):
     publications = await db.static_publications.find({}).sort('year', -1).limit(limit).to_list(limit)
     return [StaticPublication(**pub) for pub in publications]
 
+@api_router.delete("/admin/static-publications/{publication_id}")
+async def delete_static_publication(publication_id: str, current_user: User = Depends(get_admin_user)):
+    result = await db.static_publications.delete_one({'id': publication_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Publication not found")
+    return {"message": "Publication deleted successfully"}
+
+
 # News endpoints (enhanced)
 @api_router.post("/admin/news", response_model=NewsArticle)
 async def create_news_article(article: NewsArticle, current_user: User = Depends(get_admin_user)):
