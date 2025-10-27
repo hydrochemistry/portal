@@ -904,6 +904,19 @@ const SiteSettingsPanel = () => {
               onChange={(e) => setSettings({...settings, scopus_author_id: e.target.value})}
             />
           </div>
+
+          <div className="flex items-center justify-between p-4 border rounded-lg">
+            <div>
+              <Label htmlFor="show_scopus" className="font-semibold">Show SCOPUS Publications Tab</Label>
+              <p className="text-sm text-gray-500">Display "Recent from SCOPUS" tab on Publications page</p>
+            </div>
+            <Switch
+              id="show_scopus"
+              checked={settings.show_scopus_publications !== false}
+              onCheckedChange={(checked) => setSettings({...settings, show_scopus_publications: checked})}
+            />
+          </div>
+
           
           <div>
             <Label htmlFor="copyright_text">Copyright Statement</Label>
