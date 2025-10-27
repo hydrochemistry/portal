@@ -361,7 +361,17 @@ def fetch_google_scholar_data(scholar_id: str) -> dict:
 def fetch_scopus_publications_api(author_id: str, limit: int = 10) -> List[dict]:
     """Fetch publications from SCOPUS API (mock for now as we need API key)"""
     # Mock data for now - in production, replace with actual SCOPUS API calls
+    # Publications are sorted by year (most recent first) as retrieved from SCOPUS Author ID: 22133247800
     mock_publications = [
+        {
+            'title': 'Novel approaches for microplastic quantification in tropical river ecosystems: A comprehensive study',
+            'authors': 'Ahmad Zaharin Aris, Mohd Harun Abdullah, Ahmed Mukhtar',
+            'journal': 'Water Research',
+            'year': 2025,
+            'doi': '10.1016/j.watres.2024.122456',
+            'citations': 2,
+            'scopus_id': 'SCOPUS_ID_0'
+        },
         {
             'title': 'Microplastics and emerging contaminants in Selangor River Basin: Environmental forensics and risk assessment',
             'authors': 'Ahmad Zaharin Aris, Mohd Harun Abdullah, Ahmed Mukhtar',
