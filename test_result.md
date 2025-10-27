@@ -126,15 +126,18 @@ backend:
 
   - task: "Static Publications Retrieval"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Endpoint /static-publications exists. Needs testing."
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: Static publications retrieval working perfectly. GET /api/static-publications returns publications sorted by year (descending). Public endpoint accessible without authentication. Retrieved 3 publications successfully during testing."
 
   - task: "Static Publications Delete Endpoint"
     implemented: true
