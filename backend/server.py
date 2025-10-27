@@ -357,35 +357,52 @@ def parse_ris_file(file_content: str) -> List[dict]:
         raise HTTPException(status_code=400, detail=f"RIS file parsing failed: {str(e)}")
 
 def fetch_google_scholar_data(scholar_id: str) -> dict:
-    """Fetch citation metrics from Google Scholar"""
+    """Fetch citation metrics from Google Scholar using scholarly library"""
     try:
-        url = f"https://scholar.google.com/citations?user={scholar_id}&hl=en"
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        from scholarly import scholarly
+        
+        # Search for author by ID
+        author = scholarly.search_author_id(scholar_id)
+        author_info = scholarly.fill(author)
+        
+        return {
+            'total_citations': author_info.get('citedby', 0),
+            'h_index': author_info.get('hindex', 0),
+            'i10_index': author_info.get('i10index', 0),
+            'last_updated': datetime.now(timezone.utc)
         }
-        
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
-        
-        soup = BeautifulSoup(response.content, 'html.parser')
-        
-        # Extract citation metrics
-        citation_table = soup.find('table', {'id': 'gsc_rsb_st'})
-        if citation_table:
-            rows = citation_table.find_all('tr')
-            if len(rows) >= 3:
-                total_citations = rows[1].find_all('td')[1].text.strip()
-                h_index = rows[2].find_all('td')[1].text.strip()
-                i10_index = rows[3].find_all('td')[1].text.strip() if len(rows) > 3 else "0"
-                
-                return {
-                    'total_citations': int(total_citations) if total_citations.isdigit() else 0,
-                    'h_index': int(h_index) if h_index.isdigit() else 0,
-                    'i10_index': int(i10_index) if i10_index.isdigit() else 0,
-                    'last_updated': datetime.now(timezone.utc)
-                }
     except Exception as e:
-        print(f"Error fetching Google Scholar data: {e}")
+        print(f"Error fetching Google Scholar data with scholarly: {e}")
+        
+        # Fallback to web scraping
+        try:
+            url = f"https://scholar.google.com/citations?user={scholar_id}&hl=en"
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+            
+            response = requests.get(url, headers=headers, timeout=10)
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Extract citation metrics
+            citation_table = soup.find('table', {'id': 'gsc_rsb_st'})
+            if citation_table:
+                rows = citation_table.find_all('tr')
+                if len(rows) >= 3:
+                    total_citations = rows[1].find_all('td')[1].text.strip()
+                    h_index = rows[2].find_all('td')[1].text.strip()
+                    i10_index = rows[3].find_all('td')[1].text.strip() if len(rows) > 3 else "0"
+                    
+                    return {
+                        'total_citations': int(total_citations.replace(',', '')) if total_citations else 0,
+                        'h_index': int(h_index) if h_index.isdigit() else 0,
+                        'i10_index': int(i10_index) if i10_index.isdigit() else 0,
+                        'last_updated': datetime.now(timezone.utc)
+                    }
+        except Exception as scrape_error:
+            print(f"Web scraping also failed: {scrape_error}")
     
     return {
         'total_citations': 0,
