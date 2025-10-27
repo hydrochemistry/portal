@@ -3025,13 +3025,6 @@ const ResearchAreasManagementPanel = () => {
                 </Card>
               ))}
             </div>
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
           ) : (
             <div className="text-center py-8">
               <Lightbulb className="w-12 h-12 mx-auto text-gray-400 mb-4" />
