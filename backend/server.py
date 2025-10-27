@@ -170,6 +170,19 @@ class PageContent(BaseModel):
     content: Optional[str] = None
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class FeaturedPublication(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    publication_id: str  # Reference to actual publication
+    title: str
+    authors: str
+    journal: str
+    year: int
+    doi: Optional[str] = None
+    citations: Optional[int] = 0
+    graphical_abstract: Optional[str] = None
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 # Existing models (keeping for compatibility)
 class StatusCheck(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
