@@ -86,6 +86,8 @@ class SiteSettings(BaseModel):
     logo_url: Optional[str] = None
     lab_name: str = "Hydrochemistry Research Group"
     about_content: str = ""
+    about_section_title: str = "About Our Research Group"
+    show_hero_section: bool = True
     hero_description: str = "Advancing environmental science through innovative research in hydrochemistry, environmental forensics, and sustainable water management at Universiti Putra Malaysia."
     hero_button1_text: str = "Explore Our Research"
     hero_button2_text: str = "Latest Publications"
