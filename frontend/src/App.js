@@ -11,6 +11,7 @@ import PublicationsPage from '@/components/PublicationsPage';
 import NewsPage from '@/components/NewsPage';
 import ContactPage from '@/components/ContactPage';
 import ImageUpload from '@/components/ImageUpload';
+import Footer from '@/components/Footer';
 
 // Import shadcn components
 import { Button } from '@/components/ui/button';
