@@ -459,96 +459,100 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Featured Publication */}
-      {featuredPublication && (
+      {/* Featured Content - Publication and News Side by Side */}
+      {(featuredPublication || featuredNews) && (
         <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center mb-8">
-              <FileText className="w-6 h-6 text-blue-500 mr-2" />
-              <h2 className="text-3xl font-bold">Featured Publication</h2>
-            </div>
-            <Card className="overflow-hidden">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {featuredPublication.graphical_abstract && (
-                  <div className="lg:col-span-1">
-                    <img 
-                      src={featuredPublication.graphical_abstract} 
-                      alt="Graphical Abstract"
-                      className="w-full h-full object-cover"
-                    />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              
+              {/* Featured Publication - Left Side */}
+              {featuredPublication ? (
+                <div>
+                  <div className="flex items-center mb-6">
+                    <FileText className="w-5 h-5 text-blue-500 mr-2" />
+                    <h2 className="text-2xl font-bold">Featured Publication</h2>
                   </div>
-                )}
-                <CardContent className={`p-8 ${featuredPublication.graphical_abstract ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
-                  <div className="flex items-center space-x-2 text-sm text-gray-500 mb-4">
-                    <Badge>{featuredPublication.year}</Badge>
-                    {featuredPublication.citations > 0 && (
-                      <span>{featuredPublication.citations} citations</span>
+                  <Card className="overflow-hidden h-full">
+                    {featuredPublication.graphical_abstract && (
+                      <div className="aspect-video">
+                        <img 
+                          src={featuredPublication.graphical_abstract} 
+                          alt="Graphical Abstract"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                     )}
-                  </div>
-                  <h3 className="text-2xl font-bold mb-4">{featuredPublication.title}</h3>
-                  <p className="text-gray-600 mb-2">{featuredPublication.authors}</p>
-                  <p className="text-blue-600 font-medium mb-4">{featuredPublication.journal}</p>
-                  {featuredPublication.doi && (
-                    <div className="flex items-center space-x-2 mb-4">
-                      <ExternalLink className="w-4 h-4 text-gray-400" />
-                      <a 
-                        href={`https://doi.org/${featuredPublication.doi}`} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="text-blue-600 hover:underline text-sm"
-                      >
-                        DOI: {featuredPublication.doi}
-                      </a>
-                    </div>
-                  )}
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-500">Featured Research</span>
-                    <Button asChild>
-                      <Link to="/publications">View All Publications</Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </div>
-            </Card>
-          </div>
-        </section>
-      )}
+                    <CardContent className="p-6">
+                      <div className="flex items-center space-x-2 text-sm text-gray-500 mb-3">
+                        <Badge>{featuredPublication.year}</Badge>
+                        {featuredPublication.citations > 0 && (
+                          <span>{featuredPublication.citations} citations</span>
+                        )}
+                      </div>
+                      <h3 className="text-lg font-bold mb-3 line-clamp-2">{featuredPublication.title}</h3>
+                      <p className="text-gray-600 text-sm mb-2 line-clamp-2">{featuredPublication.authors}</p>
+                      <p className="text-blue-600 font-medium text-sm mb-4">{featuredPublication.journal}</p>
+                      {featuredPublication.doi && (
+                        <div className="flex items-center space-x-2 mb-4">
+                          <ExternalLink className="w-3 h-3 text-gray-400" />
+                          <a 
+                            href={`https://doi.org/${featuredPublication.doi}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="text-blue-600 hover:underline text-xs"
+                          >
+                            DOI: {featuredPublication.doi}
+                          </a>
+                        </div>
+                      )}
+                      <Button size="sm" asChild>
+                        <Link to="/publications">View All Publications</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : (
+                <div></div>
+              )}
 
-      {/* Featured News */}
-      {featuredNews && (
-        <section className="py-16 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center mb-8">
-              <Star className="w-6 h-6 text-yellow-500 mr-2" />
-              <h2 className="text-3xl font-bold">Featured News</h2>
+              {/* Featured News - Right Side */}
+              {featuredNews ? (
+                <div>
+                  <div className="flex items-center mb-6">
+                    <Star className="w-5 h-5 text-yellow-500 mr-2" />
+                    <h2 className="text-2xl font-bold">Featured News</h2>
+                  </div>
+                  <Card className="overflow-hidden h-full">
+                    {featuredNews.image_url && (
+                      <div className="aspect-video">
+                        <img 
+                          src={featuredNews.image_url} 
+                          alt={featuredNews.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <CardContent className="p-6">
+                      <div className="flex items-center space-x-2 text-sm text-gray-500 mb-3">
+                        <Calendar className="w-4 h-4" />
+                        <span>{new Date(featuredNews.created_at).toLocaleDateString()}</span>
+                      </div>
+                      <h3 className="text-lg font-bold mb-3 line-clamp-2">{featuredNews.title}</h3>
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-4">{featuredNews.content}</p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-500">By {featuredNews.author}</span>
+                        <Button size="sm" asChild>
+                          <Link to="/news">Read More News</Link>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : (
+                <div></div>
+              )}
+
             </div>
-            <Card className="overflow-hidden">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {featuredNews.image_url && (
-                  <div className="aspect-video lg:aspect-square">
-                    <img 
-                      src={featuredNews.image_url} 
-                      alt={featuredNews.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-                <CardContent className="p-8">
-                  <div className="flex items-center space-x-2 text-sm text-gray-500 mb-4">
-                    <Calendar className="w-4 h-4" />
-                    <span>{new Date(featuredNews.created_at).toLocaleDateString()}</span>
-                  </div>
-                  <h3 className="text-2xl font-bold mb-4">{featuredNews.title}</h3>
-                  <p className="text-gray-600 mb-4">{featuredNews.content}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-500">By {featuredNews.author}</span>
-                    <Button asChild>
-                      <Link to={`/news`}>Read More News</Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </div>
-            </Card>
           </div>
         </section>
       )}
