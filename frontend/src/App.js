@@ -2373,96 +2373,127 @@ const PublicationsManagementPanel = () => {
         <TabsContent value="featured" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Featured Publication on Homepage</CardTitle>
-              <CardDescription>
-                Select a publication to highlight on the homepage. If none selected, random publications will be shown.
-              </CardDescription>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>Featured Publications</CardTitle>
+                  <CardDescription>Add up to 5 publications to feature on homepage</CardDescription>
+                </div>
+                {featuredPubs.length < 5 && (
+                  <Button onClick={() => {
+                    setEditingFeatured(null);
+                    setNewFeatured({ title: '', authors: '', journal: '', year: new Date().getFullYear(), volume: '', issue: '', pages: '', doi: '', link: '', graphical_abstract: '' });
+                    setShowFeaturedDialog(true);
+                  }}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Featured
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
-              {featuredPub ? (
+              {featuredPubs.length > 0 ? (
                 <div className="space-y-4">
-                  <div className="p-4 border rounded-lg">
-                    <div className="flex justify-between items-start mb-2">
-                      <h4 className="font-semibold">{featuredPub.title}</h4>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={removeFeatured}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        Remove Featured
-                      </Button>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-2">{featuredPub.authors}</p>
-                    <p className="text-sm text-blue-600">{featuredPub.journal} ({featuredPub.year})</p>
-                    {featuredPub.graphical_abstract && (
-                      <div className="mt-3">
-                        <img 
-                          src={featuredPub.graphical_abstract} 
-                          alt="Graphical Abstract" 
-                          className="w-32 h-32 object-cover rounded"
-                        />
-                      </div>
-                    )}
-                  </div>
-                  
-                  <Button onClick={() => setShowFeaturedDialog(true)}>
-                    Change Featured Publication
-                  </Button>
+                  {featuredPubs.map((pub) => (
+                    <Card key={pub.id}>
+                      <CardContent className="p-4">
+                        <div className="flex gap-4">
+                          {pub.graphical_abstract && (
+                            <img src={pub.graphical_abstract} alt="Graphic" className="w-24 h-24 object-cover rounded" />
+                          )}
+                          <div className="flex-1">
+                            <h4 className="font-semibold mb-1">{pub.title}</h4>
+                            <p className="text-sm text-gray-600 mb-1">{pub.authors}</p>
+                            <p className="text-sm text-blue-600">{pub.journal} ({pub.year})</p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm" onClick={() => {
+                              setEditingFeatured(pub);
+                              setNewFeatured(pub);
+                              setShowFeaturedDialog(true);
+                            }}>Edit</Button>
+                            <Button variant="ghost" size="sm" onClick={() => deleteFeaturedPub(pub.id)} className="text-red-600">
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               ) : (
                 <div className="text-center py-8">
                   <FileText className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                  <p className="text-gray-600 mb-4">No featured publication selected</p>
-                  <p className="text-sm text-gray-500 mb-4">Random publications will be displayed on homepage</p>
-                  <Button onClick={() => setShowFeaturedDialog(true)}>
-                    Select Featured Publication
-                  </Button>
+                  <p className="text-gray-600">No featured publications yet</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
           <Dialog open={showFeaturedDialog} onOpenChange={setShowFeaturedDialog}>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Select Featured Publication</DialogTitle>
-                <DialogDescription>
-                  Choose a publication from your SCOPUS list to feature on the homepage
-                </DialogDescription>
+                <DialogTitle>{editingFeatured ? 'Edit' : 'Add'} Featured Publication</DialogTitle>
               </DialogHeader>
-              
               <div className="space-y-4">
-                <div className="space-y-3 max-h-60 overflow-y-auto">
-                  {publications.map((pub) => (
-                    <div 
-                      key={pub.id}
-                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                        selectedPub?.id === pub.id ? 'bg-blue-50 border-blue-300' : 'hover:bg-gray-50'
-                      }`}
-                      onClick={() => setSelectedPub(pub)}
-                    >
-                      <h4 className="font-medium text-sm mb-1">{pub.title}</h4>
-                      <p className="text-xs text-gray-600">{pub.authors}</p>
-                      <p className="text-xs text-blue-600">{pub.journal} ({pub.year})</p>
-                    </div>
-                  ))}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Title</Label>
+                    <Input value={newFeatured.title} onChange={(e) => setNewFeatured({...newFeatured, title: e.target.value})} />
+                  </div>
+                  <div>
+                    <Label>Authors</Label>
+                    <Input value={newFeatured.authors} onChange={(e) => setNewFeatured({...newFeatured, authors: e.target.value})} />
+                  </div>
                 </div>
-                
-                {selectedPub && (
-                  <div className="space-y-4 border-t pt-4">
-                    <div>
-                      <h4 className="font-semibold mb-2">Selected Publication:</h4>
-                      <div className="p-3 bg-gray-50 rounded">
-                        <p className="font-medium">{selectedPub.title}</p>
-                        <p className="text-sm text-gray-600">{selectedPub.authors}</p>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <Label>Graphical Abstract (Optional)</Label>
-                      <ImageUpload 
-                        onUpload={(url) => setGraphicalAbstract(url)}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Journal</Label>
+                    <Input value={newFeatured.journal} onChange={(e) => setNewFeatured({...newFeatured, journal: e.target.value})} />
+                  </div>
+                  <div>
+                    <Label>Year</Label>
+                    <Input type="number" value={newFeatured.year} onChange={(e) => setNewFeatured({...newFeatured, year: parseInt(e.target.value)})} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label>Volume</Label>
+                    <Input value={newFeatured.volume} onChange={(e) => setNewFeatured({...newFeatured, volume: e.target.value})} />
+                  </div>
+                  <div>
+                    <Label>Issue</Label>
+                    <Input value={newFeatured.issue} onChange={(e) => setNewFeatured({...newFeatured, issue: e.target.value})} />
+                  </div>
+                  <div>
+                    <Label>Pages</Label>
+                    <Input value={newFeatured.pages} onChange={(e) => setNewFeatured({...newFeatured, pages: e.target.value})} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>DOI</Label>
+                    <Input value={newFeatured.doi} onChange={(e) => setNewFeatured({...newFeatured, doi: e.target.value})} />
+                  </div>
+                  <div>
+                    <Label>Link</Label>
+                    <Input value={newFeatured.link} onChange={(e) => setNewFeatured({...newFeatured, link: e.target.value})} />
+                  </div>
+                </div>
+                <div>
+                  <Label>Graphical Abstract</Label>
+                  <ImageUpload onUpload={(url) => setNewFeatured({...newFeatured, graphical_abstract: url})} label="Upload graphic" />
+                  {newFeatured.graphical_abstract && (
+                    <img src={newFeatured.graphical_abstract} alt="Preview" className="w-32 h-32 object-cover rounded mt-2" />
+                  )}
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowFeaturedDialog(false)}>Cancel</Button>
+                  <Button onClick={saveFeaturedPub}>Save</Button>
+                </DialogFooter>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </TabsContent>
                         label="Upload graphical abstract"
                       />
                       {graphicalAbstract && (
