@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Lightbulb } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Lightbulb, Award, DollarSign } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -29,21 +30,29 @@ const SDG_IMAGES = {
 
 const ResearchPage = () => {
   const [researchAreas, setResearchAreas] = useState([]);
+  const [grants, setGrants] = useState([]);
+  const [awards, setAwards] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchResearchAreas = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`${API}/research-areas`);
-        setResearchAreas(response.data);
+        const [areasRes, grantsRes, awardsRes] = await Promise.all([
+          axios.get(`${API}/research-areas`),
+          axios.get(`${API}/grants`),
+          axios.get(`${API}/awards`)
+        ]);
+        setResearchAreas(areasRes.data);
+        setGrants(grantsRes.data);
+        setAwards(awardsRes.data);
       } catch (error) {
-        console.error('Error fetching research areas:', error);
+        console.error('Error fetching research data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchResearchAreas();
+    fetchData();
   }, []);
 
   if (loading) {
