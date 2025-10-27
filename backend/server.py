@@ -91,6 +91,7 @@ class SiteSettings(BaseModel):
     show_hero_section: bool = True
     show_menu_logo: bool = True  # Toggle to show/hide logo in menu
     show_lab_info_logo: bool = False  # Toggle to show/hide logo in lab info section
+    show_scopus_publications: bool = True  # Toggle to show/hide SCOPUS publications tab
     hero_description: str = "Advancing environmental science through innovative research in hydrochemistry, environmental forensics, and sustainable water management at Universiti Putra Malaysia."
     hero_button1_text: str = "Explore Our Research"
     hero_button2_text: str = "Latest Publications"
