@@ -367,7 +367,7 @@ def fetch_scopus_publications_api(author_id: str, limit: int = 10) -> List[dict]
         return get_mock_scopus_publications(limit)
     
     try:
-        # Step 1: Fetch publication list from Search API
+        # Step 1: Fetch publication list from Search API - using exact parameters from user
         url = "https://api.elsevier.com/content/search/scopus"
         headers = {
             'X-ELS-APIKey': api_key,
@@ -375,12 +375,11 @@ def fetch_scopus_publications_api(author_id: str, limit: int = 10) -> List[dict]
         }
         params = {
             'query': f'AU-ID({author_id})',
-            'sort': 'coverDate desc',  # Sort by cover date descending
-            'count': limit,
-            'field': 'dc:title,dc:creator,prism:publicationName,prism:coverDate,prism:doi,citedby-count,dc:identifier,prism:pageRange'
+            'sort': 'pubyear desc',  # Sort by publication year descending - most recent first
+            'count': limit
         }
         
-        response = requests.get(url, headers=headers, params=params, timeout=10)
+        response = requests.get(url, headers=headers, params=params, timeout=15)
         response.raise_for_status()
         
         data = response.json()
@@ -472,10 +471,8 @@ def fetch_scopus_publications_api(author_id: str, limit: int = 10) -> List[dict]
                 
                 publications.append(pub)
         
-        # Sort by year descending (most recent first) as additional safeguard
-        publications.sort(key=lambda x: x['year'], reverse=True)
-        
-        logging.info(f"Successfully fetched {len(publications)} publications from Scopus API with complete author lists")
+        # Keep the order from API (already sorted by pubyear desc)
+        logging.info(f"Successfully fetched {len(publications)} publications from Scopus API (sorted by pubyear desc)")
         return publications
         
     except requests.exceptions.RequestException as e:
