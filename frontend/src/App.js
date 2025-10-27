@@ -784,17 +784,12 @@ const SiteSettingsPanel = () => {
   const handleSaveSettings = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      await axios.put(`${API}/admin/settings`, settings, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      await axios.put(`${API}/admin/settings`, settings);
       toast.success('Settings updated successfully!');
     } catch (error) {
-      console.error('Error updating settings:', error);
+      console.error('Error updating settings:', error.response || error);
       const errorMsg = error.response?.data?.detail || error.message || 'Error updating settings';
-      toast.error(errorMsg);
+      toast.error(`Error: ${errorMsg}`);
     } finally {
       setLoading(false);
     }
