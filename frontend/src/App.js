@@ -2792,10 +2792,6 @@ const PublicationsManagementPanel = () => {
       </Tabs>
 
 
-            <TabsContent value="research-areas">
-              <ResearchAreasManagementPanel />
-
-
 const ResearchAreasManagementPanel = () => {
   const [areas, setAreas] = useState([]);
   const [showDialog, setShowDialog] = useState(false);
