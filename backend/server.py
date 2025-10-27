@@ -377,7 +377,7 @@ def fetch_scopus_publications_api(author_id: str, limit: int = 10) -> List[dict]
             'query': f'AU-ID({author_id})',
             'sort': 'coverDate desc',  # Sort by cover date descending
             'count': limit,
-            'field': 'dc:title,author,prism:publicationName,prism:coverDate,prism:doi,citedby-count,dc:identifier,prism:pageRange'
+            'field': 'dc:title,author,dc:creator,prism:publicationName,prism:coverDate,prism:doi,citedby-count,dc:identifier,prism:pageRange'
         }
         
         response = requests.get(url, headers=headers, params=params, timeout=10)
