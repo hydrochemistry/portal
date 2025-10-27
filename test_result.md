@@ -101,3 +101,165 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  Implement three pending features for the research group website:
+  1. EndNote RIS File Upload - Allow admins to upload RIS files for static publications
+  2. Graphical Abstract - Support graphical abstracts for featured publications
+  3. User Management Panel - Complete user management with role assignment
+
+backend:
+  - task: "RIS File Upload Endpoint"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Endpoint /upload/ris already exists with rispy parsing. Needs testing."
+
+  - task: "Static Publications Retrieval"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Endpoint /static-publications exists. Needs testing."
+
+  - task: "Static Publications Delete Endpoint"
+    implemented: false
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Need to add DELETE endpoint for static publications management."
+
+  - task: "Featured Publication with Graphical Abstract"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Endpoint /admin/featured-publication supports graphical_abstract field. Needs testing."
+
+  - task: "User Management Endpoints"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Endpoints exist: /admin/users, /admin/users/{user_id}/approve, /admin/users/{user_id}/role. Need to verify role endpoint accepts proper payload."
+
+frontend:
+  - task: "RIS File Upload UI"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "AdminPanel > Publications > EndNote Upload tab exists with file upload. Needs testing."
+
+  - task: "Static Publications Display"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/PublicationsPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "PublicationsPage has 'All Publications' tab displaying static publications. Needs testing."
+
+  - task: "Graphical Abstract Upload"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "AdminPanel > Publications > Featured Publication has ImageUpload for graphical abstract. Needs testing."
+
+  - task: "Graphical Abstract Display on Homepage"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "HomePage displays graphical abstract if present in featured publication. Needs testing."
+
+  - task: "User Management Panel - Role Assignment"
+    implemented: false
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "User Management Panel exists but lacks role assignment UI. Need to add dropdown for role selection."
+
+  - task: "Static Publications Management in Admin"
+    implemented: false
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Need to add UI to view and delete uploaded static publications in admin panel."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 0
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Complete User Management Panel - Role Assignment"
+    - "Add Static Publications Management in Admin"
+    - "Add Static Publications Delete Endpoint"
+    - "Test RIS File Upload End-to-End"
+    - "Test Graphical Abstract Upload and Display"
+    - "Test User Management Workflow"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Initial assessment complete. Most features already implemented. Need to: 1) Add role assignment UI in User Management Panel, 2) Add static publications management in admin, 3) Add delete endpoint for static publications, 4) Test all three features thoroughly."
