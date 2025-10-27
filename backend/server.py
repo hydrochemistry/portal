@@ -1008,6 +1008,66 @@ async def delete_award(award_id: str, current_user: User = Depends(get_admin_use
         raise HTTPException(status_code=404, detail="Award not found")
     return {"message": "Award deleted successfully"}
 
+
+# Books endpoints
+@api_router.get("/books", response_model=List[Book])
+async def get_books():
+    books = await db.books.find({}).sort([('year', -1)]).to_list(100)
+    result = []
+    for book in books:
+        book.pop('_id', None)
+        result.append(Book(**book))
+    return result
+
+@api_router.post("/admin/books", response_model=Book)
+async def create_book(book: Book, current_user: User = Depends(get_admin_user)):
+    await db.books.insert_one(book.dict())
+    return book
+
+@api_router.put("/admin/books/{book_id}", response_model=Book)
+async def update_book(book_id: str, book: Book, current_user: User = Depends(get_admin_user)):
+    result = await db.books.replace_one({'id': book_id}, book.dict())
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return book
+
+@api_router.delete("/admin/books/{book_id}")
+async def delete_book(book_id: str, current_user: User = Depends(get_admin_user)):
+    result = await db.books.delete_one({'id': book_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return {"message": "Book deleted successfully"}
+
+# Intellectual Properties endpoints
+@api_router.get("/intellectual-properties", response_model=List[IntellectualProperty])
+async def get_intellectual_properties():
+    ips = await db.intellectual_properties.find({}).sort([('year', -1)]).to_list(100)
+    result = []
+    for ip in ips:
+        ip.pop('_id', None)
+        result.append(IntellectualProperty(**ip))
+    return result
+
+@api_router.post("/admin/intellectual-properties", response_model=IntellectualProperty)
+async def create_intellectual_property(ip: IntellectualProperty, current_user: User = Depends(get_admin_user)):
+    await db.intellectual_properties.insert_one(ip.dict())
+    return ip
+
+@api_router.put("/admin/intellectual-properties/{ip_id}", response_model=IntellectualProperty)
+async def update_intellectual_property(ip_id: str, ip: IntellectualProperty, current_user: User = Depends(get_admin_user)):
+    result = await db.intellectual_properties.replace_one({'id': ip_id}, ip.dict())
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Intellectual property not found")
+    return ip
+
+@api_router.delete("/admin/intellectual-properties/{ip_id}")
+async def delete_intellectual_property(ip_id: str, current_user: User = Depends(get_admin_user)):
+    result = await db.intellectual_properties.delete_one({'id': ip_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Intellectual property not found")
+    return {"message": "Intellectual property deleted successfully"}
+
+
 # Research highlights endpoints
 @api_router.get("/research-highlights", response_model=List[ResearchHighlight])
 async def get_research_highlights():
