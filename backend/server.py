@@ -137,6 +137,25 @@ class Award(BaseModel):
     recipient: str = "Prof. Dr. Ahmad Zaharin Aris"
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class Book(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    authors: str
+    year: int
+    publisher: str
+    link: Optional[str] = None
+    cover_image_url: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class IntellectualProperty(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    type: str  # e.g., "Patent", "Copyright", "Trademark", etc.
+    title: str
+    year: int
+    synopsis: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
 class ResearchHighlight(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str
