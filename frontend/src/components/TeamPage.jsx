@@ -34,11 +34,17 @@ const TeamPage = () => {
     fetchTeam();
   }, []);
 
-  // Separate principal, active members and alumni
+  // Separate principal, active members, collaborators and alumni
   const principal = settings.supervisor_profile || {};
-  const activeMembers = team.filter(member => member.status !== 'alumni' && member.role !== 'Principal');
+  const activeMembers = team.filter(member => member.status !== 'alumni' && member.role !== 'Principal' && member.role !== 'Collaborator');
+  const collaborators = team.filter(member => member.role === 'Collaborator' && member.status !== 'alumni');
   const alumniMembers = team.filter(member => member.status === 'alumni');
 
+  const COUNTRY_FLAGS = {
+    'MY': '🇲🇾', 'SG': '🇸🇬', 'ID': '🇮🇩', 'TH': '🇹🇭', 'PH': '🇵🇭', 'VN': '🇻🇳',
+    'US': '🇺🇸', 'GB': '🇬🇧', 'AU': '🇦🇺', 'JP': '🇯🇵', 'CN': '🇨🇳', 'IN': '🇮🇳',
+    'DE': '🇩🇪', 'FR': '🇫🇷'
+  };
 
   // Sort active members by role priority
   const rolePriority = {
