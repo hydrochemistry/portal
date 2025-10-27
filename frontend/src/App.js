@@ -2030,61 +2030,160 @@ const PublicationsManagementPanel = () => {
 
 const UserManagementPanel = () => {
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
   
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get(`${API}/admin/users`);
-        setUsers(response.data);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
-    };
     fetchUsers();
   }, []);
 
-  const approveUser = async (userId) => {
+  const fetchUsers = async () => {
     try {
-      await axios.post(`${API}/admin/users/${userId}/approve`);
-      toast.success('User approved!');
-      // Refresh users list
       const response = await axios.get(`${API}/admin/users`);
       setUsers(response.data);
     } catch (error) {
+      console.error('Error fetching users:', error);
+      toast.error('Error fetching users');
+    }
+  };
+
+  const approveUser = async (userId) => {
+    try {
+      setLoading(true);
+      await axios.post(`${API}/admin/users/${userId}/approve`);
+      toast.success('User approved successfully!');
+      await fetchUsers();
+    } catch (error) {
+      console.error('Error approving user:', error);
       toast.error('Error approving user');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateUserRole = async (userId, newRole) => {
+    try {
+      setLoading(true);
+      await axios.post(`${API}/admin/users/${userId}/role?role=${newRole}`);
+      toast.success('User role updated successfully!');
+      await fetchUsers();
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      toast.error('Error updating user role');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getRoleDisplayName = (role) => {
+    switch(role) {
+      case 'super_admin': return 'Super Admin';
+      case 'admin': return 'Web Admin';
+      case 'user': return 'User';
+      default: return role;
+    }
+  };
+
+  const getRoleBadgeVariant = (role) => {
+    switch(role) {
+      case 'super_admin': return 'default';
+      case 'admin': return 'secondary';
+      default: return 'outline';
     }
   };
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">User Management</h2>
+      <Card>
+        <CardHeader>
+          <CardTitle>User Management</CardTitle>
+          <CardDescription>
+            Manage user accounts, approvals, and role assignments. Only super admins can access this panel.
+          </CardDescription>
+        </CardHeader>
+      </Card>
       
       <div className="space-y-4">
-        {users.map((user) => (
-          <Card key={user.id}>
-            <CardContent className="p-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="font-semibold">{user.name}</h3>
-                  <p className="text-sm text-gray-600">{user.email}</p>
-                  <div className="flex items-center space-x-2 mt-2">
-                    <Badge variant={user.is_approved ? "default" : "secondary"}>
-                      {user.is_approved ? "Approved" : "Pending"}
-                    </Badge>
-                    <Badge variant="outline">{user.role}</Badge>
-                  </div>
-                </div>
-                
-                {!user.is_approved && (
-                  <Button onClick={() => approveUser(user.id)}>
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Approve
-                  </Button>
-                )}
-              </div>
+        {users.length === 0 ? (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <Users className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-600">No users found.</p>
             </CardContent>
           </Card>
-        ))}
+        ) : (
+          users.map((user) => (
+            <Card key={user.id}>
+              <CardContent className="p-6">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <h3 className="font-semibold text-lg">{user.name}</h3>
+                      {user.role === 'super_admin' && (
+                        <Badge variant="default" className="bg-purple-600">
+                          <Shield className="w-3 h-3 mr-1" />
+                          Super Admin
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">{user.email}</p>
+                    
+                    <div className="flex items-center space-x-2 mb-3">
+                      <Badge variant={user.is_approved ? "default" : "secondary"}>
+                        {user.is_approved ? "Approved" : "Pending Approval"}
+                      </Badge>
+                      <Badge variant={getRoleBadgeVariant(user.role)}>
+                        {getRoleDisplayName(user.role)}
+                      </Badge>
+                    </div>
+
+                    {user.approved_at && (
+                      <p className="text-xs text-gray-500">
+                        Approved on: {new Date(user.approved_at).toLocaleDateString()}
+                      </p>
+                    )}
+                  </div>
+                  
+                  <div className="flex flex-col space-y-2 md:items-end">
+                    {!user.is_approved && (
+                      <Button 
+                        onClick={() => approveUser(user.id)}
+                        disabled={loading}
+                        className="w-full md:w-auto"
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Approve User
+                      </Button>
+                    )}
+                    
+                    {user.is_approved && user.role !== 'super_admin' && (
+                      <div className="flex flex-col space-y-2 w-full md:w-auto">
+                        <Label className="text-xs text-gray-600">Change Role:</Label>
+                        <Select 
+                          value={user.role} 
+                          onValueChange={(newRole) => updateUserRole(user.id, newRole)}
+                          disabled={loading}
+                        >
+                          <SelectTrigger className="w-full md:w-48">
+                            <SelectValue placeholder="Select role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="user">User</SelectItem>
+                            <SelectItem value="admin">Web Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-gray-500">
+                          {user.role === 'admin' 
+                            ? 'Can manage all content except users' 
+                            : 'Limited access, requires approval'}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
     </div>
   );
