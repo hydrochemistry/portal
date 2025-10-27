@@ -3,7 +3,8 @@ import axios from 'axios';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Users, Mail, ExternalLink, User } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Users, Mail, ExternalLink, User, Award } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -11,6 +12,7 @@ const API = `${BACKEND_URL}/api`;
 const TeamPage = () => {
   const [team, setTeam] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('active');
 
   useEffect(() => {
     const fetchTeam = async () => {
@@ -27,6 +29,28 @@ const TeamPage = () => {
     fetchTeam();
   }, []);
 
+  // Separate active and alumni members
+  const activeMembers = team.filter(member => member.status !== 'alumni');
+  const alumniMembers = team.filter(member => member.status === 'alumni');
+
+  // Sort active members by role priority
+  const rolePriority = {
+    'Principal': 1,
+    'Researcher': 2,
+    'Post-Doctoral': 3,
+    'PhD Student': 4,
+    'MS Student': 5,
+    'Research Assistant': 6,
+    'Intern': 7,
+    'Research Attachment': 8
+  };
+
+  const sortedActiveMembers = [...activeMembers].sort((a, b) => {
+    const priorityA = rolePriority[a.role] || 999;
+    const priorityB = rolePriority[b.role] || 999;
+    return priorityA - priorityB;
+  });
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -35,19 +59,10 @@ const TeamPage = () => {
     );
   }
 
-  return (
-    <div className="bg-white py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Our Team</h1>
-          <p className="text-xl text-gray-600">Meet the researchers driving innovation in hydrochemistry</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {team.map((member) => (
-            <Card key={member.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-              <CardHeader className="text-center">
-                <div className="relative mb-4">
+  const renderMemberCard = (member) => (
+    <Card key={member.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+      <CardHeader className="text-center">
+        <div className="relative mb-4">
                   {member.photo_url ? (
                     <img 
                       src={member.photo_url} 
