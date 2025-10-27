@@ -2757,6 +2757,229 @@ const PublicationsManagementPanel = () => {
 
             <TabsContent value="research">
               <ResearchAreasManagementPanel />
+
+
+const ResearchAreasManagementPanel = () => {
+  const [areas, setAreas] = useState([]);
+  const [showDialog, setShowDialog] = useState(false);
+  const [editingArea, setEditingArea] = useState(null);
+  const [newArea, setNewArea] = useState({ title: '', description: '', keywords: [], sdgs: [], image_url: '' });
+  const [keywordInput, setKeywordInput] = useState('');
+
+  useEffect(() => {
+    fetchAreas();
+  }, []);
+
+  const fetchAreas = async () => {
+    try {
+      const response = await axios.get(`${API}/research-areas`);
+      setAreas(response.data);
+    } catch (error) {
+      console.error('Error fetching research areas:', error);
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      if (editingArea) {
+        await axios.put(`${API}/admin/research-areas/${editingArea.id}`, newArea);
+        toast.success('Research area updated!');
+      } else {
+        await axios.post(`${API}/admin/research-areas`, newArea);
+        toast.success('Research area added!');
+      }
+      setShowDialog(false);
+      setNewArea({ title: '', description: '', keywords: [], sdgs: [], image_url: '' });
+      setEditingArea(null);
+      fetchAreas();
+    } catch (error) {
+      toast.error('Error saving research area');
+    }
+  };
+
+  const handleDelete = async (areaId) => {
+    if (!window.confirm('Delete this research area?')) return;
+    try {
+      await axios.delete(`${API}/admin/research-areas/${areaId}`);
+      toast.success('Research area deleted!');
+      fetchAreas();
+    } catch (error) {
+      toast.error('Error deleting research area');
+    }
+  };
+
+  const addKeyword = () => {
+    if (keywordInput.trim()) {
+      setNewArea({...newArea, keywords: [...newArea.keywords, keywordInput.trim()]});
+      setKeywordInput('');
+    }
+  };
+
+  const removeKeyword = (idx) => {
+    setNewArea({...newArea, keywords: newArea.keywords.filter((_, i) => i !== idx)});
+  };
+
+  const toggleSDG = (sdg) => {
+    if (newArea.sdgs.includes(sdg)) {
+      setNewArea({...newArea, sdgs: newArea.sdgs.filter(s => s !== sdg)});
+    } else {
+      setNewArea({...newArea, sdgs: [...newArea.sdgs, sdg]});
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle>Research Areas Management</CardTitle>
+            <Dialog open={showDialog} onOpenChange={setShowDialog}>
+              <DialogTrigger asChild>
+                <Button onClick={() => {
+                  setEditingArea(null);
+                  setNewArea({ title: '', description: '', keywords: [], sdgs: [], image_url: '' });
+                }}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Research Area
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>{editingArea ? 'Edit' : 'Add'} Research Area</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label>Title</Label>
+                    <Input
+                      value={newArea.title}
+                      onChange={(e) => setNewArea({...newArea, title: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label>Description</Label>
+                    <Textarea
+                      value={newArea.description}
+                      onChange={(e) => setNewArea({...newArea, description: e.target.value})}
+                      rows={4}
+                    />
+                  </div>
+                  <div>
+                    <Label>Image</Label>
+                    <ImageUpload 
+                      onUpload={(url) => setNewArea({...newArea, image_url: url})}
+                      label="Upload Research Area Image"
+                    />
+                    {newArea.image_url && (
+                      <img src={newArea.image_url} alt="Preview" className="w-full h-32 object-cover mt-2 rounded" />
+                    )}
+                  </div>
+                  <div>
+                    <Label>Keywords</Label>
+                    <div className="flex gap-2 mb-2">
+                      <Input
+                        value={keywordInput}
+                        onChange={(e) => setKeywordInput(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && addKeyword()}
+                        placeholder="Add keyword"
+                      />
+                      <Button type="button" onClick={addKeyword}>Add</Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {newArea.keywords.map((kw, idx) => (
+                        <Badge key={idx} variant="secondary">
+                          {kw}
+                          <button onClick={() => removeKeyword(idx)} className="ml-2">×</button>
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Select SDGs (1-17)</Label>
+                    <div className="grid grid-cols-9 gap-2">
+                      {[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].map(sdg => (
+                        <Button
+                          key={sdg}
+                          type="button"
+                          variant={newArea.sdgs.includes(sdg) ? "default" : "outline"}
+                          onClick={() => toggleSDG(sdg)}
+                          className="w-full"
+                        >
+                          {sdg}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setShowDialog(false)}>Cancel</Button>
+                    <Button onClick={handleSave}>Save</Button>
+                  </DialogFooter>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {areas.length > 0 ? (
+            <div className="space-y-4">
+              {areas.map((area) => (
+                <Card key={area.id}>
+                  <CardContent className="p-4">
+                    <div className="flex gap-4">
+                      {area.image_url && (
+                        <img src={area.image_url} alt={area.title} className="w-24 h-24 object-cover rounded" />
+                      )}
+                      <div className="flex-1">
+                        <h4 className="font-semibold mb-1">{area.title}</h4>
+                        <p className="text-sm text-gray-600 mb-2">{area.description}</p>
+                        {area.keywords.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            {area.keywords.map((kw, idx) => (
+                              <Badge key={idx} variant="outline" className="text-xs">{kw}</Badge>
+                            ))}
+                          </div>
+                        )}
+                        {area.sdgs.length > 0 && (
+                          <div className="text-xs text-gray-500">SDGs: {area.sdgs.join(', ')}</div>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setEditingArea(area);
+                            setNewArea(area);
+                            setShowDialog(true);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleDelete(area.id)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <Lightbulb className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-600">No research areas added yet</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
             </TabsContent>
 
     </div>
