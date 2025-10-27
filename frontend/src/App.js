@@ -1196,101 +1196,12 @@ const SiteSettingsPanel = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>PI Display Settings</CardTitle>
-          <CardDescription>Control visibility of PI information on homepage and Team page</CardDescription>
+          <CardTitle>PI Display Settings - Team Page</CardTitle>
+          <CardDescription>Control visibility of PI information on dedicated Team page. All fields show by default.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Home Page Section */}
-          <div className="border-b pb-4">
-            <h3 className="font-semibold mb-3">PI PAGE - HOME</h3>
-            <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
-              <div>
-                <Label className="font-semibold">Show PI section on homepage</Label>
-                <p className="text-xs text-gray-500">Toggle to show/hide entire PI section on home</p>
-              </div>
-              <Switch
-                checked={settings.pi_home_display?.show_on_home === true}
-                onCheckedChange={(checked) => setSettings({
-                  ...settings,
-                  pi_home_display: { ...settings.pi_home_display, show_on_home: checked }
-                })}
-              />
-            </div>
-            
-            {settings.pi_home_display?.show_on_home && (
-              <div className="mt-3 ml-4 space-y-2">
-                <p className="text-sm text-gray-600 mb-2">Select fields to display on home:</p>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="flex items-center justify-between p-2 border rounded">
-                    <Label className="text-sm">Photo</Label>
-                    <Switch
-                      checked={settings.pi_home_display?.show_photo === true}
-                      onCheckedChange={(checked) => setSettings({
-                        ...settings,
-                        pi_home_display: { ...settings.pi_home_display, show_photo: checked }
-                      })}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between p-2 border rounded">
-                    <Label className="text-sm">Name</Label>
-                    <Switch
-                      checked={settings.pi_home_display?.show_name !== false}
-                      onCheckedChange={(checked) => setSettings({
-                        ...settings,
-                        pi_home_display: { ...settings.pi_home_display, show_name: checked }
-                      })}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between p-2 border rounded">
-                    <Label className="text-sm">Title</Label>
-                    <Switch
-                      checked={settings.pi_home_display?.show_title === true}
-                      onCheckedChange={(checked) => setSettings({
-                        ...settings,
-                        pi_home_display: { ...settings.pi_home_display, show_title: checked }
-                      })}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between p-2 border rounded">
-                    <Label className="text-sm">Bio</Label>
-                    <Switch
-                      checked={settings.pi_home_display?.show_bio === true}
-                      onCheckedChange={(checked) => setSettings({
-                        ...settings,
-                        pi_home_display: { ...settings.pi_home_display, show_bio: checked }
-                      })}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between p-2 border rounded">
-                    <Label className="text-sm">Research Interests</Label>
-                    <Switch
-                      checked={settings.pi_home_display?.show_research_interests === true}
-                      onCheckedChange={(checked) => setSettings({
-                        ...settings,
-                        pi_home_display: { ...settings.pi_home_display, show_research_interests: checked }
-                      })}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between p-2 border rounded">
-                    <Label className="text-sm">Contact</Label>
-                    <Switch
-                      checked={settings.pi_home_display?.show_contact === true}
-                      onCheckedChange={(checked) => setSettings({
-                        ...settings,
-                        pi_home_display: { ...settings.pi_home_display, show_contact: checked }
-                      })}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Team Page Section */}
-          <div>
-            <h3 className="font-semibold mb-3">PI PAGE - TEAM (Dedicated Page)</h3>
-            <p className="text-sm text-gray-600 mb-3">All fields show by default. Uncheck to hide specific fields:</p>
-            <div className="grid grid-cols-2 gap-2">
+        <CardContent className="space-y-4">
+          <p className="text-sm text-gray-600 mb-3">Uncheck to hide specific fields on Team → Principal Investigator page:</p>
+          <div className="grid grid-cols-2 gap-2">
               <div className="flex items-center justify-between p-2 border rounded">
                 <Label className="text-sm">Photo</Label>
                 <Switch
