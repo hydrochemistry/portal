@@ -982,30 +982,7 @@ def main():
     # Step 1: Test Updated Scopus Web Scraping Implementation (FOCUSED TEST)
     test_scopus_web_scraping_updated()
     
-    # Step 2: Login as super admin
-    token = login_super_admin()
-    if not token:
-        print("❌ Cannot proceed without super admin authentication")
-        test_results.print_summary()
-        return
-    
-    # Step 3: Register test user for user management testing
-    test_user_email = register_test_user()
-    
-    # Step 4: Run all tests
-    test_ris_file_upload(token)
-    test_static_publications_management(token)
-    
-    if test_user_email:
-        test_user_management(token, test_user_email)
-    else:
-        test_results.add_result(
-            "User Management - Skipped", 
-            False, 
-            "Skipped user management tests due to registration failure"
-        )
-    
-    test_featured_publication_with_graphical_abstract(token)
+    # Focus only on Scopus web scraping test as requested
     
     # Step 5: Print comprehensive results
     test_results.print_summary()
