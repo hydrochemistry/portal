@@ -464,7 +464,10 @@ def fetch_scopus_publications_api(author_id: str, limit: int = 10) -> List[dict]
         }
     ]
     
-    return mock_publications[:limit]
+    # Sort by year (most recent first) to ensure latest publications appear first
+    sorted_publications = sorted(mock_publications, key=lambda x: x['year'], reverse=True)
+    
+    return sorted_publications[:limit]
 
 # Initialize default data
 async def initialize_default_data():
