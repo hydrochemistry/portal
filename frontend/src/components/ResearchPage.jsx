@@ -8,23 +8,23 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const SDG_IMAGES = {
-  1: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-01.jpg',
-  2: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-02.jpg',
-  3: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-03.jpg',
-  4: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-04.jpg',
-  5: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-05.jpg',
-  6: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-06.jpg',
-  7: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-07.jpg',
-  8: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-08.jpg',
-  9: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-09.jpg',
-  10: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-10.jpg',
-  11: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-11.jpg',
-  12: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-12.jpg',
-  13: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-13.jpg',
-  14: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-14.jpg',
-  15: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-15.jpg',
-  16: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-16.jpg',
-  17: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-17.jpg'
+  1: '/sdg-icons/E-SDG-01.jpg',
+  2: '/sdg-icons/E-SDG-02.jpg',
+  3: '/sdg-icons/E-SDG-03.jpg',
+  4: '/sdg-icons/E-SDG-04.jpg',
+  5: '/sdg-icons/E-SDG-05.jpg',
+  6: '/sdg-icons/E-SDG-06.jpg',
+  7: '/sdg-icons/E-SDG-07.jpg',
+  8: '/sdg-icons/E-SDG-08.jpg',
+  9: '/sdg-icons/E-SDG-09.jpg',
+  10: '/sdg-icons/E-SDG-10.jpg',
+  11: '/sdg-icons/E-SDG-11.jpg',
+  12: '/sdg-icons/E-SDG-12.jpg',
+  13: '/sdg-icons/E-SDG-13.jpg',
+  14: '/sdg-icons/E-SDG-14.jpg',
+  15: '/sdg-icons/E-SDG-15.jpg',
+  16: '/sdg-icons/E-SDG-16.jpg',
+  17: '/sdg-icons/E-SDG-17.jpg'
 };
 
 const ResearchPage = () => {
