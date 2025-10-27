@@ -689,8 +689,9 @@ def test_featured_publication_with_graphical_abstract(token):
         )
 
 def test_scopus_api_integration():
-    """Test Scopus API integration for publications endpoint"""
-    print("\n🧪 Testing Scopus API Integration...")
+    """Test Scopus API integration for publications endpoint - Detailed verification of 10 most recent publications"""
+    print("\n🧪 Testing Scopus API Integration - Detailed Publication Verification...")
+    print("="*80)
     
     try:
         # Test GET publications endpoint (public endpoint)
@@ -719,6 +720,30 @@ def test_scopus_api_integration():
                 )
             
             if publications:
+                print(f"\n📋 DETAILED PUBLICATION VERIFICATION:")
+                print(f"📊 Total Publications Retrieved: {len(publications)}")
+                print(f"🔗 Scopus Author Profile: https://www.scopus.com/authid/detail.uri?authorId=22133247800")
+                print("="*80)
+                
+                # Print ALL 10 publications with detailed information
+                for i, pub in enumerate(publications, 1):
+                    title = pub.get('title', 'N/A')
+                    year = pub.get('year', 'N/A')
+                    authors = pub.get('authors', 'N/A')
+                    journal = pub.get('journal', 'N/A')
+                    citations = pub.get('citations', 0)
+                    doi = pub.get('doi', 'N/A')
+                    scopus_id = pub.get('scopus_id', 'N/A')
+                    
+                    print(f"📄 Position {i:2d}: {year}")
+                    print(f"   📝 Title: {title[:80]}{'...' if len(title) > 80 else ''}")
+                    print(f"   👥 Authors: {authors}")
+                    print(f"   📚 Journal: {journal}")
+                    print(f"   📊 Citations: {citations}")
+                    print(f"   🔗 DOI: {doi}")
+                    print(f"   🆔 Scopus ID: {scopus_id}")
+                    print("-" * 80)
+                
                 # Check data structure - verify required fields
                 first_pub = publications[0]
                 required_fields = ['title', 'authors', 'journal', 'year', 'doi', 'citations', 'scopus_id']
@@ -743,16 +768,53 @@ def test_scopus_api_integration():
                 
                 # Check if publications are sorted by year (descending - most recent first)
                 years = [pub.get('year', 0) for pub in publications if pub.get('year')]
+                print(f"\n📅 YEAR SORTING VERIFICATION:")
+                print(f"Years in order: {years}")
+                
                 if len(years) > 1:
                     is_sorted_desc = all(years[i] >= years[i+1] for i in range(len(years)-1))
+                    if is_sorted_desc:
+                        print("✅ Publications are correctly sorted by year (descending - most recent first)")
+                        test_results.add_result(
+                            "Scopus API - Year Sorting (Descending)", 
+                            True, 
+                            f"Publications correctly sorted by year: {years}"
+                        )
+                    else:
+                        print("❌ Publications are NOT properly sorted by year")
+                        test_results.add_result(
+                            "Scopus API - Year Sorting (Descending)", 
+                            False, 
+                            f"Publications NOT properly sorted by year: {years}"
+                        )
+                
+                # Check author information completeness
+                print(f"\n👥 AUTHOR INFORMATION VERIFICATION:")
+                author_info_complete = True
+                for i, pub in enumerate(publications, 1):
+                    authors = pub.get('authors', '')
+                    if not authors or authors == 'N/A' or authors == 'Unknown':
+                        print(f"❌ Position {i}: Missing or incomplete author information")
+                        author_info_complete = False
+                    else:
+                        # Count number of authors (simple comma count + 1)
+                        author_count = len([a.strip() for a in authors.split(',') if a.strip()])
+                        print(f"✅ Position {i}: {author_count} author(s) - {authors[:60]}{'...' if len(authors) > 60 else ''}")
+                
+                if author_info_complete:
                     test_results.add_result(
-                        "Scopus API - Year Sorting (Descending)", 
-                        is_sorted_desc, 
-                        f"Publications sorted by year: {years[:5]}..." if is_sorted_desc else f"Publications NOT properly sorted by year: {years[:5]}..."
+                        "Scopus API - Author Information Completeness", 
+                        True, 
+                        "All publications have author information"
+                    )
+                else:
+                    test_results.add_result(
+                        "Scopus API - Author Information Completeness", 
+                        False, 
+                        "Some publications missing author information"
                     )
                 
                 # Check if this is real Scopus data (not mock data)
-                # Mock data has specific titles like "Novel approaches for microplastic quantification..."
                 mock_indicators = [
                     "Novel approaches for microplastic quantification",
                     "Microplastics and emerging contaminants in Selangor River Basin",
@@ -769,13 +831,16 @@ def test_scopus_api_integration():
                     if is_mock_data:
                         break
                 
+                print(f"\n🔍 DATA SOURCE VERIFICATION:")
                 if not is_mock_data:
+                    print("✅ Publications appear to be real Scopus data (not mock data)")
                     test_results.add_result(
                         "Scopus API - Real Data Verification", 
                         True, 
                         "Publications appear to be real Scopus data (not mock data)"
                     )
                 else:
+                    print("❌ Publications appear to be mock data, not real Scopus API data")
                     test_results.add_result(
                         "Scopus API - Real Data Verification", 
                         False, 
@@ -783,20 +848,26 @@ def test_scopus_api_integration():
                     )
                 
                 # Check if Scopus API key is being used
-                # We can infer this by checking if the data looks like real API responses
                 has_scopus_ids = all(pub.get('scopus_id') for pub in publications[:3])
                 has_realistic_citations = any(pub.get('citations', 0) > 0 for pub in publications[:3])
                 has_dois = any(pub.get('doi') for pub in publications[:3])
                 
                 api_indicators = sum([has_scopus_ids, has_realistic_citations, has_dois])
                 
+                print(f"🔑 API KEY VERIFICATION:")
+                print(f"   - Scopus IDs present: {'✅' if has_scopus_ids else '❌'}")
+                print(f"   - Realistic citations: {'✅' if has_realistic_citations else '❌'}")
+                print(f"   - DOIs present: {'✅' if has_dois else '❌'}")
+                
                 if api_indicators >= 2:
+                    print("✅ Data characteristics suggest real Scopus API is being used")
                     test_results.add_result(
                         "Scopus API - API Key Usage", 
                         True, 
                         "Data characteristics suggest real Scopus API is being used"
                     )
                 else:
+                    print("❌ Data characteristics suggest mock data or API not working properly")
                     test_results.add_result(
                         "Scopus API - API Key Usage", 
                         False, 
@@ -826,14 +897,14 @@ def test_scopus_api_integration():
                         f"Custom limit request failed with status {response_limit.status_code}"
                     )
                 
-                # Display sample publication data for verification
-                sample_pub = publications[0]
-                sample_info = f"Title: {sample_pub.get('title', 'N/A')[:60]}..., Year: {sample_pub.get('year', 'N/A')}, Citations: {sample_pub.get('citations', 'N/A')}"
-                test_results.add_result(
-                    "Scopus API - Sample Publication Data", 
-                    True, 
-                    sample_info
-                )
+                # Final verification summary
+                print(f"\n📊 VERIFICATION SUMMARY:")
+                print(f"   📄 Total Publications: {len(publications)}")
+                print(f"   📅 Most Recent Year: {max(years) if years else 'N/A'}")
+                print(f"   📅 Oldest Year: {min(years) if years else 'N/A'}")
+                print(f"   📊 Total Citations: {sum(pub.get('citations', 0) for pub in publications)}")
+                print(f"   🔗 Publications with DOI: {sum(1 for pub in publications if pub.get('doi'))}")
+                print("="*80)
                 
             else:
                 test_results.add_result(
