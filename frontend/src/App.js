@@ -803,6 +803,34 @@ const SiteSettingsPanel = () => {
               onChange={(e) => setSettings({...settings, about_content: e.target.value})}
               className="min-h-32"
             />
+
+
+          <div>
+            <Label>About Section Cards</Label>
+            {settings.about_cards && settings.about_cards.map((card, idx) => (
+              <div key={idx} className="grid grid-cols-2 gap-4 mb-3 p-3 border rounded">
+                <Input
+                  placeholder="Card Title"
+                  value={card.title}
+                  onChange={(e) => {
+                    const newCards = [...settings.about_cards];
+                    newCards[idx].title = e.target.value;
+                    setSettings({...settings, about_cards: newCards});
+                  }}
+                />
+                <Input
+                  placeholder="Card Description"
+                  value={card.description}
+                  onChange={(e) => {
+                    const newCards = [...settings.about_cards];
+                    newCards[idx].description = e.target.value;
+                    setSettings({...settings, about_cards: newCards});
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+
           </div>
         </CardContent>
       </Card>
