@@ -413,6 +413,9 @@ def fetch_scopus_publications_api(author_id: str, limit: int = 10) -> List[dict]
                 
                 publications.append(pub)
         
+        # Sort by year descending (most recent first) - client-side sorting to ensure proper order
+        publications.sort(key=lambda x: x['year'], reverse=True)
+        
         logging.info(f"Successfully fetched {len(publications)} publications from Scopus API")
         return publications
         
