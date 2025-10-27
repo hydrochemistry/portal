@@ -39,7 +39,7 @@ const ResearchPage = () => {
       try {
         const [areasRes, grantsRes, awardsRes] = await Promise.all([
           axios.get(`${API}/research-areas`),
-          axios.get(`${API}/grants`),
+          axios.get(`${API}/research-grants`),
           axios.get(`${API}/awards`)
         ]);
         setResearchAreas(areasRes.data);
