@@ -365,7 +365,7 @@ SCHOLAR_FALLBACK_DATA = {
 
 # Cache for Google Scholar data
 _scholar_cache = {'data': None, 'last_fetched': None}
-CACHE_DURATION_HOURS = 6
+CACHE_DURATION_HOURS = 168  # 7 days
 
 def fetch_google_scholar_data(scholar_id: str) -> dict:
     """Fetch citation metrics from Google Scholar with caching and fallback"""
