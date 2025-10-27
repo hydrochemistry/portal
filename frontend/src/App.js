@@ -2088,18 +2088,21 @@ function App() {
           <Routes>
             <Route path="/login" element={<AuthPage />} />
             <Route path="/*" element={
-              <>
+              <div className="min-h-screen flex flex-col">
                 <Navigation />
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/team" element={<TeamPage />} />
-                  <Route path="/research" element={<ResearchPage />} />
-                  <Route path="/publications" element={<PublicationsPage />} />
-                  <Route path="/news" element={<NewsPage />} />
-                  <Route path="/contact" element={<ContactPage />} />
-                  <Route path="/admin" element={<AdminPanel />} />
-                </Routes>
-              </>
+                <main className="flex-grow">
+                  <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/team" element={<TeamPage />} />
+                    <Route path="/research" element={<ResearchPage />} />
+                    <Route path="/publications" element={<PublicationsPage />} />
+                    <Route path="/news" element={<NewsPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
+                    <Route path="/admin" element={<AdminPanel />} />
+                  </Routes>
+                </main>
+                <Footer />
+              </div>
             } />
           </Routes>
         </BrowserRouter>
