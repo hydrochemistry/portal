@@ -103,10 +103,11 @@
 #====================================================================================================
 
 user_problem_statement: |
-  Implement three pending features for the research group website:
-  1. EndNote RIS File Upload - Allow admins to upload RIS files for static publications
-  2. Graphical Abstract - Support graphical abstracts for featured publications
-  3. User Management Panel - Complete user management with role assignment
+  Complete four pending features for the research group website:
+  1. Collaborators Tab - Display team members with "Collaborator" role with country flags
+  2. Research Areas Page - Display research areas in 2-column layout with SDG logos
+  3. Research Areas Admin Management - Full CRUD interface for research areas with SDG selection
+  4. About Section Cards - Editable "Advance Analytics" and "Education" cards on homepage
 
 backend:
   - task: "Scopus API Integration"
