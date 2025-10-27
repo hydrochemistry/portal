@@ -134,16 +134,16 @@ backend:
         comment: "Endpoint /static-publications exists. Needs testing."
 
   - task: "Static Publications Delete Endpoint"
-    implemented: false
+    implemented: true
     working: "NA"
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Need to add DELETE endpoint for static publications management."
+        comment: "Added DELETE /admin/static-publications/{publication_id} endpoint. Needs testing."
 
   - task: "Featured Publication with Graphical Abstract"
     implemented: true
