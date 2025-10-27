@@ -688,23 +688,195 @@ def test_featured_publication_with_graphical_abstract(token):
             f"Featured publication test error: {str(e)}"
         )
 
+def test_scopus_api_integration():
+    """Test Scopus API integration for publications endpoint"""
+    print("\n🧪 Testing Scopus API Integration...")
+    
+    try:
+        # Test GET publications endpoint (public endpoint)
+        response = requests.get(f"{BASE_URL}/publications")
+        
+        if response.status_code == 200:
+            publications = response.json()
+            test_results.add_result(
+                "Scopus API - GET Publications (Status)", 
+                True, 
+                f"Successfully retrieved {len(publications)} publications"
+            )
+            
+            # Check if exactly 10 publications are returned by default
+            if len(publications) == 10:
+                test_results.add_result(
+                    "Scopus API - Default Count (10)", 
+                    True, 
+                    "Exactly 10 publications returned by default"
+                )
+            else:
+                test_results.add_result(
+                    "Scopus API - Default Count (10)", 
+                    False, 
+                    f"Expected 10 publications, got {len(publications)}"
+                )
+            
+            if publications:
+                # Check data structure - verify required fields
+                first_pub = publications[0]
+                required_fields = ['title', 'authors', 'journal', 'year', 'doi', 'citations', 'scopus_id']
+                missing_fields = []
+                
+                for field in required_fields:
+                    if field not in first_pub:
+                        missing_fields.append(field)
+                
+                if not missing_fields:
+                    test_results.add_result(
+                        "Scopus API - Data Structure Validation", 
+                        True, 
+                        "All required fields present in publication data"
+                    )
+                else:
+                    test_results.add_result(
+                        "Scopus API - Data Structure Validation", 
+                        False, 
+                        f"Missing required fields: {', '.join(missing_fields)}"
+                    )
+                
+                # Check if publications are sorted by year (descending - most recent first)
+                years = [pub.get('year', 0) for pub in publications if pub.get('year')]
+                if len(years) > 1:
+                    is_sorted_desc = all(years[i] >= years[i+1] for i in range(len(years)-1))
+                    test_results.add_result(
+                        "Scopus API - Year Sorting (Descending)", 
+                        is_sorted_desc, 
+                        f"Publications sorted by year: {years[:5]}..." if is_sorted_desc else f"Publications NOT properly sorted by year: {years[:5]}..."
+                    )
+                
+                # Check if this is real Scopus data (not mock data)
+                # Mock data has specific titles like "Novel approaches for microplastic quantification..."
+                mock_indicators = [
+                    "Novel approaches for microplastic quantification",
+                    "Microplastics and emerging contaminants in Selangor River Basin",
+                    "Hydrochemical characterization and water quality assessment"
+                ]
+                
+                is_mock_data = False
+                for pub in publications[:3]:  # Check first 3 publications
+                    title = pub.get('title', '')
+                    for mock_title in mock_indicators:
+                        if mock_title in title:
+                            is_mock_data = True
+                            break
+                    if is_mock_data:
+                        break
+                
+                if not is_mock_data:
+                    test_results.add_result(
+                        "Scopus API - Real Data Verification", 
+                        True, 
+                        "Publications appear to be real Scopus data (not mock data)"
+                    )
+                else:
+                    test_results.add_result(
+                        "Scopus API - Real Data Verification", 
+                        False, 
+                        "Publications appear to be mock data, not real Scopus API data"
+                    )
+                
+                # Check if Scopus API key is being used
+                # We can infer this by checking if the data looks like real API responses
+                has_scopus_ids = all(pub.get('scopus_id') for pub in publications[:3])
+                has_realistic_citations = any(pub.get('citations', 0) > 0 for pub in publications[:3])
+                has_dois = any(pub.get('doi') for pub in publications[:3])
+                
+                api_indicators = sum([has_scopus_ids, has_realistic_citations, has_dois])
+                
+                if api_indicators >= 2:
+                    test_results.add_result(
+                        "Scopus API - API Key Usage", 
+                        True, 
+                        "Data characteristics suggest real Scopus API is being used"
+                    )
+                else:
+                    test_results.add_result(
+                        "Scopus API - API Key Usage", 
+                        False, 
+                        "Data characteristics suggest mock data or API not working properly"
+                    )
+                
+                # Test with custom limit parameter
+                response_limit = requests.get(f"{BASE_URL}/publications?limit=5")
+                if response_limit.status_code == 200:
+                    limited_pubs = response_limit.json()
+                    if len(limited_pubs) == 5:
+                        test_results.add_result(
+                            "Scopus API - Custom Limit Parameter", 
+                            True, 
+                            "Custom limit parameter works correctly"
+                        )
+                    else:
+                        test_results.add_result(
+                            "Scopus API - Custom Limit Parameter", 
+                            False, 
+                            f"Expected 5 publications with limit=5, got {len(limited_pubs)}"
+                        )
+                else:
+                    test_results.add_result(
+                        "Scopus API - Custom Limit Parameter", 
+                        False, 
+                        f"Custom limit request failed with status {response_limit.status_code}"
+                    )
+                
+                # Display sample publication data for verification
+                sample_pub = publications[0]
+                sample_info = f"Title: {sample_pub.get('title', 'N/A')[:60]}..., Year: {sample_pub.get('year', 'N/A')}, Citations: {sample_pub.get('citations', 'N/A')}"
+                test_results.add_result(
+                    "Scopus API - Sample Publication Data", 
+                    True, 
+                    sample_info
+                )
+                
+            else:
+                test_results.add_result(
+                    "Scopus API - Publications Data", 
+                    False, 
+                    "No publications returned from API"
+                )
+                
+        else:
+            test_results.add_result(
+                "Scopus API - GET Publications (Status)", 
+                False, 
+                f"GET publications failed with status {response.status_code}",
+                response.text
+            )
+            
+    except Exception as e:
+        test_results.add_result(
+            "Scopus API - Exception", 
+            False, 
+            f"Scopus API test error: {str(e)}"
+        )
+
 def main():
     """Main test execution function"""
     print("🚀 Starting Backend API Testing Suite for Hydrochemistry Research Group")
     print(f"Testing against: {BASE_URL}")
     print("="*80)
     
-    # Step 1: Login as super admin
+    # Step 1: Test Scopus API Integration (NEW TEST)
+    test_scopus_api_integration()
+    
+    # Step 2: Login as super admin
     token = login_super_admin()
     if not token:
         print("❌ Cannot proceed without super admin authentication")
         test_results.print_summary()
         return
     
-    # Step 2: Register test user for user management testing
+    # Step 3: Register test user for user management testing
     test_user_email = register_test_user()
     
-    # Step 3: Run all tests
+    # Step 4: Run all tests
     test_ris_file_upload(token)
     test_static_publications_management(token)
     
@@ -719,7 +891,7 @@ def main():
     
     test_featured_publication_with_graphical_abstract(token)
     
-    # Step 4: Print comprehensive results
+    # Step 5: Print comprehensive results
     test_results.print_summary()
     
     print(f"\n{'='*60}")
