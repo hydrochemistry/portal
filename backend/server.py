@@ -254,14 +254,6 @@ class CitationMetrics(BaseModel):
     i10_index: int
     last_updated: datetime
 
-class ResearchArea(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    title: str
-    description: str
-    keywords: List[str]
-    sdgs: List[int] = []
-    image_url: Optional[str] = None
-
 # Utility functions
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
