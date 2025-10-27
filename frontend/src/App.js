@@ -725,6 +725,10 @@ const AdminPanel = () => {
               <PublicationsManagementPanel />
             </TabsContent>
             
+            <TabsContent value="research-areas">
+              <ResearchAreasManagementPanel />
+            </TabsContent>
+            
             {isSuperAdmin() && (
               <TabsContent value="users">
                 <UserManagementPanel />
