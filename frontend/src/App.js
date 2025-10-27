@@ -1999,9 +1999,11 @@ const PublicationsManagementPanel = () => {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="featured">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="featured">Featured Publication</TabsTrigger>
           <TabsTrigger value="upload">EndNote Upload</TabsTrigger>
+          <TabsTrigger value="books">Books</TabsTrigger>
+          <TabsTrigger value="ip">Intellectual Properties</TabsTrigger>
         </TabsList>
 
         <TabsContent value="featured" className="space-y-6">
