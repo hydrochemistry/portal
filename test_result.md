@@ -219,16 +219,16 @@ frontend:
         comment: "HomePage displays graphical abstract if present in featured publication. Needs testing."
 
   - task: "User Management Panel - Role Assignment"
-    implemented: false
+    implemented: true
     working: "NA"
     file: "/app/frontend/src/App.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "User Management Panel exists but lacks role assignment UI. Need to add dropdown for role selection."
+        comment: "Enhanced User Management Panel with role assignment dropdown. Super admins can now change user roles between 'user' and 'admin'. Includes better UI with role descriptions."
 
   - task: "Static Publications Management in Admin"
     implemented: false
