@@ -1423,43 +1423,39 @@ const TeamManagementPanel = () => {
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-gray-500 mt-1">
-
-                  
-                  {newMember.role === 'Collaborator' && (
-                    <div>
-                      <Label>Country</Label>
-                      <Select 
-                        value={newMember.country} 
-                        onValueChange={(value) => setNewMember({...newMember, country: value})}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select country" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="MY">Malaysia</SelectItem>
-                          <SelectItem value="SG">Singapore</SelectItem>
-                          <SelectItem value="ID">Indonesia</SelectItem>
-                          <SelectItem value="TH">Thailand</SelectItem>
-                          <SelectItem value="PH">Philippines</SelectItem>
-                          <SelectItem value="VN">Vietnam</SelectItem>
-                          <SelectItem value="US">United States</SelectItem>
-                          <SelectItem value="GB">United Kingdom</SelectItem>
-                          <SelectItem value="AU">Australia</SelectItem>
-                          <SelectItem value="JP">Japan</SelectItem>
-                          <SelectItem value="CN">China</SelectItem>
-                          <SelectItem value="IN">India</SelectItem>
-                          <SelectItem value="DE">Germany</SelectItem>
-                          <SelectItem value="FR">France</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                </div>
-
                     {newMember.status === 'alumni' ? 'Former position' : 'Current position in team'}
                   </p>
                 </div>
-              </div>
+
+                {newMember.role === 'Collaborator' && (
+                  <div>
+                    <Label>Country</Label>
+                    <Select 
+                      value={newMember.country} 
+                      onValueChange={(value) => setNewMember({...newMember, country: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="MY">Malaysia</SelectItem>
+                        <SelectItem value="SG">Singapore</SelectItem>
+                        <SelectItem value="ID">Indonesia</SelectItem>
+                        <SelectItem value="TH">Thailand</SelectItem>
+                        <SelectItem value="PH">Philippines</SelectItem>
+                        <SelectItem value="VN">Vietnam</SelectItem>
+                        <SelectItem value="US">United States</SelectItem>
+                        <SelectItem value="GB">United Kingdom</SelectItem>
+                        <SelectItem value="AU">Australia</SelectItem>
+                        <SelectItem value="JP">Japan</SelectItem>
+                        <SelectItem value="CN">China</SelectItem>
+                        <SelectItem value="IN">India</SelectItem>
+                        <SelectItem value="DE">Germany</SelectItem>
+                        <SelectItem value="FR">France</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
               <div>
                 <Label>Email</Label>
