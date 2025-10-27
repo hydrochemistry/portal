@@ -1281,16 +1281,6 @@ async def get_publications(limit: int = 10):
     
     return publications
 
-@api_router.get("/research-areas", response_model=List[ResearchArea])
-async def get_research_areas():
-    areas = await db.research_areas.find({}).to_list(100)
-    return [ResearchArea(**area) for area in areas]
-
-@api_router.post("/admin/research-areas", response_model=ResearchArea)
-async def create_research_area(area: ResearchArea, current_user: User = Depends(get_admin_user)):
-    await db.research_areas.insert_one(area.dict())
-    return area
-
 # Include the router in the main app
 app.include_router(api_router)
 
