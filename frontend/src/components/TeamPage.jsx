@@ -335,6 +335,19 @@ const TeamPage = () => {
             )}
           </TabsContent>
 
+          <TabsContent value="collaborators" className="space-y-8">
+            {collaborators.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {collaborators.map((member) => renderMemberCard(member))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Users className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-600">No collaborators listed yet.</p>
+              </div>
+            )}
+          </TabsContent>
+
           <TabsContent value="alumni" className="space-y-8">
             {alumniMembers.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
