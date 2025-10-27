@@ -359,9 +359,73 @@ def fetch_google_scholar_data(scholar_id: str) -> dict:
     }
 
 def fetch_scopus_publications_api(author_id: str, limit: int = 10) -> List[dict]:
-    """Fetch publications from SCOPUS API (mock for now as we need API key)"""
-    # Mock data for now - in production, replace with actual SCOPUS API calls
-    # Publications are sorted by year (most recent first) as retrieved from SCOPUS Author ID: 22133247800
+    """Fetch publications from SCOPUS API"""
+    api_key = os.environ.get('SCOPUS_API_KEY')
+    
+    if not api_key:
+        logging.warning("SCOPUS_API_KEY not found, using mock data")
+        return get_mock_scopus_publications(limit)
+    
+    try:
+        # Scopus API endpoint
+        url = "https://api.elsevier.com/content/search/scopus"
+        headers = {
+            'X-ELS-APIKey': api_key,
+            'Accept': 'application/json'
+        }
+        params = {
+            'query': f'AU-ID({author_id})',
+            'sort': 'pubyear desc',
+            'count': limit,
+            'field': 'dc:title,dc:creator,prism:publicationName,prism:coverDate,prism:doi,citedby-count,dc:identifier'
+        }
+        
+        response = requests.get(url, headers=headers, params=params, timeout=10)
+        response.raise_for_status()
+        
+        data = response.json()
+        publications = []
+        
+        # Parse Scopus API response
+        if 'search-results' in data and 'entry' in data['search-results']:
+            for entry in data['search-results']['entry']:
+                # Extract publication details
+                pub = {
+                    'title': entry.get('dc:title', 'Untitled'),
+                    'authors': entry.get('dc:creator', 'Unknown'),
+                    'journal': entry.get('prism:publicationName', 'Unknown Journal'),
+                    'year': 0,
+                    'doi': entry.get('prism:doi', ''),
+                    'citations': int(entry.get('citedby-count', 0)),
+                    'scopus_id': entry.get('dc:identifier', '').replace('SCOPUS_ID:', '')
+                }
+                
+                # Extract year from coverDate (format: YYYY-MM-DD)
+                cover_date = entry.get('prism:coverDate', '')
+                if cover_date:
+                    try:
+                        pub['year'] = int(cover_date.split('-')[0])
+                    except (ValueError, IndexError):
+                        pub['year'] = 0
+                
+                # Generate unique ID
+                pub['id'] = str(uuid.uuid4())
+                
+                publications.append(pub)
+        
+        logging.info(f"Successfully fetched {len(publications)} publications from Scopus API")
+        return publications
+        
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error fetching from Scopus API: {e}")
+        # Fallback to mock data if API fails
+        return get_mock_scopus_publications(limit)
+    except Exception as e:
+        logging.error(f"Unexpected error parsing Scopus data: {e}")
+        return get_mock_scopus_publications(limit)
+
+def get_mock_scopus_publications(limit: int = 10) -> List[dict]:
+    """Fallback mock data for when Scopus API is unavailable"""
     mock_publications = [
         {
             'title': 'Novel approaches for microplastic quantification in tropical river ecosystems: A comprehensive study',
@@ -464,9 +528,8 @@ def fetch_scopus_publications_api(author_id: str, limit: int = 10) -> List[dict]
         }
     ]
     
-    # Sort by year (most recent first) to ensure latest publications appear first
+    # Sort by year (most recent first)
     sorted_publications = sorted(mock_publications, key=lambda x: x['year'], reverse=True)
-    
     return sorted_publications[:limit]
 
 # Initialize default data
