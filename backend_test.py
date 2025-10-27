@@ -12,7 +12,7 @@ import os
 from datetime import datetime
 
 # Configuration
-BASE_URL = "https://hydrochem-portal.preview.emergentagent.com/api"
+BASE_URL = "https://hydrochem-research.preview.emergentagent.com/api"
 SUPER_ADMIN_EMAIL = "zaharin@upm.edu.my"
 SUPER_ADMIN_PASSWORD = "admin123"
 

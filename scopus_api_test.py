@@ -15,7 +15,7 @@ import json
 from datetime import datetime
 
 # Configuration
-BASE_URL = "https://hydrochem-portal.preview.emergentagent.com/api"
+BASE_URL = "https://hydrochem-research.preview.emergentagent.com/api"
 
 def test_scopus_api_integration():
     """Test Scopus API integration with new API key and requirements"""

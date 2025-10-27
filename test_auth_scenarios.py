@@ -6,7 +6,7 @@ Test different authentication scenarios for the Users endpoint
 import requests
 import json
 
-BASE_URL = "https://hydrochem-portal.preview.emergentagent.com/api"
+BASE_URL = "https://hydrochem-research.preview.emergentagent.com/api"
 
 def test_auth_scenarios():
     """Test various authentication scenarios"""

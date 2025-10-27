@@ -1,0 +1,95 @@
+<analysis>
+The AI engineer successfully built a comprehensive university research group website, progressing from an MVP to a feature-rich application. The development was iterative, focusing on core functionality, then adding advanced features like an admin panel, authentication, and extensive content management. Significant effort was dedicated to integrating live data from Google Scholar and Scopus, overcoming API limitations (quota, author parsing), and ensuring robust role-based access control. UI/UX was refined based on user feedback, adopting an Apple-style design with Shadcn UI. Debugging involved fixing backend serialization, frontend rendering issues, and addressing persistent authentication token problems. Recent work included refining publications (Scopus API integration, manual entry), team management (status, roles, principal investigator profiles, duplicate photo fix), and dynamic site settings (logos, hero, about cards). The trajectory concluded mid-implementation of new features for Collaborators and Research Areas.
+</analysis>
+
+<product_requirements>
+The objective is to create a professional university research group website for the Hydrochemistry Research Group at Universiti Putra Malaysia, emulating their existing site but with enhanced, interactive features and a minimalist, Apple-style design.
+
+**Key Features (Implemented or in Progress):**
+*   **Live Research Impact:** Display real-time citation metrics from Google Scholar.
+*   **Publications:** Show 10 most recent publications from SCOPUS, dynamically updated and sorted. Manual entry for Books and Intellectual Properties. Admin toggle for SCOPUS visibility and sorting for All Publications.
+*   **News & Updates:** Functionality for posting and highlighting news.
+*   **Design:** Interactive, professional, minimalist, Apple-style web design with a white background.
+
+**Admin Panel & Content Management:**
+*   A secure admin panel with login, registration, super admin approval for new users, and user role assignment (including remove and freeze options).
+*   Ability to upload a web logo (with options for menu/lab info display).
+*   Editable About Our Lab content and two configurable About section cards on the homepage.
+*   Comprehensive management of team members (photos, academic IDs, research focus, status like active/alumni, roles like Principal/Researcher, and country for Collaborators).
+*   Management of research grants and awards.
+*   Configurable hero section (description, buttons, visibility).
+*   Dedicated Principal Investigator (PI) page under Team, with configurable display fields, photo upload, and removed from the Home page.
+*   Admin-editable copyright footer.
+*   EndNote RIS file upload for static publications.
+*   Research Areas management with descriptions, keywords, multiple SDGs, images, displayed in a two-column card layout.
+</product_requirements>
+
+<key_technical_concepts>
+-   **Full-stack Architecture:** React frontend, FastAPI backend, MongoDB database.
+-   **UI/UX:** Shadcn UI, Tailwind CSS,  for toasts.
+-   **Data Integration:** Scopus API (using ), web scraping (),  for RIS files.
+-   **Authentication:** JWT, bcrypt, role-based access control.
+-   **Data Management:** Pydantic models, UUIDs for MongoDB IDs.
+-   **Deployment:** Kubernetes container environment, Supervisor.
+</key_technical_concepts>
+
+<code_architecture>
+The application uses a standard full-stack setup: React for the frontend, FastAPI for the backend, and MongoDB for the database. Communication is handled via RESTful API calls, with environment variables for URL management.
+
+
+
+**Key Files and Changes:**
+
+*   
+    *   **Importance:** Core backend, defines all APIs, database logic, and external integrations.
+    *   **Changes:** Updated Scopus API integration to fetch real data with specific parameters and all authors. Added , , and  models with associated CRUD endpoints.  model expanded for logo options, , , and PI display toggles.  model augmented with , , and . User management endpoints for  and  were added.
+*   
+    *   **Importance:** Stores critical environment variables.
+    *   **Changes:**  was updated multiple times.
+*   
+    *   **Importance:** Main React component handling routing, layout, and most admin panel UI.
+    *   **Changes:** Refactored for new routes (). Admin panel now includes UI for managing logo visibility, SCOPUS visibility toggle, PI display controls, editable About section cards, user freeze/delete/role assignment, Book/IP management, and Research Area management. PI section removed from Home page.
+*   
+    *   **Importance:** Displays the website footer.
+    *   **Changes:** Simplified to only show copyright statement; removed logo and university details.
+*   
+    *   **Importance:** Displays all research publications.
+    *   **Changes:** Added Books and Intellectual Property tabs, and a sort dropdown for All Publications. Fixed JSX compilation issues.
+*   
+    *   **Importance:** Displays team members and their profiles.
+    *   **Changes:** Introduced Principal, Active Members, Alumni, and Collaborators tabs. Implemented filtering, role badges, supervisor badge, country flags for collaborators, and configurable PI profile display. Fixed duplicate photo rendering for team members.
+*   
+    *   **Importance:** New component for displaying research areas.
+    *   **Changes:** Created to display research areas in a two-column card layout with image support.
+</code_architecture>
+
+<pending_tasks>
+-   Complete the frontend UI for displaying collaborator profiles under the Collaborators tab, including country flags.
+-   Finalize the  to correctly display research areas with images, descriptions, keywords, and SDG logos in a 2-column card layout.
+-   Implement the full frontend UI in  for adding, editing, and deleting research areas, including selecting multiple SDGs and uploading images.
+-   Ensure the Advance Analytics and Education cards on the Home page's About Our Research Group section are fully editable through the admin management interface.
+</pending_tasks>
+
+<current_work>
+The AI engineer is currently in the process of implementing a set of features requested by the user, specifically focusing on enhancements to the About Our Research Group section, user management, team member roles (Collaborators), and Research Areas.
+
+**Backend progress includes:**
+*    model in  was updated to support editable  (for Advance Analytics and Education sections on the homepage).
+*    model now includes a  field to support the Collaborators feature.
+*   New  model and associated CRUD endpoints have been added to .
+*   User management in  was extended with  and  endpoints.
+
+**Frontend progress includes:**
+*   A new  component was created and its route added to .
+*   The homepage's About section in  is being adapted to use the editable  from site settings, along with their admin management UI.
+*   The  in  has been updated to include Delete and Freeze buttons for user accounts.
+*    in  has been enhanced to allow selecting a Collaborator role and specifying a country for team members.
+*    has been updated to include a Collaborators tab, filter members by status, and conditionally render country flags for collaborators.
+*   The  component was created and integrated into the admin panel tabs.  was set up to display research areas in a two-column card layout with image support.
+
+The immediate last action was updating  to add the Collaborators tab content, indicating work is underway to complete this specific display.
+</current_work>
+
+<optional_next_step>
+Complete the frontend implementation for the Collaborators tab content within .
+</optional_next_step>

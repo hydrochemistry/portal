@@ -9,7 +9,7 @@ import json
 from datetime import datetime
 
 # Configuration
-BASE_URL = "https://hydrochem-portal.preview.emergentagent.com/api"
+BASE_URL = "https://hydrochem-research.preview.emergentagent.com/api"
 
 def test_scopus_publications_year_sorting():
     """Test that Scopus API publications are correctly sorted by year in descending order"""
