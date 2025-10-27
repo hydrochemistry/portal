@@ -1133,14 +1133,15 @@ const SiteSettingsPanel = () => {
 
           
           <div>
-            <Label htmlFor="supervisor_cv">Short CV</Label>
+            <Label htmlFor="supervisor_cv">Bio / Short CV</Label>
             <Textarea
               id="supervisor_cv"
-              value={settings.supervisor_profile?.short_cv || ''}
+              value={settings.supervisor_profile?.bio || settings.supervisor_profile?.short_cv || ''}
               onChange={(e) => setSettings({
                 ...settings, 
                 supervisor_profile: {
                   ...settings.supervisor_profile,
+                  bio: e.target.value,
                   short_cv: e.target.value
                 }
               })}
