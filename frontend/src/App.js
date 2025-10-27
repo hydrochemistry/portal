@@ -396,18 +396,17 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-5xl font-bold text-gray-900 mb-6">
-              Hydrochemistry Research Group
+              {settings.lab_name || 'Hydrochemistry Research Group'}
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Advancing environmental science through innovative research in hydrochemistry, 
-              environmental forensics, and sustainable water management at Universiti Putra Malaysia.
+              {settings.hero_description || 'Advancing environmental science through innovative research in hydrochemistry, environmental forensics, and sustainable water management at Universiti Putra Malaysia.'}
             </p>
             <div className="flex justify-center space-x-4">
               <Button size="lg" asChild>
-                <Link to="/research">Explore Our Research</Link>
+                <Link to="/research">{settings.hero_button1_text || 'Explore Our Research'}</Link>
               </Button>
               <Button variant="outline" size="lg" asChild>
-                <Link to="/publications">Latest Publications</Link>
+                <Link to="/publications">{settings.hero_button2_text || 'Latest Publications'}</Link>
               </Button>
             </div>
           </div>
