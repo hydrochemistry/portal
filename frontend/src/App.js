@@ -1174,6 +1174,104 @@ const SiteSettingsPanel = () => {
             />
           </div>
         </CardContent>
+
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>PI Display on Homepage</CardTitle>
+          <CardDescription>Choose what information to show on the home landing page</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between p-3 border rounded-lg">
+            <Label>Show PI section on homepage</Label>
+            <Switch
+              checked={settings.pi_home_display?.show_on_home || false}
+              onCheckedChange={(checked) => setSettings({
+                ...settings,
+                pi_home_display: { ...settings.pi_home_display, show_on_home: checked }
+              })}
+            />
+          </div>
+          
+          {settings.pi_home_display?.show_on_home && (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <Label className="text-sm">Show Photo</Label>
+                  <Switch
+                    checked={settings.pi_home_display?.show_photo || false}
+                    onCheckedChange={(checked) => setSettings({
+                      ...settings,
+                      pi_home_display: { ...settings.pi_home_display, show_photo: checked }
+                    })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <Label className="text-sm">Show Name</Label>
+                  <Switch
+                    checked={settings.pi_home_display?.show_name !== false}
+                    onCheckedChange={(checked) => setSettings({
+                      ...settings,
+                      pi_home_display: { ...settings.pi_home_display, show_name: checked }
+                    })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <Label className="text-sm">Show Title</Label>
+                  <Switch
+                    checked={settings.pi_home_display?.show_title || false}
+                    onCheckedChange={(checked) => setSettings({
+                      ...settings,
+                      pi_home_display: { ...settings.pi_home_display, show_title: checked }
+                    })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <Label className="text-sm">Show Bio</Label>
+                  <Switch
+                    checked={settings.pi_home_display?.show_bio || false}
+                    onCheckedChange={(checked) => setSettings({
+                      ...settings,
+                      pi_home_display: { ...settings.pi_home_display, show_bio: checked }
+                    })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <Label className="text-sm">Show Research Interests</Label>
+                  <Switch
+                    checked={settings.pi_home_display?.show_research_interests || false}
+                    onCheckedChange={(checked) => setSettings({
+                      ...settings,
+                      pi_home_display: { ...settings.pi_home_display, show_research_interests: checked }
+                    })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <Label className="text-sm">Show Contact</Label>
+                  <Switch
+                    checked={settings.pi_home_display?.show_contact || false}
+                    onCheckedChange={(checked) => setSettings({
+                      ...settings,
+                      pi_home_display: { ...settings.pi_home_display, show_contact: checked }
+                    })}
+                  />
+                </div>
+              </div>
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  <strong>Note:</strong> Full profile is always available on Team page. This controls what appears on the homepage for a simpler display.
+                </p>
+              </div>
+            </>
+          )}
+        </CardContent>
+
       </Card>
 
       <Button onClick={handleSaveSettings} disabled={loading}>
