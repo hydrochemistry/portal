@@ -884,6 +884,51 @@ async def update_user_role(user_id: str, role: str, current_user: User = Depends
     return {"message": "User role updated successfully"}
 
 # File upload endpoints
+
+
+@api_router.delete("/admin/users/{user_id}")
+async def delete_user(user_id: str, current_user: User = Depends(get_super_admin_user)):
+    result = await db.users.delete_one({'id': user_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"message": "User deleted successfully"}
+
+@api_router.post("/admin/users/{user_id}/freeze")
+async def freeze_user(user_id: str, freeze: bool, current_user: User = Depends(get_super_admin_user)):
+    result = await db.users.update_one({'id': user_id}, {'$set': {'is_frozen': freeze}})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"message": f"User {'frozen' if freeze else 'unfrozen'} successfully"}
+
+# Research Areas endpoints
+@api_router.get("/research-areas", response_model=List[ResearchArea])
+async def get_research_areas():
+    areas = await db.research_areas.find({}).to_list(100)
+    result = []
+    for area in areas:
+        area.pop('_id', None)
+        result.append(ResearchArea(**area))
+    return result
+
+@api_router.post("/admin/research-areas", response_model=ResearchArea)
+async def create_research_area(area: ResearchArea, current_user: User = Depends(get_admin_user)):
+    await db.research_areas.insert_one(area.dict())
+    return area
+
+@api_router.put("/admin/research-areas/{area_id}", response_model=ResearchArea)
+async def update_research_area(area_id: str, area: ResearchArea, current_user: User = Depends(get_admin_user)):
+    result = await db.research_areas.replace_one({'id': area_id}, area.dict())
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Research area not found")
+    return area
+
+@api_router.delete("/admin/research-areas/{area_id}")
+async def delete_research_area(area_id: str, current_user: User = Depends(get_admin_user)):
+    result = await db.research_areas.delete_one({'id': area_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Research area not found")
+    return {"message": "Research area deleted successfully"}
+
 @api_router.post("/upload/image")
 async def upload_image(file: UploadFile = File(...), current_user: User = Depends(get_admin_user)):
     if not file.content_type.startswith('image/'):
