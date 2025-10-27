@@ -351,8 +351,10 @@ const HomePage = () => {
   const [citations, setCitations] = useState(null);
   const [recentNews, setRecentNews] = useState([]);
   const [featuredNews, setFeaturedNews] = useState(null);
+  const [featuredPublication, setFeaturedPublication] = useState(null);
   const [researchHighlights, setResearchHighlights] = useState([]);
   const [supervisorProfile, setSupervisorProfile] = useState(null);
+  const [settings, setSettings] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
