@@ -263,11 +263,15 @@ const NewsPage = () => {
           <div className="text-center py-12">
             <Calendar className="w-12 h-12 mx-auto text-gray-400 mb-4" />
             <p className="text-gray-600 mb-4">No news articles available yet.</p>
-            {isWebAdmin() && (
+            {isWebAdmin() ? (
               <Button onClick={() => setShowAddDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add First Article
               </Button>
+            ) : (
+              <p className="text-sm text-gray-500">
+                News articles can only be added by web administrators.
+              </p>
             )}
           </div>
         )}
