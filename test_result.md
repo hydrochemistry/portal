@@ -123,6 +123,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ TESTED: Scopus API integration working correctly. Successfully retrieves real publications from Scopus API (not mock data). API key e2620b70d74ce8322e4f6fb773c706d0 is functional. Returns exactly 10 publications by default, supports custom limit parameter. All required fields present (title, authors, journal, year, doi, citations, scopus_id). Minor: Year sorting not working as expected from Scopus API (returns [2018, 2013, 2014, 2019, 2015] instead of descending order), but core functionality is working."
+      - working: true
+        agent: "testing"
+        comment: "✅ RE-TESTED (Year Sorting Fix): Scopus API publications are now correctly sorted by year in descending order. Retrieved 10 publications with years [2023, 2019, 2018, 2015, 2015, 2014, 2014, 2013, 2013, 2010] - properly sorted from most recent (2023) to oldest (2010). The client-side sorting implementation in server.py line 417 is working correctly. Year sorting issue has been resolved."
 
   - task: "RIS File Upload Endpoint"
     implemented: true
