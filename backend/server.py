@@ -356,7 +356,7 @@ def parse_ris_file(file_content: str) -> List[dict]:
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"RIS file parsing failed: {str(e)}")
 
-# Hardcoded fallback values for Ahmad Zaharin Aris (updated Oct 2024)
+# Hardcoded fallback values for Ahmad Zaharin Aris
 SCHOLAR_FALLBACK_DATA = {
     'total_citations': 3698,
     'h_index': 29,
@@ -365,7 +365,7 @@ SCHOLAR_FALLBACK_DATA = {
 
 # Cache for Google Scholar data
 _scholar_cache = {'data': None, 'last_fetched': None}
-CACHE_DURATION_HOURS = 24
+CACHE_DURATION_HOURS = 6
 
 def fetch_google_scholar_data(scholar_id: str) -> dict:
     """Fetch citation metrics from Google Scholar with caching and fallback"""
@@ -375,46 +375,63 @@ def fetch_google_scholar_data(scholar_id: str) -> dict:
     if _scholar_cache['data'] and _scholar_cache['last_fetched']:
         time_diff = datetime.now(timezone.utc) - _scholar_cache['last_fetched']
         if time_diff.total_seconds() < CACHE_DURATION_HOURS * 3600:
+            print(f"Returning cached scholar data")
             return _scholar_cache['data']
     
-    # Try web scraping
-    try:
-        url = f"https://scholar.google.com/citations?user={scholar_id}&hl=en"
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
-        
-        response = requests.get(url, headers=headers, timeout=5)
-        
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.content, 'html.parser')
-            citation_table = soup.find('table', {'id': 'gsc_rsb_st'})
+    # Try web scraping with multiple user agents
+    user_agents = [
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    ]
+    
+    for user_agent in user_agents:
+        try:
+            import time
+            time.sleep(1)  # Small delay between attempts
             
-            if citation_table:
-                rows = citation_table.find_all('tr')
-                if len(rows) >= 3:
-                    total_citations = rows[1].find_all('td')[1].text.strip().replace(',', '')
-                    h_index = rows[2].find_all('td')[1].text.strip()
-                    i10_index = rows[3].find_all('td')[1].text.strip() if len(rows) > 3 else "0"
-                    
-                    data = {
-                        'total_citations': int(total_citations) if total_citations.isdigit() else SCHOLAR_FALLBACK_DATA['total_citations'],
-                        'h_index': int(h_index) if h_index.isdigit() else SCHOLAR_FALLBACK_DATA['h_index'],
-                        'i10_index': int(i10_index) if i10_index.isdigit() else SCHOLAR_FALLBACK_DATA['i10_index'],
-                        'last_updated': datetime.now(timezone.utc)
-                    }
-                    
-                    _scholar_cache['data'] = data
-                    _scholar_cache['last_fetched'] = datetime.now(timezone.utc)
-                    return data
-    except Exception as e:
-        print(f"Google Scholar fetch failed: {e}")
+            url = f"https://scholar.google.com/citations?user={scholar_id}&hl=en"
+            headers = {'User-Agent': user_agent}
+            
+            response = requests.get(url, headers=headers, timeout=8)
+            print(f"Google Scholar response: {response.status_code}")
+            
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.content, 'html.parser')
+                citation_table = soup.find('table', {'id': 'gsc_rsb_st'})
+                
+                if citation_table:
+                    rows = citation_table.find_all('tr')
+                    if len(rows) >= 3:
+                        total_citations = rows[1].find_all('td')[1].text.strip().replace(',', '')
+                        h_index = rows[2].find_all('td')[1].text.strip()
+                        i10_index = rows[3].find_all('td')[1].text.strip() if len(rows) > 3 else "0"
+                        
+                        data = {
+                            'total_citations': int(total_citations) if total_citations.isdigit() else SCHOLAR_FALLBACK_DATA['total_citations'],
+                            'h_index': int(h_index) if h_index.isdigit() else SCHOLAR_FALLBACK_DATA['h_index'],
+                            'i10_index': int(i10_index) if i10_index.isdigit() else SCHOLAR_FALLBACK_DATA['i10_index'],
+                            'last_updated': datetime.now(timezone.utc)
+                        }
+                        
+                        print(f"Successfully fetched live data: {data}")
+                        _scholar_cache['data'] = data
+                        _scholar_cache['last_fetched'] = datetime.now(timezone.utc)
+                        return data
+            elif response.status_code == 429:
+                print(f"Rate limited, trying next user agent...")
+                continue
+        except Exception as e:
+            print(f"Error with user agent {user_agent[:50]}: {e}")
+            continue
     
     # Return cached data if available
     if _scholar_cache['data']:
+        print("Returning previously cached data")
         return _scholar_cache['data']
     
     # Return hardcoded fallback values
+    print("Using hardcoded fallback data")
     fallback_data = {
         **SCHOLAR_FALLBACK_DATA,
         'last_updated': datetime.now(timezone.utc)
