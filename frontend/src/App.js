@@ -2479,8 +2479,7 @@ const PublicationsManagementPanel = () => {
                     });
                     toast.success(response.data.message);
                     // Refresh publications list
-                    const pubsRes = await axios.get(`${API}/static-publications`);
-                    setStaticPublications(pubsRes.data);
+                    fetchStaticPublications();
                     e.target.value = '';
                   } catch (error) {
                     console.error('RIS upload error:', error);
@@ -2492,6 +2491,80 @@ const PublicationsManagementPanel = () => {
               <p className="text-sm text-gray-500 mt-2">
                 Export your EndNote library as RIS format and upload here. Duplicates (same title and year) will be automatically skipped.
               </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Add Journal Manually</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Title</Label>
+                  <Input placeholder="Publication title" />
+                </div>
+                <div>
+                  <Label>Authors</Label>
+                  <Input placeholder="Author names" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Journal Name</Label>
+                  <Input placeholder="Journal name" />
+                </div>
+                <div>
+                  <Label>Year</Label>
+                  <Input type="number" placeholder="2024" />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label>Volume</Label>
+                  <Input placeholder="Volume" />
+                </div>
+                <div>
+                  <Label>Issue</Label>
+                  <Input placeholder="Issue" />
+                </div>
+                <div>
+                  <Label>Pages</Label>
+                  <Input placeholder="1-10" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>DOI</Label>
+                  <Input placeholder="10.xxxx/xxxxx" />
+                </div>
+                <div>
+                  <Label>Link</Label>
+                  <Input placeholder="https://..." />
+                </div>
+              </div>
+              <Button onClick={async () => {
+                const inputs = document.querySelectorAll('#manual-journal-form input');
+                const data = {
+                  title: inputs[0].value,
+                  authors: inputs[1].value,
+                  journal: inputs[2].value,
+                  year: parseInt(inputs[3].value) || new Date().getFullYear(),
+                  volume: inputs[4].value,
+                  issue: inputs[5].value,
+                  pages: inputs[6].value,
+                  doi: inputs[7].value,
+                  link: inputs[8].value
+                };
+                try {
+                  await axios.post(`${API}/admin/static-publications`, data);
+                  toast.success('Publication added!');
+                  fetchStaticPublications();
+                  inputs.forEach(input => input.value = '');
+                } catch (error) {
+                  toast.error('Error adding publication');
+                }
+              }}>Add Publication</Button>
             </CardContent>
           </Card>
 
