@@ -171,15 +171,18 @@ backend:
 
   - task: "User Management Endpoints"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Endpoints exist: /admin/users, /admin/users/{user_id}/approve, /admin/users/{user_id}/role. Need to verify role endpoint accepts proper payload."
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: User management endpoints working perfectly. GET /api/admin/users retrieves all users (super admin only). POST /api/admin/users/{id}/approve successfully approves users. POST /api/admin/users/{id}/role?role=admin successfully changes user roles. Invalid roles rejected with 400. Non-existent users return 404. Super admin authentication enforced. Role endpoint accepts query parameter format correctly."
 
 frontend:
   - task: "RIS File Upload UI"
