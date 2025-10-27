@@ -1789,40 +1789,240 @@ const HighlightsManagementPanel = () => {
   );
 };
 
-const PublicationsManagementPanel = () => (
-  <div className="space-y-6">
-    <Card>
-      <CardHeader>
-        <CardTitle>Upload EndNote Publications</CardTitle>
-        <CardDescription>Upload RIS file from EndNote to populate static publications</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <input 
-          type="file" 
-          accept=".ris" 
-          onChange={async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            const formData = new FormData();
-            formData.append('file', file);
-            
-            try {
-              const response = await axios.post(`${API}/upload/ris`, formData);
-              toast.success(response.data.message);
-            } catch (error) {
-              toast.error('Error uploading RIS file');
-            }
-          }}
-          className="w-full p-3 border border-dashed border-gray-300 rounded-lg"
-        />
-        <p className="text-sm text-gray-500 mt-2">
-          Export your EndNote library as RIS format and upload here
-        </p>
-      </CardContent>
-    </Card>
-  </div>
-);
+const PublicationsManagementPanel = () => {
+  const [publications, setPublications] = useState([]);
+  const [featuredPub, setFeaturedPub] = useState(null);
+  const [showFeaturedDialog, setShowFeaturedDialog] = useState(false);
+  const [selectedPub, setSelectedPub] = useState(null);
+  const [graphicalAbstract, setGraphicalAbstract] = useState('');
+
+  useEffect(() => {
+    fetchPublications();
+    fetchFeaturedPublication();
+  }, []);
+
+  const fetchPublications = async () => {
+    try {
+      const response = await axios.get(`${API}/publications`);
+      setPublications(response.data);
+    } catch (error) {
+      console.error('Error fetching publications:', error);
+    }
+  };
+
+  const fetchFeaturedPublication = async () => {
+    try {
+      const response = await axios.get(`${API}/featured-publication`);
+      setFeaturedPub(response.data);
+    } catch (error) {
+      console.error('Error fetching featured publication:', error);
+    }
+  };
+
+  const handleSetFeatured = async () => {
+    if (!selectedPub) return;
+    
+    try {
+      const featuredData = {
+        publication_id: selectedPub.id,
+        title: selectedPub.title,
+        authors: selectedPub.authors,
+        journal: selectedPub.journal,
+        year: selectedPub.year,
+        doi: selectedPub.doi || '',
+        citations: selectedPub.citations || 0,
+        graphical_abstract: graphicalAbstract,
+        is_active: true
+      };
+
+      await axios.post(`${API}/admin/featured-publication`, featuredData);
+      toast.success('Featured publication set successfully!');
+      setShowFeaturedDialog(false);
+      setSelectedPub(null);
+      setGraphicalAbstract('');
+      fetchFeaturedPublication();
+    } catch (error) {
+      toast.error('Error setting featured publication');
+    }
+  };
+
+  const removeFeatured = async () => {
+    if (!featuredPub || !window.confirm('Remove this featured publication?')) return;
+    
+    try {
+      await axios.delete(`${API}/admin/featured-publication/${featuredPub.id}`);
+      toast.success('Featured publication removed!');
+      fetchFeaturedPublication();
+    } catch (error) {
+      toast.error('Error removing featured publication');
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Tabs defaultValue="featured">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="featured">Featured Publication</TabsTrigger>
+          <TabsTrigger value="upload">EndNote Upload</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="featured" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Featured Publication on Homepage</CardTitle>
+              <CardDescription>
+                Select a publication to highlight on the homepage. If none selected, random publications will be shown.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {featuredPub ? (
+                <div className="space-y-4">
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className="font-semibold">{featuredPub.title}</h4>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={removeFeatured}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        Remove Featured
+                      </Button>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-2">{featuredPub.authors}</p>
+                    <p className="text-sm text-blue-600">{featuredPub.journal} ({featuredPub.year})</p>
+                    {featuredPub.graphical_abstract && (
+                      <div className="mt-3">
+                        <img 
+                          src={featuredPub.graphical_abstract} 
+                          alt="Graphical Abstract" 
+                          className="w-32 h-32 object-cover rounded"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  
+                  <Button onClick={() => setShowFeaturedDialog(true)}>
+                    Change Featured Publication
+                  </Button>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <FileText className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <p className="text-gray-600 mb-4">No featured publication selected</p>
+                  <p className="text-sm text-gray-500 mb-4">Random publications will be displayed on homepage</p>
+                  <Button onClick={() => setShowFeaturedDialog(true)}>
+                    Select Featured Publication
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Dialog open={showFeaturedDialog} onOpenChange={setShowFeaturedDialog}>
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Select Featured Publication</DialogTitle>
+                <DialogDescription>
+                  Choose a publication from your SCOPUS list to feature on the homepage
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                <div className="space-y-3 max-h-60 overflow-y-auto">
+                  {publications.map((pub) => (
+                    <div 
+                      key={pub.id}
+                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                        selectedPub?.id === pub.id ? 'bg-blue-50 border-blue-300' : 'hover:bg-gray-50'
+                      }`}
+                      onClick={() => setSelectedPub(pub)}
+                    >
+                      <h4 className="font-medium text-sm mb-1">{pub.title}</h4>
+                      <p className="text-xs text-gray-600">{pub.authors}</p>
+                      <p className="text-xs text-blue-600">{pub.journal} ({pub.year})</p>
+                    </div>
+                  ))}
+                </div>
+                
+                {selectedPub && (
+                  <div className="space-y-4 border-t pt-4">
+                    <div>
+                      <h4 className="font-semibold mb-2">Selected Publication:</h4>
+                      <div className="p-3 bg-gray-50 rounded">
+                        <p className="font-medium">{selectedPub.title}</p>
+                        <p className="text-sm text-gray-600">{selectedPub.authors}</p>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label>Graphical Abstract (Optional)</Label>
+                      <ImageUpload 
+                        onUpload={(url) => setGraphicalAbstract(url)}
+                        label="Upload graphical abstract"
+                      />
+                      {graphicalAbstract && (
+                        <div className="mt-2">
+                          <img 
+                            src={graphicalAbstract} 
+                            alt="Preview" 
+                            className="w-32 h-32 object-cover rounded"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex justify-end space-x-2">
+                  <Button variant="outline" onClick={() => setShowFeaturedDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSetFeatured} disabled={!selectedPub}>
+                    Set as Featured
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </TabsContent>
+
+        <TabsContent value="upload" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Upload EndNote Publications</CardTitle>
+              <CardDescription>Upload RIS file from EndNote to populate static publications</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <input 
+                type="file" 
+                accept=".ris" 
+                onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  
+                  const formData = new FormData();
+                  formData.append('file', file);
+                  
+                  try {
+                    const response = await axios.post(`${API}/upload/ris`, formData);
+                    toast.success(response.data.message);
+                  } catch (error) {
+                    toast.error('Error uploading RIS file');
+                  }
+                }}
+                className="w-full p-3 border border-dashed border-gray-300 rounded-lg"
+              />
+              <p className="text-sm text-gray-500 mt-2">
+                Export your EndNote library as RIS format and upload here
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
 
 const UserManagementPanel = () => {
   const [users, setUsers] = useState([]);
