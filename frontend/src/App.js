@@ -2471,13 +2471,20 @@ const PublicationsManagementPanel = () => {
                   formData.append('file', file);
                   
                   try {
-                    const response = await axios.post(`${API}/upload/ris`, formData);
+                    const token = localStorage.getItem('token');
+                    const response = await axios.post(`${API}/upload/ris`, formData, {
+                      headers: {
+                        'Authorization': `Bearer ${token}`
+                      }
+                    });
                     toast.success(response.data.message);
                     // Refresh publications list
                     const pubsRes = await axios.get(`${API}/static-publications`);
                     setStaticPublications(pubsRes.data);
+                    e.target.value = '';
                   } catch (error) {
-                    toast.error('Error uploading RIS file');
+                    console.error('RIS upload error:', error);
+                    toast.error(error.response?.data?.detail || 'Error uploading RIS file');
                   }
                 }}
                 className="w-full p-3 border border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400"
