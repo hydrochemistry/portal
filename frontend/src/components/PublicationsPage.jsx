@@ -121,36 +121,152 @@ const PublicationsPage = () => {
           <p className="text-xl text-gray-600">Recent research contributions and scholarly articles</p>
         </div>
 
-        <Tabs defaultValue="recent" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="recent">
-              <FileText className="w-4 h-4 mr-2" />
-              Recent from SCOPUS ({publications.length})
-            </TabsTrigger>
+        <Tabs defaultValue={settings.show_scopus_publications !== false ? "recent" : "all"} className="space-y-8">
+          <TabsList className="grid w-full grid-cols-4">
+            {settings.show_scopus_publications !== false && (
+              <TabsTrigger value="recent">
+                <FileText className="w-4 h-4 mr-2" />
+                Recent from SCOPUS ({publications.length})
+              </TabsTrigger>
+            )}
             <TabsTrigger value="all">
               <FileText className="w-4 h-4 mr-2" />
               All Publications ({staticPublications.length})
             </TabsTrigger>
+            <TabsTrigger value="books">
+              <BookOpen className="w-4 h-4 mr-2" />
+              Books ({books.length})
+            </TabsTrigger>
+            <TabsTrigger value="ip">
+              <Lightbulb className="w-4 h-4 mr-2" />
+              Intellectual Properties ({intellectualProperties.length})
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="recent" className="space-y-6">
+          {settings.show_scopus_publications !== false && (
+            <TabsContent value="recent" className="space-y-6">
+              <div className="space-y-6">
+                {publications.length > 0 ? (
+                  publications.map((pub) => (
+                    <PublicationCard key={pub.id} pub={pub} />
+                  ))
+                ) : (
+                  <Card className="text-center py-12">
+                    <CardContent>
+                      <FileText className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                      <p className="text-gray-600">No recent publications available from SCOPUS.</p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </TabsContent>
+          )}
+
+          <TabsContent value="all" className="space-y-6">
+            <div className="flex justify-end mb-4">
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="w-4 h-4 text-gray-500" />
+                <Select value={sortOrder} onValueChange={setSortOrder}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Sort by year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="desc">Newest First</SelectItem>
+                    <SelectItem value="asc">Oldest First</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
             <div className="space-y-6">
-              {publications.length > 0 ? (
-                publications.map((pub) => (
-                  <PublicationCard key={pub.id} pub={pub} />
+              {getSortedPublications().length > 0 ? (
+                getSortedPublications().map((pub) => (
+                  <PublicationCard key={pub.id} pub={pub} isStatic={true} />
                 ))
               ) : (
                 <Card className="text-center py-12">
                   <CardContent>
                     <FileText className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                    <p className="text-gray-600">No recent publications available from SCOPUS.</p>
+                    <p className="text-gray-600">No publications uploaded yet.</p>
                   </CardContent>
                 </Card>
               )}
             </div>
           </TabsContent>
 
-          <TabsContent value="all" className="space-y-6">
+          <TabsContent value="books" className="space-y-6">
+            <div className="space-y-6">
+              {books.length > 0 ? (
+                books.map((book) => (
+                  <Card key={book.id} className="hover:shadow-lg transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex gap-4">
+                        {book.cover_image_url && (
+                          <img 
+                            src={book.cover_image_url} 
+                            alt={book.title} 
+                            className="w-32 h-44 object-cover rounded shadow"
+                          />
+                        )}
+                        <div className="flex-1">
+                          <h3 className="text-xl font-semibold mb-2">{book.title}</h3>
+                          <p className="text-gray-600 mb-2">{book.authors}</p>
+                          <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
+                            <Badge variant="outline">{book.year}</Badge>
+                            <span>{book.publisher}</span>
+                          </div>
+                          {book.link && (
+                            <a 
+                              href={book.link} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="text-blue-600 hover:underline text-sm flex items-center gap-1"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                              View Book
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <Card className="text-center py-12">
+                  <CardContent>
+                    <BookOpen className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                    <p className="text-gray-600">No books published yet.</p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="ip" className="space-y-6">
+            <div className="space-y-6">
+              {intellectualProperties.length > 0 ? (
+                intellectualProperties.map((ip) => (
+                  <Card key={ip.id} className="hover:shadow-lg transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Badge variant="secondary">{ip.type}</Badge>
+                        <Badge variant="outline">{ip.year}</Badge>
+                      </div>
+                      <h3 className="text-xl font-semibold mb-3">{ip.title}</h3>
+                      <p className="text-gray-600">{ip.synopsis}</p>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <Card className="text-center py-12">
+                  <CardContent>
+                    <Lightbulb className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                    <p className="text-gray-600">No intellectual properties listed yet.</p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
             <div className="space-y-6">
               {staticPublications.length > 0 ? (
                 staticPublications.map((pub) => (
