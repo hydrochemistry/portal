@@ -27,7 +27,7 @@ const NewsPage = () => {
     image_url: '', 
     is_featured: false 
   });
-  const { isAdmin } = useAuth();
+  const { isWebAdmin } = useAuth();
 
   useEffect(() => {
     fetchNews();
