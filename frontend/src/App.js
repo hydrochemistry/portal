@@ -2807,6 +2807,37 @@ const UserManagementPanel = () => {
     }
   };
 
+
+  const deleteUser = async (userId) => {
+    if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+    try {
+      setLoading(true);
+      await axios.delete(`${API}/admin/users/${userId}`);
+      toast.success('User deleted successfully!');
+      await fetchUsers();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast.error('Error deleting user');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const freezeUser = async (userId, freeze) => {
+    try {
+      setLoading(true);
+      await axios.post(`${API}/admin/users/${userId}/freeze?freeze=${freeze}`);
+      toast.success(`User ${freeze ? 'frozen' : 'unfrozen'} successfully!`);
+      await fetchUsers();
+    } catch (error) {
+      console.error('Error freezing user:', error);
+      toast.error('Error freezing user');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   const getRoleDisplayName = (role) => {
     switch(role) {
       case 'super_admin': return 'Super Admin';
