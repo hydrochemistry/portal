@@ -184,14 +184,18 @@ const TeamPage = () => {
         </div>
 
         <Tabs defaultValue="principal" className="w-full" onValueChange={setActiveTab}>
-          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3 mb-8">
+          <TabsList className="grid w-full max-w-3xl mx-auto grid-cols-4 mb-8">
             <TabsTrigger value="principal" className="flex items-center gap-2">
               <User className="w-4 h-4" />
-              Principal Investigator
+              Principal
             </TabsTrigger>
             <TabsTrigger value="active" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
-              Active Members ({activeMembers.length})
+              Active ({activeMembers.length})
+            </TabsTrigger>
+            <TabsTrigger value="collaborators" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Collaborators ({collaborators.length})
             </TabsTrigger>
             <TabsTrigger value="alumni" className="flex items-center gap-2">
               <Award className="w-4 h-4" />
