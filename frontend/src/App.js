@@ -2011,15 +2011,74 @@ const PublicationsManagementPanel = () => {
                   try {
                     const response = await axios.post(`${API}/upload/ris`, formData);
                     toast.success(response.data.message);
+                    // Refresh publications list
+                    const pubsRes = await axios.get(`${API}/static-publications`);
+                    setStaticPublications(pubsRes.data);
                   } catch (error) {
                     toast.error('Error uploading RIS file');
                   }
                 }}
-                className="w-full p-3 border border-dashed border-gray-300 rounded-lg"
+                className="w-full p-3 border border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400"
               />
               <p className="text-sm text-gray-500 mt-2">
-                Export your EndNote library as RIS format and upload here
+                Export your EndNote library as RIS format and upload here. Duplicates (same title and year) will be automatically skipped.
               </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Manage Uploaded Publications</CardTitle>
+              <CardDescription>View and manage publications uploaded from EndNote</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {staticPublications.length > 0 ? (
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {staticPublications.map((pub) => (
+                    <div key={pub.id} className="flex justify-between items-start p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-sm mb-1">{pub.title}</h4>
+                        <p className="text-xs text-gray-600 mb-1">{pub.authors}</p>
+                        <div className="flex items-center space-x-3 text-xs text-gray-500">
+                          <span className="font-medium">{pub.journal}</span>
+                          <span>•</span>
+                          <span>{pub.year}</span>
+                          {pub.doi && (
+                            <>
+                              <span>•</span>
+                              <span>DOI: {pub.doi}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={async () => {
+                          if (!window.confirm('Delete this publication?')) return;
+                          try {
+                            await axios.delete(`${API}/admin/static-publications/${pub.id}`);
+                            toast.success('Publication deleted');
+                            const pubsRes = await axios.get(`${API}/static-publications`);
+                            setStaticPublications(pubsRes.data);
+                          } catch (error) {
+                            toast.error('Error deleting publication');
+                          }
+                        }}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <FileText className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <p className="text-gray-600">No publications uploaded yet</p>
+                  <p className="text-sm text-gray-500">Upload an RIS file to get started</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
