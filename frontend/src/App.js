@@ -1090,14 +1090,15 @@ const SiteSettingsPanel = () => {
               />
             </div>
             <div>
-              <Label htmlFor="supervisor_position">Position</Label>
+              <Label htmlFor="supervisor_position">Title/Position</Label>
               <Input
                 id="supervisor_position"
-                value={settings.supervisor_profile?.position || ''}
+                value={settings.supervisor_profile?.title || settings.supervisor_profile?.position || ''}
                 onChange={(e) => setSettings({
                   ...settings, 
                   supervisor_profile: {
                     ...settings.supervisor_profile,
+                    title: e.target.value,
                     position: e.target.value
                   }
                 })}
