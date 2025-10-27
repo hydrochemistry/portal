@@ -156,15 +156,18 @@ backend:
 
   - task: "Featured Publication with Graphical Abstract"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Endpoint /admin/featured-publication supports graphical_abstract field. Needs testing."
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: Featured publication with graphical abstract working perfectly. GET /api/featured-publication returns current featured publication. POST /api/admin/featured-publication successfully creates new featured publication with graphical abstract. Old featured publications are properly deactivated. Graphical abstract field included in responses. Admin authentication required."
 
   - task: "User Management Endpoints"
     implemented: true
