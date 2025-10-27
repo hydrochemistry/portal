@@ -698,44 +698,7 @@ const HomePage = () => {
         </section>
       )}
 
-      {/* About Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl font-bold mb-6">About Our Research Group</h2>
-              <p className="text-lg text-gray-600 mb-6">
-                The Hydrochemistry Research Group at Universiti Putra Malaysia is a leading center 
-                for environmental chemistry research. Under the direction of Professor Dr. Ahmad Zaharin Aris, 
-                we focus on cutting-edge research in water quality, environmental forensics, and emerging contaminants.
-              </p>
-              <p className="text-lg text-gray-600 mb-6">
-                Our multidisciplinary approach combines analytical chemistry, environmental science, 
-                and sustainable technology to address critical environmental challenges facing our region and the world.
-              </p>
-              <Button asChild>
-                <Link to="/team">Meet Our Team</Link>
-              </Button>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <Beaker className="w-12 h-12 mx-auto text-blue-600 mb-4" />
-                  <h3 className="font-semibold mb-2">Advanced Analytics</h3>
-                  <p className="text-sm text-gray-600">State-of-the-art analytical methods</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <GraduationCap className="w-12 h-12 mx-auto text-green-600 mb-4" />
-                  <h3 className="font-semibold mb-2">Education</h3>
-                  <p className="text-sm text-gray-600">Training the next generation</p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Duplicate About Section removed - keeping only the one positioned at the top */}
 
       {/* Latest News section removed - now using Featured News only */}
     </div>
