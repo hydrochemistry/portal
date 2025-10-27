@@ -975,12 +975,12 @@ def test_scopus_web_scraping_updated():
 
 def main():
     """Main test execution function"""
-    print("🚀 Starting Backend API Testing Suite for Hydrochemistry Research Group")
+    print("🚀 Testing Updated Scopus Web Scraping Implementation")
     print(f"Testing against: {BASE_URL}")
     print("="*80)
     
-    # Step 1: Test Scopus API Integration (NEW TEST)
-    test_scopus_api_integration()
+    # Step 1: Test Updated Scopus Web Scraping Implementation (FOCUSED TEST)
+    test_scopus_web_scraping_updated()
     
     # Step 2: Login as super admin
     token = login_super_admin()
