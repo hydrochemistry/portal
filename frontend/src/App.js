@@ -873,6 +873,15 @@ const SiteSettingsPanel = () => {
             <Label htmlFor="show_hero_section">Show Hero Section on Homepage</Label>
           </div>
           
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="show_research_impact"
+              checked={settings.show_research_impact !== false}
+              onCheckedChange={(checked) => setSettings({...settings, show_research_impact: checked})}
+            />
+            <Label htmlFor="show_research_impact">Show Research Impact on Homepage</Label>
+          </div>
+          
           <div>
             <Label htmlFor="hero_description">Hero Section Description</Label>
             <Textarea
