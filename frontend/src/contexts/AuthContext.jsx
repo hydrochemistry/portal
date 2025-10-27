@@ -60,6 +60,10 @@ export const AuthProvider = ({ children }) => {
     return user && user.role === 'super_admin';
   };
 
+  const isWebAdmin = () => {
+    return user && ['admin', 'super_admin'].includes(user.role);
+  };
+
   return (
     <AuthContext.Provider value={{ user, login, register, logout, isAdmin, isSuperAdmin, loading }}>
       {children}
