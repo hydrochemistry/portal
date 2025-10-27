@@ -87,6 +87,11 @@ const TeamPage = () => {
               <User className="w-12 h-12 text-white" />
             </div>
           )}
+          {member.country && COUNTRY_FLAGS[member.country] && (
+            <div className="absolute top-0 right-0 text-3xl">
+              {COUNTRY_FLAGS[member.country]}
+            </div>
+          )}
           {member.is_supervisor && (
             <Badge className="absolute -top-2 -right-2 bg-yellow-500">Supervisor</Badge>
           )}
