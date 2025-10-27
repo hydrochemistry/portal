@@ -855,6 +855,38 @@ const SiteSettingsPanel = () => {
           </div>
           
           <div>
+            <Label htmlFor="hero_description">Hero Section Description</Label>
+            <Textarea
+              id="hero_description"
+              value={settings.hero_description || ''}
+              onChange={(e) => setSettings({...settings, hero_description: e.target.value})}
+              className="min-h-24"
+              placeholder="Advancing environmental science through innovative research..."
+            />
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="hero_button1_text">Hero Button 1 Text</Label>
+              <Input
+                id="hero_button1_text"
+                value={settings.hero_button1_text || ''}
+                onChange={(e) => setSettings({...settings, hero_button1_text: e.target.value})}
+                placeholder="Explore Our Research"
+              />
+            </div>
+            <div>
+              <Label htmlFor="hero_button2_text">Hero Button 2 Text</Label>
+              <Input
+                id="hero_button2_text"
+                value={settings.hero_button2_text || ''}
+                onChange={(e) => setSettings({...settings, hero_button2_text: e.target.value})}
+                placeholder="Latest Publications"
+              />
+            </div>
+          </div>
+          
+          <div>
             <Label htmlFor="scopus_id">SCOPUS Author ID</Label>
             <Input
               id="scopus_id"
