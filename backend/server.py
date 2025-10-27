@@ -375,9 +375,9 @@ def fetch_scopus_publications_api(author_id: str, limit: int = 10) -> List[dict]
         }
         params = {
             'query': f'AU-ID({author_id})',
-            'sort': 'pubyear desc',
+            'sort': 'coverDate desc',  # Sort by cover date descending
             'count': limit,
-            'field': 'dc:title,dc:creator,prism:publicationName,prism:coverDate,prism:doi,citedby-count,dc:identifier'
+            'field': 'dc:title,author,prism:publicationName,prism:coverDate,prism:doi,citedby-count,dc:identifier,prism:pageRange'
         }
         
         response = requests.get(url, headers=headers, params=params, timeout=10)
@@ -389,15 +389,32 @@ def fetch_scopus_publications_api(author_id: str, limit: int = 10) -> List[dict]
         # Parse Scopus API response
         if 'search-results' in data and 'entry' in data['search-results']:
             for entry in data['search-results']['entry']:
+                # Extract all authors (not just first author)
+                authors_list = []
+                if 'author' in entry and isinstance(entry['author'], list):
+                    for author in entry['author']:
+                        author_name = author.get('authname', '')
+                        if author_name:
+                            authors_list.append(author_name)
+                
+                # Fallback to dc:creator if author list is empty
+                if not authors_list:
+                    dc_creator = entry.get('dc:creator', '')
+                    if dc_creator:
+                        authors_list = [dc_creator]
+                
+                authors_str = ', '.join(authors_list) if authors_list else 'Unknown'
+                
                 # Extract publication details
                 pub = {
                     'title': entry.get('dc:title', 'Untitled'),
-                    'authors': entry.get('dc:creator', 'Unknown'),
+                    'authors': authors_str,
                     'journal': entry.get('prism:publicationName', 'Unknown Journal'),
                     'year': 0,
                     'doi': entry.get('prism:doi', ''),
                     'citations': int(entry.get('citedby-count', 0)),
-                    'scopus_id': entry.get('dc:identifier', '').replace('SCOPUS_ID:', '')
+                    'scopus_id': entry.get('dc:identifier', '').replace('SCOPUS_ID:', ''),
+                    'pages': entry.get('prism:pageRange', '')
                 }
                 
                 # Extract year from coverDate (format: YYYY-MM-DD)
@@ -413,7 +430,7 @@ def fetch_scopus_publications_api(author_id: str, limit: int = 10) -> List[dict]
                 
                 publications.append(pub)
         
-        # Sort by year descending (most recent first) - client-side sorting to ensure proper order
+        # Sort by year descending (most recent first) as additional safeguard
         publications.sort(key=lambda x: x['year'], reverse=True)
         
         logging.info(f"Successfully fetched {len(publications)} publications from Scopus API")
