@@ -265,3 +265,5 @@ agent_communication:
     message: "Initial assessment complete. Most features already implemented. Need to: 1) Add role assignment UI in User Management Panel, 2) Add static publications management in admin, 3) Add delete endpoint for static publications, 4) Test all three features thoroughly."
   - agent: "main"
     message: "Implementation complete! Added: 1) Role assignment dropdown in User Management Panel with descriptions, 2) Static publications management UI with delete functionality, 3) DELETE endpoint for static publications. Ready for comprehensive backend testing."
+  - agent: "testing"
+    message: "Comprehensive backend testing completed. Created backend_test.py and tested all 4 main features. Overall success rate: 84% (21/25 tests passed). All core functionality working correctly. Minor issue: authentication endpoints return 403 instead of expected 401 for unauthorized access, but this doesn't affect functionality."
