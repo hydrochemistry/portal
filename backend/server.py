@@ -259,6 +259,7 @@ class ResearchArea(BaseModel):
     title: str
     description: str
     keywords: List[str]
+    sdgs: List[int] = []
     image_url: Optional[str] = None
 
 # Utility functions
