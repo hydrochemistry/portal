@@ -1160,6 +1160,13 @@ async def get_static_publications(limit: int = 50):
     publications = await db.static_publications.find({}).sort('year', -1).limit(limit).to_list(limit)
     return [StaticPublication(**pub) for pub in publications]
 
+@api_router.post("/admin/static-publications", response_model=StaticPublication)
+async def create_static_publication(pub: StaticPublication, current_user: User = Depends(get_admin_user)):
+    pub_dict = pub.dict()
+    pub_dict['created_at'] = datetime.now(timezone.utc)
+    await db.static_publications.insert_one(pub_dict)
+    return pub
+
 @api_router.delete("/admin/static-publications/{publication_id}")
 async def delete_static_publication(publication_id: str, current_user: User = Depends(get_admin_user)):
     result = await db.static_publications.delete_one({'id': publication_id})
