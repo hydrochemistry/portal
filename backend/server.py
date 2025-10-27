@@ -881,6 +881,39 @@ async def delete_news_article(news_id: str, current_user: User = Depends(get_adm
         raise HTTPException(status_code=404, detail="News article not found")
     return {"message": "News article deleted successfully"}
 
+# Featured publication endpoints
+@api_router.get("/featured-publication")
+async def get_featured_publication():
+    featured = await db.featured_publications.find_one({'is_active': True}, sort=[('created_at', -1)])
+    if not featured:
+        # Return random publication if no featured one is set
+        publications = fetch_scopus_publications_api("22133247800", 10)
+        if publications:
+            import random
+            random_pub = random.choice(publications)
+            random_pub['graphical_abstract'] = None
+            return random_pub
+        return None
+    
+    featured.pop('_id', None)
+    return FeaturedPublication(**featured)
+
+@api_router.post("/admin/featured-publication", response_model=FeaturedPublication)
+async def create_featured_publication(publication: FeaturedPublication, current_user: User = Depends(get_admin_user)):
+    # Deactivate existing featured publications
+    await db.featured_publications.update_many({}, {'$set': {'is_active': False}})
+    
+    # Add new featured publication
+    await db.featured_publications.insert_one(publication.dict())
+    return publication
+
+@api_router.delete("/admin/featured-publication/{pub_id}")
+async def delete_featured_publication(pub_id: str, current_user: User = Depends(get_admin_user)):
+    result = await db.featured_publications.delete_one({'id': pub_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Featured publication not found")
+    return {"message": "Featured publication removed successfully"}
+
 # Page content endpoints
 @api_router.get("/page-content/{page_name}")
 async def get_page_content(page_name: str):
