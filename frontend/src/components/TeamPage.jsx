@@ -199,7 +199,7 @@ const TeamPage = () => {
                 <Card className="overflow-hidden">
                   <CardContent className="p-8">
                     <div className="flex flex-col md:flex-row gap-8">
-                      {principal.photo_url && (
+                      {settings.pi_team_display?.show_photo !== false && principal.photo_url && (
                         <div className="flex-shrink-0">
                           <img 
                             src={principal.photo_url} 
@@ -209,16 +209,20 @@ const TeamPage = () => {
                         </div>
                       )}
                       <div className="flex-1">
-                        <h2 className="text-3xl font-bold mb-2">{principal.name}</h2>
-                        <p className="text-xl text-blue-600 mb-4">{principal.title}</p>
+                        {settings.pi_team_display?.show_name !== false && (
+                          <h2 className="text-3xl font-bold mb-2">{principal.name}</h2>
+                        )}
+                        {settings.pi_team_display?.show_title !== false && principal.title && (
+                          <p className="text-xl text-blue-600 mb-4">{principal.title}</p>
+                        )}
                         
-                        {principal.bio && (
+                        {settings.pi_team_display?.show_bio !== false && principal.bio && (
                           <div className="mb-4">
                             <p className="text-gray-700 leading-relaxed">{principal.bio}</p>
                           </div>
                         )}
 
-                        {principal.education && principal.education.length > 0 && (
+                        {settings.pi_team_display?.show_education !== false && principal.education && principal.education.length > 0 && (
                           <div className="mb-4">
                             <h3 className="font-semibold text-lg mb-2">Education</h3>
                             <ul className="list-disc list-inside space-y-1 text-gray-700">
@@ -229,7 +233,7 @@ const TeamPage = () => {
                           </div>
                         )}
 
-                        {principal.research_interests && principal.research_interests.length > 0 && (
+                        {settings.pi_team_display?.show_research_interests !== false && principal.research_interests && principal.research_interests.length > 0 && (
                           <div className="mb-4">
                             <h3 className="font-semibold text-lg mb-2">Research Interests</h3>
                             <div className="flex flex-wrap gap-2">
@@ -240,7 +244,7 @@ const TeamPage = () => {
                           </div>
                         )}
 
-                        {principal.experience && principal.experience.length > 0 && (
+                        {settings.pi_team_display?.show_experience !== false && principal.experience && principal.experience.length > 0 && (
                           <div className="mb-4">
                             <h3 className="font-semibold text-lg mb-2">Experience</h3>
                             <ul className="list-disc list-inside space-y-1 text-gray-700">
@@ -251,7 +255,7 @@ const TeamPage = () => {
                           </div>
                         )}
 
-                        {principal.awards && principal.awards.length > 0 && (
+                        {settings.pi_team_display?.show_awards !== false && principal.awards && principal.awards.length > 0 && (
                           <div className="mb-4">
                             <h3 className="font-semibold text-lg mb-2">Awards & Recognition</h3>
                             <ul className="list-disc list-inside space-y-1 text-gray-700">
@@ -262,32 +266,34 @@ const TeamPage = () => {
                           </div>
                         )}
 
-                        <div className="space-y-2 mt-4">
-                          {principal.email && (
-                            <div className="flex items-center space-x-2">
-                              <Mail className="w-4 h-4 text-gray-400" />
-                              <a href={`mailto:${principal.email}`} className="text-blue-600 hover:underline">
-                                {principal.email}
-                              </a>
-                            </div>
-                          )}
-                          {principal.google_scholar && (
-                            <div className="flex items-center space-x-2">
-                              <ExternalLink className="w-4 h-4 text-gray-400" />
-                              <a href={principal.google_scholar} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                                Google Scholar
-                              </a>
-                            </div>
-                          )}
-                          {principal.scopus_id && (
-                            <div className="flex items-center space-x-2">
-                              <ExternalLink className="w-4 h-4 text-gray-400" />
-                              <a href={`https://www.scopus.com/authid/detail.uri?authorId=${principal.scopus_id}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                                SCOPUS Profile
-                              </a>
-                            </div>
-                          )}
-                        </div>
+                        {settings.pi_team_display?.show_contact !== false && (
+                          <div className="space-y-2 mt-4">
+                            {principal.email && (
+                              <div className="flex items-center space-x-2">
+                                <Mail className="w-4 h-4 text-gray-400" />
+                                <a href={`mailto:${principal.email}`} className="text-blue-600 hover:underline">
+                                  {principal.email}
+                                </a>
+                              </div>
+                            )}
+                            {principal.google_scholar && (
+                              <div className="flex items-center space-x-2">
+                                <ExternalLink className="w-4 h-4 text-gray-400" />
+                                <a href={principal.google_scholar} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                  Google Scholar
+                                </a>
+                              </div>
+                            )}
+                            {principal.scopus_id && (
+                              <div className="flex items-center space-x-2">
+                                <ExternalLink className="w-4 h-4 text-gray-400" />
+                                <a href={`https://www.scopus.com/authid/detail.uri?authorId=${principal.scopus_id}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                  SCOPUS Profile
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </CardContent>
