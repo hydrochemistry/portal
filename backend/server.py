@@ -375,7 +375,7 @@ def fetch_google_scholar_data(scholar_id: str) -> dict:
     if _scholar_cache['data'] and _scholar_cache['last_fetched']:
         time_diff = datetime.now(timezone.utc) - _scholar_cache['last_fetched']
         if time_diff.total_seconds() < CACHE_DURATION_HOURS * 3600:
-            print(f"Returning cached scholar data")
+            print("Returning cached scholar data")
             return _scholar_cache['data']
     
     # Try web scraping with multiple user agents
@@ -419,7 +419,7 @@ def fetch_google_scholar_data(scholar_id: str) -> dict:
                         _scholar_cache['last_fetched'] = datetime.now(timezone.utc)
                         return data
             elif response.status_code == 429:
-                print(f"Rate limited, trying next user agent...")
+                print("Rate limited, trying next user agent...")
                 continue
         except Exception as e:
             print(f"Error with user agent {user_agent[:50]}: {e}")
