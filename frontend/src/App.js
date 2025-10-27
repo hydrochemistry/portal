@@ -1105,6 +1105,31 @@ const SiteSettingsPanel = () => {
               />
             </div>
           </div>
+
+
+          <div>
+            <Label>Principal Investigator Photo</Label>
+            <ImageUpload 
+              onUpload={(url) => setSettings({
+                ...settings, 
+                supervisor_profile: {
+                  ...settings.supervisor_profile,
+                  photo_url: url
+                }
+              })}
+              label="Upload PI Photo"
+            />
+            {settings.supervisor_profile?.photo_url && (
+              <div className="mt-2">
+                <img 
+                  src={settings.supervisor_profile.photo_url} 
+                  alt="PI Photo" 
+                  className="w-32 h-32 rounded-lg object-cover"
+                />
+              </div>
+            )}
+          </div>
+
           
           <div>
             <Label htmlFor="supervisor_cv">Short CV</Label>
