@@ -1302,7 +1302,7 @@ const TeamManagementPanel = () => {
   });
 
   // Role options based on status
-  const activeRoles = ['Principal', 'Researcher', 'Post-Doctoral', 'PhD Student', 'MS Student', 'Intern', 'Research Assistant', 'Research Attachment'];
+  const activeRoles = ['Principal', 'Researcher', 'Post-Doctoral', 'PhD Student', 'MS Student', 'Intern', 'Research Assistant', 'Research Attachment', 'Collaborator'];
   const alumniRoles = ['Post-Doctoral', 'PhD Student', 'MS Student', 'Intern', 'Research Assistant', 'Research Attachment'];
 
   useEffect(() => {
