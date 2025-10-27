@@ -99,6 +99,10 @@ class SiteSettings(BaseModel):
     supervisor_profile: Dict[str, Any] = {}
     pi_home_display: Dict[str, bool] = {}  # Control what PI info shows on home page
     pi_team_display: Dict[str, bool] = {}  # Control what PI info shows on dedicated Team page
+    about_cards: List[Dict[str, str]] = [
+        {"title": "Advanced Analytics", "description": "State-of-the-art analytical methods"},
+        {"title": "Education", "description": "Training the next generation"}
+    ]
     scopus_author_id: str = "22133247800"
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_by: str = ""
