@@ -953,14 +953,14 @@ def test_scopus_web_scraping_updated():
                 
             else:
                 test_results.add_result(
-                    "Scopus API - Publications Data", 
+                    "Scopus Web Scraping - Publications Data", 
                     False, 
                     "No publications returned from API"
                 )
                 
         else:
             test_results.add_result(
-                "Scopus API - GET Publications (Status)", 
+                "Scopus Web Scraping - GET Publications (Status)", 
                 False, 
                 f"GET publications failed with status {response.status_code}",
                 response.text
@@ -968,9 +968,9 @@ def test_scopus_web_scraping_updated():
             
     except Exception as e:
         test_results.add_result(
-            "Scopus API - Exception", 
+            "Scopus Web Scraping - Exception", 
             False, 
-            f"Scopus API test error: {str(e)}"
+            f"Scopus web scraping test error: {str(e)}"
         )
 
 def main():
