@@ -84,10 +84,13 @@ class Token(BaseModel):
 class SiteSettings(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     logo_url: Optional[str] = None
+    menu_logo_url: Optional[str] = None  # Separate logo for menu/navigation
     lab_name: str = "Hydrochemistry Research Group"
     about_content: str = ""
     about_section_title: str = "About Our Research Group"
     show_hero_section: bool = True
+    show_menu_logo: bool = True  # Toggle to show/hide logo in menu
+    show_lab_info_logo: bool = False  # Toggle to show/hide logo in lab info section
     hero_description: str = "Advancing environmental science through innovative research in hydrochemistry, environmental forensics, and sustainable water management at Universiti Putra Malaysia."
     hero_button1_text: str = "Explore Our Research"
     hero_button2_text: str = "Latest Publications"
