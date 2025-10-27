@@ -210,6 +210,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ TESTED: User management endpoints working perfectly. GET /api/admin/users retrieves all users (super admin only). POST /api/admin/users/{id}/approve successfully approves users. POST /api/admin/users/{id}/role?role=admin successfully changes user roles. Invalid roles rejected with 400. Non-existent users return 404. Super admin authentication enforced. Role endpoint accepts query parameter format correctly."
+      - working: true
+        agent: "testing"
+        comment: "✅ RE-TESTED (User Report: 'Error fetching users'): Investigated specific user report of 'Error fetching users' in admin panel. BACKEND DIAGNOSIS: 1) ✅ Super admin login working (zaharin@upm.edu.my), 2) ✅ Super admin has correct role (super_admin), 3) ✅ GET /api/admin/users endpoint working (returns 4 users), 4) ✅ Authentication and authorization working correctly. ISSUE IDENTIFIED: Backend logs show multiple 401 Unauthorized requests to /api/admin/users, indicating FRONTEND AUTHENTICATION ISSUE. The backend is working correctly - the problem is that the frontend is not sending proper Authorization headers or JWT tokens are expired/invalid. RECOMMENDATION: Check frontend authentication state management, token storage, and ensure Authorization headers are being sent with API requests."
 
   - task: "Settings Update Endpoint"
     implemented: true
