@@ -1456,6 +1456,7 @@ const TeamManagementPanel = () => {
                     </Select>
                   </div>
                 )}
+              </div>
 
               <div>
                 <Label>Email</Label>
