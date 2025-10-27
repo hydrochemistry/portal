@@ -86,6 +86,9 @@ class SiteSettings(BaseModel):
     logo_url: Optional[str] = None
     lab_name: str = "Hydrochemistry Research Group"
     about_content: str = ""
+    hero_description: str = "Advancing environmental science through innovative research in hydrochemistry, environmental forensics, and sustainable water management at Universiti Putra Malaysia."
+    hero_button1_text: str = "Explore Our Research"
+    hero_button2_text: str = "Latest Publications"
     supervisor_profile: Dict[str, Any] = {}
     scopus_author_id: str = "22133247800"
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
