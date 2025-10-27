@@ -91,6 +91,7 @@ class SiteSettings(BaseModel):
     hero_description: str = "Advancing environmental science through innovative research in hydrochemistry, environmental forensics, and sustainable water management at Universiti Putra Malaysia."
     hero_button1_text: str = "Explore Our Research"
     hero_button2_text: str = "Latest Publications"
+    copyright_text: str = "© 2024 Hydrochemistry Research Group, Universiti Putra Malaysia. All rights reserved."
     supervisor_profile: Dict[str, Any] = {}
     scopus_author_id: str = "22133247800"
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
