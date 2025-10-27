@@ -1198,6 +1198,58 @@ const SiteSettingsPanel = () => {
               placeholder="Excellence in Research Award, Organization, Year&#10;Best Paper Award, Conference Name, Year"
             />
           </div>
+
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="supervisor_email">Email</Label>
+              <Input
+                id="supervisor_email"
+                type="email"
+                value={settings.supervisor_profile?.email || ''}
+                onChange={(e) => setSettings({
+                  ...settings, 
+                  supervisor_profile: {
+                    ...settings.supervisor_profile,
+                    email: e.target.value
+                  }
+                })}
+                placeholder="email@university.edu"
+              />
+            </div>
+            <div>
+              <Label htmlFor="supervisor_scopus">SCOPUS ID</Label>
+              <Input
+                id="supervisor_scopus"
+                value={settings.supervisor_profile?.scopus_id || ''}
+                onChange={(e) => setSettings({
+                  ...settings, 
+                  supervisor_profile: {
+                    ...settings.supervisor_profile,
+                    scopus_id: e.target.value
+                  }
+                })}
+                placeholder="12345678900"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="supervisor_scholar">Google Scholar URL</Label>
+            <Input
+              id="supervisor_scholar"
+              value={settings.supervisor_profile?.google_scholar || ''}
+              onChange={(e) => setSettings({
+                ...settings, 
+                supervisor_profile: {
+                  ...settings.supervisor_profile,
+                  google_scholar: e.target.value
+                }
+              })}
+              placeholder="https://scholar.google.com/citations?user=..."
+            />
+          </div>
+
         </CardContent>
 
       </Card>
