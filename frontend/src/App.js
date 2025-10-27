@@ -120,7 +120,7 @@ const Navigation = () => {
     { path: '/contact', label: 'Contact', icon: <Mail className="w-4 h-4" /> }
   ];
 
-  if (isAdmin()) {
+  if (isWebAdmin()) {
     navItems.push({ path: '/admin', label: 'Admin', icon: <Settings className="w-4 h-4" /> });
   }
 
