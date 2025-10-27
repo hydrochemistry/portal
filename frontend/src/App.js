@@ -1116,8 +1116,13 @@ const TeamManagementPanel = () => {
   const [newMember, setNewMember] = useState({
     name: '', position: '', email: '', bio: '', photo_url: '',
     scopus_id: '', google_scholar: '', orcid: '', research_focus: '', 
-    current_work: '', is_supervisor: false, order_index: 0
+    current_work: '', is_supervisor: false, order_index: 0,
+    status: 'active', role: 'Researcher'
   });
+
+  // Role options based on status
+  const activeRoles = ['Principal', 'Researcher', 'Post-Doctoral', 'PhD Student', 'MS Student', 'Intern', 'Research Assistant', 'Research Attachment'];
+  const alumniRoles = ['Post-Doctoral', 'PhD Student', 'MS Student', 'Intern', 'Research Assistant', 'Research Attachment'];
 
   useEffect(() => {
     fetchTeam();
