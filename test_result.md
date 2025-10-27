@@ -111,15 +111,18 @@ user_problem_statement: |
 backend:
   - task: "RIS File Upload Endpoint"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Endpoint /upload/ris already exists with rispy parsing. Needs testing."
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: RIS file upload working correctly. Successfully parsed and saved 3 publications from test RIS file. Duplicate handling works (skips existing publications). Invalid file rejection works (returns 400 for non-RIS files). Admin authentication required and enforced."
 
   - task: "Static Publications Retrieval"
     implemented: true
