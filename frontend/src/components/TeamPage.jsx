@@ -63,22 +63,6 @@ const TeamPage = () => {
     <Card key={member.id} className="overflow-hidden hover:shadow-lg transition-shadow">
       <CardHeader className="text-center">
         <div className="relative mb-4">
-                  {member.photo_url ? (
-                    <img 
-                      src={member.photo_url} 
-                      alt={member.name}
-                      className="w-24 h-24 mx-auto rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-24 h-24 mx-auto bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
-                      <User className="w-12 h-12 text-white" />
-                    </div>
-                  )}
-                  {member.is_supervisor && (
-                    <Badge className="absolute -top-2 -right-2 bg-yellow-500">Supervisor</Badge>
-                  )}
-        </div>
-        <div className="relative mb-4">
           {member.photo_url ? (
             <img 
               src={member.photo_url} 
