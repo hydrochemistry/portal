@@ -67,11 +67,19 @@ const ResearchPage = () => {
     <div className="bg-white py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Research Areas</h1>
+          <h1 className="text-4xl font-bold mb-4">Research</h1>
           <p className="text-xl text-gray-600">Exploring innovative solutions for environmental challenges</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Tabs defaultValue="areas" className="w-full">
+          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3 mb-8">
+            <TabsTrigger value="areas">Research Areas</TabsTrigger>
+            <TabsTrigger value="grants">Research Grants</TabsTrigger>
+            <TabsTrigger value="awards">Research Awards</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="areas">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {researchAreas.length > 0 ? (
             researchAreas.map((area) => (
               <Card key={area.id} className="hover:shadow-lg transition-shadow">
