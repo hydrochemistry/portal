@@ -224,7 +224,6 @@ const TeamPage = () => {
             )}
           </TabsContent>
         </Tabs>
-        </div>
       </div>
     </div>
   );
