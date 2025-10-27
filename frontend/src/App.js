@@ -1158,7 +1158,8 @@ const TeamManagementPanel = () => {
     setNewMember({
       name: '', position: '', email: '', bio: '', photo_url: '',
       scopus_id: '', google_scholar: '', orcid: '', research_focus: '', 
-      current_work: '', is_supervisor: false, order_index: 0
+      current_work: '', is_supervisor: false, order_index: 0,
+      status: 'active', role: 'Researcher'
     });
     setEditingMember(null);
     setShowAddDialog(false);
