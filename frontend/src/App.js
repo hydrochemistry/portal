@@ -905,19 +905,75 @@ const SiteSettingsPanel = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Logo</CardTitle>
-          <CardDescription>Upload your research group logo</CardDescription>
+          <CardTitle>Logo Settings</CardTitle>
+          <CardDescription>Manage logo display in different sections</CardDescription>
         </CardHeader>
-        <CardContent>
-          <ImageUpload 
-            onUpload={(url) => setSettings({...settings, logo_url: url})}
-            label="Upload Lab Logo"
-          />
-          {settings.logo_url && (
-            <div className="mt-4">
-              <img src={settings.logo_url} alt="Lab Logo" className="h-16 object-contain" />
+        <CardContent className="space-y-6">
+          {/* Menu Panel Logo */}
+          <div className="space-y-4 p-4 border rounded-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-base font-semibold">Menu Panel Logo</Label>
+                <p className="text-sm text-gray-500">Logo displayed in the navigation bar</p>
+              </div>
+              <Switch
+                id="show_menu_logo"
+                checked={settings.show_menu_logo !== false}
+                onCheckedChange={(checked) => setSettings({...settings, show_menu_logo: checked})}
+              />
             </div>
-          )}
+            
+            {settings.show_menu_logo !== false && (
+              <>
+                <ImageUpload 
+                  onUpload={(url) => setSettings({...settings, menu_logo_url: url})}
+                  label="Upload Menu Logo (optional - uses Lab Logo if not set)"
+                />
+                {settings.menu_logo_url && (
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-600 mb-2">Menu Logo Preview:</p>
+                    <img src={settings.menu_logo_url} alt="Menu Logo" className="h-12 object-contain" />
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Lab Information Logo */}
+          <div className="space-y-4 p-4 border rounded-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-base font-semibold">Lab Information Logo</Label>
+                <p className="text-sm text-gray-500">Logo displayed in the about/lab info section</p>
+              </div>
+              <Switch
+                id="show_lab_info_logo"
+                checked={settings.show_lab_info_logo === true}
+                onCheckedChange={(checked) => setSettings({...settings, show_lab_info_logo: checked})}
+              />
+            </div>
+            
+            {settings.show_lab_info_logo === true && (
+              <>
+                <ImageUpload 
+                  onUpload={(url) => setSettings({...settings, logo_url: url})}
+                  label="Upload Lab Info Logo"
+                />
+                {settings.logo_url && (
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-600 mb-2">Lab Info Logo Preview:</p>
+                    <img src={settings.logo_url} alt="Lab Logo" className="h-16 object-contain" />
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+          
+          <div className="bg-blue-50 p-3 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <strong>Note:</strong> If Menu Logo is not uploaded, the system will use Lab Info Logo for the menu. You can upload different logos for each section.
+            </p>
+          </div>
         </CardContent>
       </Card>
 
