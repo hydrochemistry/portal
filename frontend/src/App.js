@@ -655,67 +655,6 @@ const HomePage = () => {
         </section>
       )}
 
-      {/* Principal Investigator Profile */}
-      {supervisorProfile && Object.keys(supervisorProfile).length > 0 && (
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-bold text-center mb-12">Principal Investigator</h2>
-            <Card className="max-w-4xl mx-auto">
-              <CardContent className="p-8">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  <div className="lg:col-span-1 text-center">
-                    <div className="w-32 h-32 mx-auto bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mb-4">
-                      <User className="w-16 h-16 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold mb-2">{supervisorProfile.name}</h3>
-                    <p className="text-gray-600 mb-4">{supervisorProfile.position}</p>
-                  </div>
-                  <div className="lg:col-span-2">
-                    <h4 className="font-semibold mb-3">Profile</h4>
-                    <p className="text-gray-600 mb-6">{supervisorProfile.short_cv}</p>
-                    
-                    {supervisorProfile.education && (
-                      <div className="mb-6">
-                        <h4 className="font-semibold mb-3">Education</h4>
-                        <ul className="space-y-1">
-                          {supervisorProfile.education.map((edu, index) => (
-                            <li key={index} className="text-gray-600">• {edu}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    
-                    {supervisorProfile.experience && (
-                      <div className="mb-6">
-                        <h4 className="font-semibold mb-3">Experience</h4>
-                        <ul className="space-y-1">
-                          {supervisorProfile.experience.map((exp, index) => (
-                            <li key={index} className="text-gray-600">• {exp}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    
-                    {supervisorProfile.awards && (
-                      <div>
-                        <h4 className="font-semibold mb-3">Awards & Recognition</h4>
-                        <ul className="space-y-1">
-                          {supervisorProfile.awards.map((award, index) => (
-                            <li key={index} className="text-gray-600">• {award}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-      )}
-
-      {/* Duplicate About Section removed - keeping only the one positioned at the top */}
-
       {/* Latest News section removed - now using Featured News only */}
     </div>
   );
