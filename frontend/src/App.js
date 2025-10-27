@@ -2024,6 +2024,68 @@ const PublicationsManagementPanel = () => {
     }
   };
 
+
+  // Book handlers
+  const handleSaveBook = async () => {
+    try {
+      if (editingBook) {
+        await axios.put(`${API}/admin/books/${editingBook.id}`, newBook);
+        toast.success('Book updated!');
+      } else {
+        await axios.post(`${API}/admin/books`, newBook);
+        toast.success('Book added!');
+      }
+      setShowBookDialog(false);
+      setNewBook({ title: '', authors: '', year: new Date().getFullYear(), publisher: '', link: '', cover_image_url: '' });
+      setEditingBook(null);
+      fetchBooks();
+    } catch (error) {
+      toast.error('Error saving book');
+    }
+  };
+
+  const handleDeleteBook = async (bookId) => {
+    if (!window.confirm('Delete this book?')) return;
+    try {
+      await axios.delete(`${API}/admin/books/${bookId}`);
+      toast.success('Book deleted!');
+      fetchBooks();
+    } catch (error) {
+      toast.error('Error deleting book');
+    }
+  };
+
+  // Intellectual Property handlers
+  const handleSaveIP = async () => {
+    try {
+      if (editingIP) {
+        await axios.put(`${API}/admin/intellectual-properties/${editingIP.id}`, newIP);
+        toast.success('Intellectual property updated!');
+      } else {
+        await axios.post(`${API}/admin/intellectual-properties`, newIP);
+        toast.success('Intellectual property added!');
+      }
+      setShowIPDialog(false);
+      setNewIP({ type: 'Patent', title: '', year: new Date().getFullYear(), synopsis: '' });
+      setEditingIP(null);
+      fetchIntellectualProperties();
+    } catch (error) {
+      toast.error('Error saving intellectual property');
+    }
+  };
+
+  const handleDeleteIP = async (ipId) => {
+    if (!window.confirm('Delete this intellectual property?')) return;
+    try {
+      await axios.delete(`${API}/admin/intellectual-properties/${ipId}`);
+      toast.success('Intellectual property deleted!');
+      fetchIntellectualProperties();
+    } catch (error) {
+      toast.error('Error deleting intellectual property');
+    }
+  };
+
+
   return (
     <div className="space-y-6">
       <Tabs defaultValue="featured">
