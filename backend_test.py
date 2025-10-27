@@ -688,9 +688,16 @@ def test_featured_publication_with_graphical_abstract(token):
             f"Featured publication test error: {str(e)}"
         )
 
-def test_scopus_api_integration():
-    """Test Scopus API integration for publications endpoint - Detailed verification of 10 most recent publications"""
-    print("\n🧪 Testing Scopus API Integration - Detailed Publication Verification...")
+def test_scopus_web_scraping_updated():
+    """Test updated Scopus web scraping implementation - Verify specific expected publication"""
+    print("\n🧪 Testing Updated Scopus Web Scraping Implementation...")
+    print("="*80)
+    print("🎯 SPECIFIC TEST: Verifying expected first publication from Scopus author profile")
+    print("📋 Expected First Publication:")
+    print("   Title: 'Evaluation of calcium-carboxylate MOFs (Ca-MOFs)...'")
+    print("   Authors: Roslan M.Q.J., Aris A.Z., Sukatis F.F., ... Lim H.N., Isa N.M.")
+    print("   Journal: Journal of Environmental Management")
+    print("   Year: 2025")
     print("="*80)
     
     try:
@@ -700,7 +707,7 @@ def test_scopus_api_integration():
         if response.status_code == 200:
             publications = response.json()
             test_results.add_result(
-                "Scopus API - GET Publications (Status)", 
+                "Scopus Web Scraping - GET Publications (Status)", 
                 True, 
                 f"Successfully retrieved {len(publications)} publications"
             )
@@ -708,40 +715,152 @@ def test_scopus_api_integration():
             # Check if exactly 10 publications are returned by default
             if len(publications) == 10:
                 test_results.add_result(
-                    "Scopus API - Default Count (10)", 
+                    "Scopus Web Scraping - Default Count (10)", 
                     True, 
                     "Exactly 10 publications returned by default"
                 )
+                print(f"✅ Retrieved exactly 10 publications as expected")
             else:
                 test_results.add_result(
-                    "Scopus API - Default Count (10)", 
+                    "Scopus Web Scraping - Default Count (10)", 
                     False, 
                     f"Expected 10 publications, got {len(publications)}"
                 )
+                print(f"❌ Expected 10 publications, got {len(publications)}")
             
             if publications:
-                print(f"\n📋 DETAILED PUBLICATION VERIFICATION:")
-                print(f"📊 Total Publications Retrieved: {len(publications)}")
-                print(f"🔗 Scopus Author Profile: https://www.scopus.com/authid/detail.uri?authorId=22133247800")
+                print(f"\n📋 FIRST PUBLICATION (MOST RECENT) VERIFICATION:")
                 print("="*80)
                 
-                # Print ALL 10 publications with detailed information
+                # Check the FIRST publication (most recent)
+                first_pub = publications[0]
+                title = first_pub.get('title', 'N/A')
+                year = first_pub.get('year', 'N/A')
+                authors = first_pub.get('authors', 'N/A')
+                journal = first_pub.get('journal', 'N/A')
+                citations = first_pub.get('citations', 0)
+                doi = first_pub.get('doi', 'N/A')
+                scopus_id = first_pub.get('scopus_id', 'N/A')
+                
+                print(f"📄 FIRST PUBLICATION DETAILS:")
+                print(f"   📝 Title: {title}")
+                print(f"   👥 Authors: {authors}")
+                print(f"   📚 Journal: {journal}")
+                print(f"   📅 Year: {year}")
+                print(f"   📊 Citations: {citations}")
+                print(f"   🔗 DOI: {doi}")
+                print(f"   🆔 Scopus ID: {scopus_id}")
+                print("="*80)
+                
+                # Verify expected first publication
+                expected_title_part = "Evaluation of calcium-carboxylate MOFs (Ca-MOFs)"
+                expected_journal = "Journal of Environmental Management"
+                expected_year = 2025
+                expected_authors_parts = ["Roslan", "M.Q.J.", "Aris", "A.Z.", "Sukatis", "F.F.", "Lim", "H.N.", "Isa", "N.M."]
+                
+                # Check title match
+                title_match = expected_title_part.lower() in title.lower()
+                if title_match:
+                    print(f"✅ TITLE MATCH: Found expected title pattern")
+                    test_results.add_result(
+                        "Scopus Web Scraping - Expected Title Match", 
+                        True, 
+                        f"Title contains expected pattern: '{expected_title_part}'"
+                    )
+                else:
+                    print(f"❌ TITLE MISMATCH: Expected pattern '{expected_title_part}' not found")
+                    test_results.add_result(
+                        "Scopus Web Scraping - Expected Title Match", 
+                        False, 
+                        f"Title does not contain expected pattern. Got: '{title[:100]}...'"
+                    )
+                
+                # Check journal match
+                journal_match = expected_journal.lower() in journal.lower()
+                if journal_match:
+                    print(f"✅ JOURNAL MATCH: Found expected journal")
+                    test_results.add_result(
+                        "Scopus Web Scraping - Expected Journal Match", 
+                        True, 
+                        f"Journal matches expected: '{expected_journal}'"
+                    )
+                else:
+                    print(f"❌ JOURNAL MISMATCH: Expected '{expected_journal}', got '{journal}'")
+                    test_results.add_result(
+                        "Scopus Web Scraping - Expected Journal Match", 
+                        False, 
+                        f"Journal mismatch. Expected: '{expected_journal}', Got: '{journal}'"
+                    )
+                
+                # Check year match
+                year_match = year == expected_year
+                if year_match:
+                    print(f"✅ YEAR MATCH: Found expected year {expected_year}")
+                    test_results.add_result(
+                        "Scopus Web Scraping - Expected Year Match", 
+                        True, 
+                        f"Year matches expected: {expected_year}"
+                    )
+                else:
+                    print(f"❌ YEAR MISMATCH: Expected {expected_year}, got {year}")
+                    test_results.add_result(
+                        "Scopus Web Scraping - Expected Year Match", 
+                        False, 
+                        f"Year mismatch. Expected: {expected_year}, Got: {year}"
+                    )
+                
+                # Check authors match (partial match for key authors)
+                authors_match_count = 0
+                for author_part in expected_authors_parts:
+                    if author_part in authors:
+                        authors_match_count += 1
+                
+                authors_match = authors_match_count >= 4  # At least 4 key author parts should match
+                if authors_match:
+                    print(f"✅ AUTHORS MATCH: Found {authors_match_count}/{len(expected_authors_parts)} expected author patterns")
+                    test_results.add_result(
+                        "Scopus Web Scraping - Expected Authors Match", 
+                        True, 
+                        f"Authors contain expected patterns ({authors_match_count}/{len(expected_authors_parts)} matches)"
+                    )
+                else:
+                    print(f"❌ AUTHORS MISMATCH: Only found {authors_match_count}/{len(expected_authors_parts)} expected author patterns")
+                    test_results.add_result(
+                        "Scopus Web Scraping - Expected Authors Match", 
+                        False, 
+                        f"Authors do not contain enough expected patterns. Got: '{authors}'"
+                    )
+                
+                # Overall expected publication match
+                overall_match = title_match and journal_match and year_match and authors_match
+                if overall_match:
+                    print(f"\n🎯 OVERALL VERIFICATION: ✅ FIRST PUBLICATION MATCHES EXPECTED DATA")
+                    test_results.add_result(
+                        "Scopus Web Scraping - Expected Publication Verification", 
+                        True, 
+                        "First publication matches all expected criteria from Scopus author profile"
+                    )
+                else:
+                    print(f"\n🎯 OVERALL VERIFICATION: ❌ FIRST PUBLICATION DOES NOT MATCH EXPECTED DATA")
+                    test_results.add_result(
+                        "Scopus Web Scraping - Expected Publication Verification", 
+                        False, 
+                        "First publication does not match expected criteria from Scopus author profile"
+                    )
+                
+                print(f"\n📋 ALL 10 PUBLICATION TITLES WITH YEARS:")
+                print("="*80)
+                
+                # Print ALL 10 publications with titles and years
                 for i, pub in enumerate(publications, 1):
                     title = pub.get('title', 'N/A')
                     year = pub.get('year', 'N/A')
                     authors = pub.get('authors', 'N/A')
                     journal = pub.get('journal', 'N/A')
-                    citations = pub.get('citations', 0)
-                    doi = pub.get('doi', 'N/A')
-                    scopus_id = pub.get('scopus_id', 'N/A')
                     
-                    print(f"📄 Position {i:2d}: {year}")
-                    print(f"   📝 Title: {title[:80]}{'...' if len(title) > 80 else ''}")
-                    print(f"   👥 Authors: {authors}")
-                    print(f"   📚 Journal: {journal}")
-                    print(f"   📊 Citations: {citations}")
-                    print(f"   🔗 DOI: {doi}")
-                    print(f"   🆔 Scopus ID: {scopus_id}")
+                    print(f"📄 {i:2d}. [{year}] {title}")
+                    print(f"      👥 {authors}")
+                    print(f"      📚 {journal}")
                     print("-" * 80)
                 
                 # Check data structure - verify required fields
