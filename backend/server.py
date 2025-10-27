@@ -359,7 +359,7 @@ def fetch_google_scholar_data(scholar_id: str) -> dict:
     }
 
 def fetch_scopus_publications_api(author_id: str, limit: int = 10) -> List[dict]:
-    """Fetch publications from SCOPUS API"""
+    """Fetch publications from SCOPUS API with complete author lists"""
     api_key = os.environ.get('SCOPUS_API_KEY')
     
     if not api_key:
@@ -367,7 +367,7 @@ def fetch_scopus_publications_api(author_id: str, limit: int = 10) -> List[dict]
         return get_mock_scopus_publications(limit)
     
     try:
-        # Scopus API endpoint
+        # Step 1: Fetch publication list from Search API
         url = "https://api.elsevier.com/content/search/scopus"
         headers = {
             'X-ELS-APIKey': api_key,
@@ -377,7 +377,7 @@ def fetch_scopus_publications_api(author_id: str, limit: int = 10) -> List[dict]
             'query': f'AU-ID({author_id})',
             'sort': 'coverDate desc',  # Sort by cover date descending
             'count': limit,
-            'field': 'dc:title,author,dc:creator,prism:publicationName,prism:coverDate,prism:doi,citedby-count,dc:identifier,prism:pageRange'
+            'field': 'dc:title,dc:creator,prism:publicationName,prism:coverDate,prism:doi,citedby-count,dc:identifier,prism:pageRange'
         }
         
         response = requests.get(url, headers=headers, params=params, timeout=10)
@@ -389,41 +389,83 @@ def fetch_scopus_publications_api(author_id: str, limit: int = 10) -> List[dict]
         # Parse Scopus API response
         if 'search-results' in data and 'entry' in data['search-results']:
             for entry in data['search-results']['entry']:
-                # Extract all authors (not just first author)
-                authors_list = []
-                if 'author' in entry and isinstance(entry['author'], list):
-                    for author in entry['author']:
-                        author_name = author.get('authname', '')
-                        if author_name:
-                            authors_list.append(author_name)
+                # Extract basic publication details
+                scopus_id = entry.get('dc:identifier', '').replace('SCOPUS_ID:', '')
                 
-                # Fallback to dc:creator if author list is empty
-                if not authors_list:
-                    dc_creator = entry.get('dc:creator', '')
-                    if dc_creator:
-                        authors_list = [dc_creator]
-                
-                authors_str = ', '.join(authors_list) if authors_list else 'Unknown'
-                
-                # Extract publication details
                 pub = {
                     'title': entry.get('dc:title', 'Untitled'),
-                    'authors': authors_str,
+                    'authors': entry.get('dc:creator', 'Unknown'),  # Will be updated with full list
                     'journal': entry.get('prism:publicationName', 'Unknown Journal'),
                     'year': 0,
                     'doi': entry.get('prism:doi', ''),
                     'citations': int(entry.get('citedby-count', 0)),
-                    'scopus_id': entry.get('dc:identifier', '').replace('SCOPUS_ID:', ''),
+                    'scopus_id': scopus_id,
                     'pages': entry.get('prism:pageRange', '')
                 }
                 
-                # Extract year from coverDate (format: YYYY-MM-DD)
+                # Extract year from coverDate
                 cover_date = entry.get('prism:coverDate', '')
                 if cover_date:
                     try:
                         pub['year'] = int(cover_date.split('-')[0])
                     except (ValueError, IndexError):
                         pub['year'] = 0
+                
+                # Step 2: Fetch complete author list from Abstract Retrieval API
+                if scopus_id:
+                    try:
+                        abstract_url = f"https://api.elsevier.com/content/abstract/scopus_id/{scopus_id}"
+                        abstract_response = requests.get(abstract_url, headers=headers, params={'field': 'authors'}, timeout=5)
+                        
+                        if abstract_response.status_code == 200:
+                            abstract_data = abstract_response.json()
+                            
+                            # Extract all authors from abstract response
+                            authors_list = []
+                            if 'abstracts-retrieval-response' in abstract_data:
+                                abstract_content = abstract_data['abstracts-retrieval-response']
+                                
+                                # Try to get authors from different possible locations in the response
+                                authors_data = None
+                                if 'authors' in abstract_content and 'author' in abstract_content['authors']:
+                                    authors_data = abstract_content['authors']['author']
+                                elif 'coredata' in abstract_content and 'dc:creator' in abstract_content['coredata']:
+                                    creator_data = abstract_content['coredata']['dc:creator']
+                                    if 'author' in creator_data:
+                                        authors_data = creator_data['author']
+                                
+                                if authors_data:
+                                    if isinstance(authors_data, list):
+                                        for author in authors_data:
+                                            if isinstance(author, dict):
+                                                # Try different name fields
+                                                name = None
+                                                if 'ce:indexed-name' in author:
+                                                    name = author['ce:indexed-name']
+                                                elif 'preferred-name' in author:
+                                                    pref = author['preferred-name']
+                                                    if isinstance(pref, dict):
+                                                        given = pref.get('ce:given-name', '')
+                                                        surname = pref.get('ce:surname', '')
+                                                        name = f"{surname} {given}".strip()
+                                                elif 'ce:surname' in author:
+                                                    given = author.get('ce:given-name', author.get('ce:initials', ''))
+                                                    surname = author.get('ce:surname', '')
+                                                    name = f"{surname} {given}".strip()
+                                                
+                                                if name:
+                                                    authors_list.append(name)
+                                    elif isinstance(authors_data, dict):
+                                        # Single author case
+                                        if 'ce:indexed-name' in authors_data:
+                                            authors_list.append(authors_data['ce:indexed-name'])
+                            
+                            if authors_list:
+                                pub['authors'] = ', '.join(authors_list)
+                        
+                    except Exception as e:
+                        logging.warning(f"Could not fetch complete authors for {scopus_id}: {e}")
+                        # Keep the first author from dc:creator
                 
                 # Generate unique ID
                 pub['id'] = str(uuid.uuid4())
@@ -433,7 +475,7 @@ def fetch_scopus_publications_api(author_id: str, limit: int = 10) -> List[dict]
         # Sort by year descending (most recent first) as additional safeguard
         publications.sort(key=lambda x: x['year'], reverse=True)
         
-        logging.info(f"Successfully fetched {len(publications)} publications from Scopus API")
+        logging.info(f"Successfully fetched {len(publications)} publications from Scopus API with complete author lists")
         return publications
         
     except requests.exceptions.RequestException as e:
