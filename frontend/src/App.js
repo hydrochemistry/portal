@@ -2964,14 +2964,14 @@ const ResearchAreasManagementPanel = () => {
                       <div className="flex-1">
                         <h4 className="font-semibold mb-1">{area.title}</h4>
                         <p className="text-sm text-gray-600 mb-2">{area.description}</p>
-                        {area.keywords.length > 0 && (
+                        {area.keywords && area.keywords.length > 0 && (
                           <div className="flex flex-wrap gap-1 mb-2">
                             {area.keywords.map((kw, idx) => (
                               <Badge key={idx} variant="outline" className="text-xs">{kw}</Badge>
                             ))}
                           </div>
                         )}
-                        {area.sdgs.length > 0 && (
+                        {area.sdgs && area.sdgs.length > 0 && (
                           <div className="text-xs text-gray-500">SDGs: {area.sdgs.join(', ')}</div>
                         )}
                       </div>
