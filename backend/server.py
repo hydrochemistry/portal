@@ -98,6 +98,7 @@ class SiteSettings(BaseModel):
     copyright_text: str = "© 2024 Hydrochemistry Research Group, Universiti Putra Malaysia. All rights reserved."
     supervisor_profile: Dict[str, Any] = {}
     pi_home_display: Dict[str, bool] = {}  # Control what PI info shows on home page
+    pi_team_display: Dict[str, bool] = {}  # Control what PI info shows on dedicated Team page
     scopus_author_id: str = "22133247800"
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_by: str = ""
