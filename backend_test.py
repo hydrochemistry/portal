@@ -973,18 +973,203 @@ def test_scopus_web_scraping_updated():
             f"Scopus web scraping test error: {str(e)}"
         )
 
+def test_settings_update_endpoint(token):
+    """Test the settings update endpoint to diagnose the 'Error updating settings' issue"""
+    print("\n🧪 Testing Settings Update Endpoint (PUT /api/admin/settings)...")
+    print("="*80)
+    print("🎯 SPECIFIC TEST: Diagnosing 'Error updating settings' issue")
+    print("📋 Test Steps:")
+    print("   1. Login as super admin")
+    print("   2. GET /api/settings to retrieve current settings")
+    print("   3. PUT updated settings back (change scopus_author_id)")
+    print("   4. Check for any errors in the response")
+    print("   5. Print exact error message and status code if it fails")
+    print("="*80)
+    
+    try:
+        # Step 1: Already logged in (token provided)
+        headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
+        
+        # Step 2: GET current settings
+        print("\n📥 Step 2: Getting current settings...")
+        response = requests.get(f"{BASE_URL}/settings")
+        
+        if response.status_code == 200:
+            current_settings = response.json()
+            test_results.add_result(
+                "Settings Update - GET Current Settings", 
+                True, 
+                "Successfully retrieved current settings"
+            )
+            print(f"✅ Successfully retrieved current settings")
+            print(f"📋 Current settings keys: {list(current_settings.keys())}")
+            print(f"📋 Current scopus_author_id: {current_settings.get('scopus_author_id', 'NOT SET')}")
+            
+            # Step 3: Prepare updated settings (change scopus_author_id)
+            print(f"\n📤 Step 3: Preparing updated settings...")
+            updated_settings = current_settings.copy()
+            
+            # Change scopus_author_id to test the update
+            original_scopus_id = updated_settings.get('scopus_author_id', '22133247800')
+            new_scopus_id = '12345678900' if original_scopus_id == '22133247800' else '22133247800'
+            updated_settings['scopus_author_id'] = new_scopus_id
+            
+            print(f"📝 Original scopus_author_id: {original_scopus_id}")
+            print(f"📝 New scopus_author_id: {new_scopus_id}")
+            
+            # Remove any fields that might cause issues
+            fields_to_remove = ['_id', 'updated_at', 'updated_by']
+            for field in fields_to_remove:
+                updated_settings.pop(field, None)
+            
+            print(f"📋 Updated settings keys: {list(updated_settings.keys())}")
+            
+            # Step 4: PUT updated settings
+            print(f"\n📤 Step 4: Sending PUT request to update settings...")
+            response = requests.put(f"{BASE_URL}/admin/settings", json=updated_settings, headers=headers)
+            
+            print(f"📊 Response Status Code: {response.status_code}")
+            print(f"📊 Response Headers: {dict(response.headers)}")
+            
+            if response.status_code == 200:
+                response_data = response.json()
+                test_results.add_result(
+                    "Settings Update - PUT Settings Success", 
+                    True, 
+                    f"Settings updated successfully. Response: {response_data}"
+                )
+                print(f"✅ Settings updated successfully!")
+                print(f"📋 Response: {response_data}")
+                
+                # Verify the update took effect
+                print(f"\n🔍 Step 5: Verifying settings update...")
+                verify_response = requests.get(f"{BASE_URL}/settings")
+                if verify_response.status_code == 200:
+                    verified_settings = verify_response.json()
+                    if verified_settings.get('scopus_author_id') == new_scopus_id:
+                        test_results.add_result(
+                            "Settings Update - Verification", 
+                            True, 
+                            f"Settings update verified. scopus_author_id changed to {new_scopus_id}"
+                        )
+                        print(f"✅ Settings update verified! scopus_author_id is now: {verified_settings.get('scopus_author_id')}")
+                    else:
+                        test_results.add_result(
+                            "Settings Update - Verification", 
+                            False, 
+                            f"Settings update not reflected. Expected: {new_scopus_id}, Got: {verified_settings.get('scopus_author_id')}"
+                        )
+                        print(f"❌ Settings update not reflected. Expected: {new_scopus_id}, Got: {verified_settings.get('scopus_author_id')}")
+                
+            else:
+                # Step 5: Capture exact error details
+                print(f"❌ Settings update FAILED!")
+                print(f"📊 Status Code: {response.status_code}")
+                
+                try:
+                    error_data = response.json()
+                    print(f"📋 Error Response (JSON): {json.dumps(error_data, indent=2)}")
+                    error_message = error_data.get('detail', str(error_data))
+                except:
+                    error_message = response.text
+                    print(f"📋 Error Response (Text): {error_message}")
+                
+                print(f"📋 Raw Response Content: {response.content}")
+                
+                # Categorize the error
+                error_category = "Unknown Error"
+                if response.status_code == 401:
+                    error_category = "Authentication Error (401) - Invalid or expired token"
+                elif response.status_code == 403:
+                    error_category = "Authorization Error (403) - Insufficient permissions"
+                elif response.status_code == 422:
+                    error_category = "Validation Error (422) - Invalid data format or missing fields"
+                elif response.status_code == 500:
+                    error_category = "Server Error (500) - Internal server error"
+                elif response.status_code == 400:
+                    error_category = "Bad Request (400) - Invalid request format"
+                
+                test_results.add_result(
+                    "Settings Update - PUT Settings Error", 
+                    False, 
+                    f"{error_category}: {error_message}",
+                    f"Status: {response.status_code}, Response: {response.text}"
+                )
+                
+                print(f"🔍 Error Category: {error_category}")
+                print(f"🔍 Error Message: {error_message}")
+                
+                # Additional debugging - check if it's a validation error
+                if response.status_code == 422:
+                    print(f"\n🔍 VALIDATION ERROR ANALYSIS:")
+                    print(f"   This suggests the request data format is invalid")
+                    print(f"   Common causes:")
+                    print(f"   - Missing required fields")
+                    print(f"   - Invalid field types")
+                    print(f"   - Extra fields not allowed by the model")
+                    print(f"   - Date/datetime format issues")
+                
+        else:
+            test_results.add_result(
+                "Settings Update - GET Current Settings", 
+                False, 
+                f"Failed to retrieve current settings. Status: {response.status_code}",
+                response.text
+            )
+            print(f"❌ Failed to retrieve current settings. Status: {response.status_code}")
+            print(f"📋 Response: {response.text}")
+        
+        # Test unauthorized access
+        print(f"\n🔒 Testing unauthorized access...")
+        unauthorized_response = requests.put(f"{BASE_URL}/admin/settings", json={"test": "data"})
+        
+        if unauthorized_response.status_code in [401, 403]:
+            test_results.add_result(
+                "Settings Update - Unauthorized Access", 
+                True, 
+                f"Unauthorized access correctly rejected with status {unauthorized_response.status_code}"
+            )
+            print(f"✅ Unauthorized access correctly rejected with status {unauthorized_response.status_code}")
+        else:
+            test_results.add_result(
+                "Settings Update - Unauthorized Access", 
+                False, 
+                f"Unauthorized access not properly rejected. Got status {unauthorized_response.status_code}",
+                unauthorized_response.text
+            )
+            print(f"❌ Unauthorized access not properly rejected. Got status {unauthorized_response.status_code}")
+            
+    except Exception as e:
+        test_results.add_result(
+            "Settings Update - Exception", 
+            False, 
+            f"Settings update test error: {str(e)}"
+        )
+        print(f"❌ Exception during settings update test: {str(e)}")
+        import traceback
+        print(f"🔍 Full traceback: {traceback.format_exc()}")
+
 def main():
     """Main test execution function"""
-    print("🚀 Testing Updated Scopus Web Scraping Implementation")
+    print("🚀 Testing Settings Update Endpoint")
     print(f"Testing against: {BASE_URL}")
     print("="*80)
     
-    # Step 1: Test Updated Scopus Web Scraping Implementation (FOCUSED TEST)
-    test_scopus_web_scraping_updated()
+    # Step 1: Login as super admin
+    print("🔐 Step 1: Logging in as super admin...")
+    token = login_super_admin()
     
-    # Focus only on Scopus web scraping test as requested
+    if not token:
+        print("❌ Failed to login as super admin. Cannot proceed with settings test.")
+        test_results.print_summary()
+        return
     
-    # Step 5: Print comprehensive results
+    print(f"✅ Successfully logged in as super admin")
+    
+    # Step 2: Test Settings Update Endpoint (FOCUSED TEST)
+    test_settings_update_endpoint(token)
+    
+    # Step 3: Print comprehensive results
     test_results.print_summary()
     
     print(f"\n{'='*60}")
