@@ -2478,33 +2478,6 @@ const PublicationsManagementPanel = () => {
             </DialogContent>
           </Dialog>
         </TabsContent>
-                        label="Upload graphical abstract"
-                      />
-                      {graphicalAbstract && (
-                        <div className="mt-2">
-                          <img 
-                            src={graphicalAbstract} 
-                            alt="Preview" 
-                            className="w-32 h-32 object-cover rounded"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-                
-                <div className="flex justify-end space-x-2">
-                  <Button variant="outline" onClick={() => setShowFeaturedDialog(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleSetFeatured} disabled={!selectedPub}>
-                    Set as Featured
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </TabsContent>
 
         <TabsContent value="upload" className="space-y-6">
           <Card>
