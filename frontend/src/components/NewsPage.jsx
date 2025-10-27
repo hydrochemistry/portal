@@ -112,7 +112,7 @@ const NewsPage = () => {
             <p className="text-xl text-gray-600">Latest developments from our research group</p>
           </div>
           
-          {isAdmin() && (
+          {isWebAdmin() && (
             <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
               <DialogTrigger asChild>
                 <Button onClick={resetForm}>
@@ -229,7 +229,7 @@ const NewsPage = () => {
                         <CardTitle className="text-2xl mb-2">{article.title}</CardTitle>
                         <CardDescription>By {article.author}</CardDescription>
                       </div>
-                      {isAdmin() && (
+                      {isWebAdmin() && (
                         <div className="flex items-center space-x-2">
                           <Button 
                             variant="ghost" 
@@ -263,7 +263,7 @@ const NewsPage = () => {
           <div className="text-center py-12">
             <Calendar className="w-12 h-12 mx-auto text-gray-400 mb-4" />
             <p className="text-gray-600 mb-4">No news articles available yet.</p>
-            {isAdmin() && (
+            {isWebAdmin() && (
               <Button onClick={() => setShowAddDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add First Article
