@@ -887,6 +887,17 @@ const SiteSettingsPanel = () => {
               onChange={(e) => setSettings({...settings, scopus_author_id: e.target.value})}
             />
           </div>
+          
+          <div>
+            <Label htmlFor="copyright_text">Copyright Statement</Label>
+            <Textarea
+              id="copyright_text"
+              value={settings.copyright_text || ''}
+              onChange={(e) => setSettings({...settings, copyright_text: e.target.value})}
+              placeholder="© 2024 Hydrochemistry Research Group, Universiti Putra Malaysia. All rights reserved."
+              className="min-h-16"
+            />
+          </div>
         </CardContent>
       </Card>
 
