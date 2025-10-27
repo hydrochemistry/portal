@@ -7,6 +7,7 @@ import '@/App.css';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import TeamPage from '@/components/TeamPage';
 import ResearchPage from '@/components/ResearchPage';
+import ResearchPage from '@/components/ResearchPage';
 import PublicationsPage from '@/components/PublicationsPage';
 import NewsPage from '@/components/NewsPage';
 import ContactPage from '@/components/ContactPage';
