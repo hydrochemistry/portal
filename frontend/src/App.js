@@ -2590,7 +2590,11 @@ const UserManagementPanel = () => {
       setUsers(response.data);
     } catch (error) {
       console.error('Error fetching users:', error);
-      toast.error('Error fetching users');
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        toast.error('Authentication required. Please log out and log back in.');
+      } else {
+        toast.error('Error fetching users. Please try again.');
+      }
     }
   };
 
