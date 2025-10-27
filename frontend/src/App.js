@@ -737,50 +737,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Recent News */}
-      {Array.isArray(recentNews) && recentNews.length > 0 && (
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center mb-12">
-              <h2 className="text-3xl font-bold">Latest News</h2>
-              <Button variant="outline" asChild>
-                <Link to="/news">View All News</Link>
-              </Button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {recentNews.map((article) => (
-                <Card key={article.id} className="hover:shadow-lg transition-shadow">
-                  {article.image_url && (
-                    <div className="aspect-video">
-                      <img 
-                        src={article.image_url} 
-                        alt={article.title}
-                        className="w-full h-full object-cover rounded-t-lg"
-                      />
-                    </div>
-                  )}
-                  <CardHeader>
-                    <div className="flex items-center space-x-2 text-sm text-gray-500 mb-2">
-                      <Calendar className="w-4 h-4" />
-                      <span>{new Date(article.created_at).toLocaleDateString()}</span>
-                    </div>
-                    <CardTitle className="line-clamp-2">{article.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600 line-clamp-3 mb-4">{article.content}</p>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-500">By {article.author}</span>
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link to={`/news`}>Read More</Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      {/* Latest News section removed - now using Featured News only */}
     </div>
   );
 };
