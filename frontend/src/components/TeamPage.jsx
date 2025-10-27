@@ -216,9 +216,9 @@ const TeamPage = () => {
                           <p className="text-xl text-blue-600 mb-4">{principal.title}</p>
                         )}
                         
-                        {settings.pi_team_display?.show_bio !== false && principal.bio && (
+                        {settings.pi_team_display?.show_bio !== false && (principal.bio || principal.short_cv) && (
                           <div className="mb-4">
-                            <p className="text-gray-700 leading-relaxed">{principal.bio}</p>
+                            <p className="text-gray-700 leading-relaxed">{principal.bio || principal.short_cv}</p>
                           </div>
                         )}
 
