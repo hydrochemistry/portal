@@ -177,8 +177,12 @@ const TeamPage = () => {
           <p className="text-xl text-gray-600">Meet the researchers driving innovation in hydrochemistry</p>
         </div>
 
-        <Tabs defaultValue="active" className="w-full" onValueChange={setActiveTab}>
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8">
+        <Tabs defaultValue="principal" className="w-full" onValueChange={setActiveTab}>
+          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3 mb-8">
+            <TabsTrigger value="principal" className="flex items-center gap-2">
+              <User className="w-4 h-4" />
+              Principal Investigator
+            </TabsTrigger>
             <TabsTrigger value="active" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
               Active Members ({activeMembers.length})
@@ -188,6 +192,92 @@ const TeamPage = () => {
               Alumni ({alumniMembers.length})
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="principal" className="space-y-8">
+            {principal && principal.name ? (
+              <div className="max-w-4xl mx-auto">
+                <Card className="overflow-hidden">
+                  <CardContent className="p-8">
+                    <div className="flex flex-col md:flex-row gap-8">
+                      {principal.photo_url && (
+                        <div className="flex-shrink-0">
+                          <img 
+                            src={principal.photo_url} 
+                            alt={principal.name}
+                            className="w-48 h-48 rounded-lg object-cover shadow-lg"
+                          />
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <h2 className="text-3xl font-bold mb-2">{principal.name}</h2>
+                        <p className="text-xl text-blue-600 mb-4">{principal.title}</p>
+                        
+                        {principal.bio && (
+                          <div className="mb-4">
+                            <p className="text-gray-700 leading-relaxed">{principal.bio}</p>
+                          </div>
+                        )}
+
+                        {principal.education && principal.education.length > 0 && (
+                          <div className="mb-4">
+                            <h3 className="font-semibold text-lg mb-2">Education</h3>
+                            <ul className="list-disc list-inside space-y-1 text-gray-700">
+                              {principal.education.map((edu, idx) => (
+                                <li key={idx}>{edu}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {principal.research_interests && principal.research_interests.length > 0 && (
+                          <div className="mb-4">
+                            <h3 className="font-semibold text-lg mb-2">Research Interests</h3>
+                            <div className="flex flex-wrap gap-2">
+                              {principal.research_interests.map((interest, idx) => (
+                                <Badge key={idx} variant="secondary">{interest}</Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="space-y-2 mt-4">
+                          {principal.email && (
+                            <div className="flex items-center space-x-2">
+                              <Mail className="w-4 h-4 text-gray-400" />
+                              <a href={`mailto:${principal.email}`} className="text-blue-600 hover:underline">
+                                {principal.email}
+                              </a>
+                            </div>
+                          )}
+                          {principal.google_scholar && (
+                            <div className="flex items-center space-x-2">
+                              <ExternalLink className="w-4 h-4 text-gray-400" />
+                              <a href={principal.google_scholar} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                Google Scholar
+                              </a>
+                            </div>
+                          )}
+                          {principal.scopus_id && (
+                            <div className="flex items-center space-x-2">
+                              <ExternalLink className="w-4 h-4 text-gray-400" />
+                              <a href={`https://www.scopus.com/authid/detail.uri?authorId=${principal.scopus_id}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                SCOPUS Profile
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <User className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-600">Principal Investigator information not available.</p>
+              </div>
+            )}
+          </TabsContent>
 
           <TabsContent value="active" className="space-y-8">
             {sortedActiveMembers.length > 0 ? (
