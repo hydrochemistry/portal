@@ -137,7 +137,65 @@ const ResearchPage = () => {
               <p className="text-gray-600">No research areas available yet.</p>
             </div>
           )}
-        </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="grants">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {grants.length > 0 ? (
+                grants.map((grant) => (
+                  <Card key={grant.id} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <DollarSign className="w-5 h-5 text-green-600" />
+                        {grant.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-600 mb-2">{grant.funding_agency}</p>
+                      <p className="text-sm text-gray-500 mb-2">Amount: ${grant.amount?.toLocaleString()}</p>
+                      <p className="text-sm text-gray-500">Period: {grant.start_year} - {grant.end_year}</p>
+                      {grant.description && <p className="text-sm text-gray-600 mt-3">{grant.description}</p>}
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <div className="col-span-3 text-center py-12">
+                  <DollarSign className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                  <p className="text-gray-600">No research grants available yet.</p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="awards">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {awards.length > 0 ? (
+                awards.map((award) => (
+                  <Card key={award.id} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Award className="w-5 h-5 text-yellow-600" />
+                        {award.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-600 mb-2">{award.awarding_organization}</p>
+                      <p className="text-sm text-gray-500 mb-2">Year: {award.year}</p>
+                      {award.recipient && <p className="text-sm text-gray-600">Recipient: {award.recipient}</p>}
+                      {award.description && <p className="text-sm text-gray-600 mt-3">{award.description}</p>}
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <div className="col-span-3 text-center py-12">
+                  <Award className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                  <p className="text-gray-600">No research awards available yet.</p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
