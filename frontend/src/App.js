@@ -97,7 +97,7 @@ const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [settings, setSettings] = useState({});
   const location = useLocation();
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout, isWebAdmin } = useAuth();
 
   useEffect(() => {
     const fetchSettings = async () => {
