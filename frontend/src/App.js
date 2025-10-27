@@ -510,39 +510,53 @@ const HomePage = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               
-              {/* Featured Publications - Left Side */}
-              {featuredPublications.length > 0 && (
-                <div>
-                  <div className="flex items-center mb-6">
-                    <FileText className="w-5 h-5 text-blue-500 mr-2" />
-                    <h2 className="text-2xl font-bold">Featured Publications</h2>
-                  </div>
-                  <div className="space-y-4">
-                    {featuredPublications.slice(0, 5).map((pub) => (
-                      <Card key={pub.id} className="overflow-hidden">
-                        <CardContent className="p-4">
-                          <div className="flex gap-4">
-                            {pub.graphical_abstract && (
-                              <img src={pub.graphical_abstract} alt="Graphic" className="w-20 h-20 object-cover rounded" />
-                            )}
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-2 text-xs text-gray-500 mb-1">
-                                <Badge>{pub.year}</Badge>
-                              </div>
-                              <h3 className="text-sm font-bold mb-1 line-clamp-2">{pub.title}</h3>
-                              <p className="text-xs text-gray-600 line-clamp-1">{pub.authors}</p>
-                              <p className="text-xs text-blue-600 font-medium">{pub.journal}</p>
-                            </div>
+              {/* Featured Publication - Left Side */}
+              {featuredPublications.length > 0 && (() => {
+                const randomPub = featuredPublications[Math.floor(Math.random() * featuredPublications.length)];
+                return (
+                  <div>
+                    <div className="flex items-center mb-6">
+                      <FileText className="w-5 h-5 text-blue-500 mr-2" />
+                      <h2 className="text-2xl font-bold">Featured Publication</h2>
+                    </div>
+                    <Card className="overflow-hidden h-full">
+                      {randomPub.graphical_abstract && (
+                        <div className="aspect-video">
+                          <img 
+                            src={randomPub.graphical_abstract} 
+                            alt="Graphical Abstract"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <CardContent className="p-6">
+                        <div className="flex items-center space-x-2 text-sm text-gray-500 mb-3">
+                          <Badge>{randomPub.year}</Badge>
+                        </div>
+                        <h3 className="text-lg font-bold mb-3 line-clamp-2">{randomPub.title}</h3>
+                        <p className="text-gray-600 text-sm mb-2 line-clamp-2">{randomPub.authors}</p>
+                        <p className="text-blue-600 font-medium text-sm mb-4">{randomPub.journal}</p>
+                        {randomPub.doi && (
+                          <div className="flex items-center space-x-2 mb-4">
+                            <ExternalLink className="w-3 h-3 text-gray-400" />
+                            <a 
+                              href={`https://doi.org/${randomPub.doi}`} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="text-blue-600 hover:underline text-xs"
+                            >
+                              DOI: {randomPub.doi}
+                            </a>
                           </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                        )}
+                        <Button size="sm" asChild>
+                          <Link to="/publications">View All Publications</Link>
+                        </Button>
+                      </CardContent>
+                    </Card>
                   </div>
-                  <Button size="sm" className="mt-4" asChild>
-                    <Link to="/publications">View All Publications</Link>
-                  </Button>
-                </div>
-              )}
+                );
+              })()}
 
               {/* Featured News - Right Side */}
               {featuredNews ? (
