@@ -1198,6 +1198,50 @@ const TeamManagementPanel = () => {
                 </div>
               </div>
               
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Status</Label>
+                  <Select 
+                    value={newMember.status} 
+                    onValueChange={(value) => {
+                      setNewMember({...newMember, status: value});
+                      // Reset role when changing status
+                      if (value === 'alumni' && !alumniRoles.includes(newMember.role)) {
+                        setNewMember({...newMember, status: value, role: 'PhD Student'});
+                      }
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="alumni">Alumni</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label>Role</Label>
+                  <Select 
+                    value={newMember.role} 
+                    onValueChange={(value) => setNewMember({...newMember, role: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(newMember.status === 'alumni' ? alumniRoles : activeRoles).map((role) => (
+                        <SelectItem key={role} value={role}>{role}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {newMember.status === 'alumni' ? 'Former position' : 'Current position in team'}
+                  </p>
+                </div>
+              </div>
+
               <div>
                 <Label>Email</Label>
                 <Input
