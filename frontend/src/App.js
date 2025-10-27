@@ -3001,7 +3001,11 @@ const ResearchAreasManagementPanel = () => {
                           size="sm"
                           onClick={() => {
                             setEditingArea(area);
-                            setNewArea(area);
+                            setNewArea({
+                              ...area,
+                              keywords: area.keywords || [],
+                              sdgs: area.sdgs || []
+                            });
                             setShowDialog(true);
                           }}
                         >
