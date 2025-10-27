@@ -62,25 +62,34 @@ const ResearchPage = () => {
           <p className="text-xl text-gray-600">Exploring innovative solutions for environmental challenges</p>
         </div>
 
-        <div className="space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {researchAreas.length > 0 ? (
             researchAreas.map((area) => (
               <Card key={area.id} className="hover:shadow-lg transition-shadow">
+                {area.image_url && (
+                  <div className="w-full h-48 overflow-hidden">
+                    <img 
+                      src={area.image_url} 
+                      alt={area.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Lightbulb className="w-6 h-6 text-blue-600" />
+                    <Lightbulb className="w-5 h-5 text-blue-600" />
                     {area.title}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 mb-4">{area.description}</p>
+                  <p className="text-gray-700 mb-4 text-sm">{area.description}</p>
                   
                   {area.keywords && area.keywords.length > 0 && (
                     <div className="mb-4">
-                      <h4 className="font-semibold text-sm mb-2">Keywords:</h4>
-                      <div className="flex flex-wrap gap-2">
+                      <h4 className="font-semibold text-xs mb-2">Keywords:</h4>
+                      <div className="flex flex-wrap gap-1">
                         {area.keywords.map((keyword, idx) => (
-                          <Badge key={idx} variant="outline">{keyword}</Badge>
+                          <Badge key={idx} variant="outline" className="text-xs">{keyword}</Badge>
                         ))}
                       </div>
                     </div>
@@ -88,14 +97,14 @@ const ResearchPage = () => {
 
                   {area.sdgs && area.sdgs.length > 0 && (
                     <div>
-                      <h4 className="font-semibold text-sm mb-2">Sustainable Development Goals:</h4>
-                      <div className="flex flex-wrap gap-2">
+                      <h4 className="font-semibold text-xs mb-2">SDGs:</h4>
+                      <div className="flex flex-wrap gap-1">
                         {area.sdgs.map((sdg) => (
                           <img
                             key={sdg}
                             src={SDG_IMAGES[sdg]}
                             alt={`SDG ${sdg}`}
-                            className="w-16 h-16 object-contain"
+                            className="w-12 h-12 object-contain"
                             title={`SDG ${sdg}`}
                           />
                         ))}
@@ -106,7 +115,7 @@ const ResearchPage = () => {
               </Card>
             ))
           ) : (
-            <div className="text-center py-12">
+            <div className="col-span-2 text-center py-12">
               <Lightbulb className="w-16 h-16 mx-auto text-gray-400 mb-4" />
               <p className="text-gray-600">No research areas available yet.</p>
             </div>
