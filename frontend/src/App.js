@@ -396,7 +396,7 @@ const HomePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-white">
       {/* Hero Section */}
       {settings.show_hero_section !== false && (
         <section className="relative bg-gradient-to-br from-blue-50 via-white to-cyan-50 py-20">
