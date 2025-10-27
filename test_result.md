@@ -280,6 +280,7 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Scopus API Integration Testing"
     - "Complete User Management Panel - Role Assignment"
     - "Add Static Publications Management in Admin"
     - "Add Static Publications Delete Endpoint"
