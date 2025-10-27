@@ -113,6 +113,8 @@ class TeamMember(BaseModel):
     research_focus: Optional[str] = None
     current_work: Optional[str] = None
     is_supervisor: bool = False
+    status: str = "active"  # "active" or "alumni"
+    role: str = "Researcher"  # Role/position in the team
     order_index: int = 0
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
