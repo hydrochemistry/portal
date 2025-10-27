@@ -2973,15 +2973,15 @@ const ResearchAreasManagementPanel = () => {
         </CardHeader>
         <CardContent>
           {areas.length > 0 ? (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {areas.map((area) => (
                 <Card key={area.id}>
                   <CardContent className="p-4">
-                    <div className="flex gap-4">
+                    <div className="space-y-3">
                       {area.image_url && (
-                        <img src={area.image_url} alt={area.title} className="w-24 h-24 object-cover rounded" />
+                        <img src={area.image_url} alt={area.title} className="w-full h-32 object-cover rounded" />
                       )}
-                      <div className="flex-1">
+                      <div>
                         <h4 className="font-semibold mb-1">{area.title}</h4>
                         <p className="text-sm text-gray-600 mb-2">{area.description}</p>
                         {area.keywords && area.keywords.length > 0 && (
@@ -2995,7 +2995,7 @@ const ResearchAreasManagementPanel = () => {
                           <div className="text-xs text-gray-500">SDGs: {area.sdgs.join(', ')}</div>
                         )}
                       </div>
-                      <div className="flex flex-col gap-2">
+                      <div className="flex gap-2">
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -3018,6 +3018,13 @@ const ResearchAreasManagementPanel = () => {
                           className="text-red-600 hover:text-red-800"
                         >
                           <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
                         </Button>
                       </div>
                     </div>
