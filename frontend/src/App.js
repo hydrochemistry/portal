@@ -2753,6 +2753,12 @@ const PublicationsManagementPanel = () => {
         </TabsContent>
 
       </Tabs>
+
+
+            <TabsContent value="research">
+              <ResearchAreasManagementPanel />
+            </TabsContent>
+
     </div>
   );
 };
