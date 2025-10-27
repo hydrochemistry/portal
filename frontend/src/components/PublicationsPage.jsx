@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ExternalLink, FileText } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ExternalLink, FileText, BookOpen, Lightbulb, ArrowUpDown } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -11,18 +13,28 @@ const API = `${BACKEND_URL}/api`;
 const PublicationsPage = () => {
   const [publications, setPublications] = useState([]);
   const [staticPublications, setStaticPublications] = useState([]);
+  const [books, setBooks] = useState([]);
+  const [intellectualProperties, setIntellectualProperties] = useState([]);
+  const [settings, setSettings] = useState({});
   const [loading, setLoading] = useState(true);
+  const [sortOrder, setSortOrder] = useState('desc'); // 'desc' or 'asc'
 
   useEffect(() => {
     const fetchPublications = async () => {
       try {
-        const [pubsRes, staticRes] = await Promise.all([
+        const [pubsRes, staticRes, booksRes, ipRes, settingsRes] = await Promise.all([
           axios.get(`${API}/publications`),
-          axios.get(`${API}/static-publications`)
+          axios.get(`${API}/static-publications`),
+          axios.get(`${API}/books`),
+          axios.get(`${API}/intellectual-properties`),
+          axios.get(`${API}/settings`)
         ]);
         
         setPublications(pubsRes.data);
         setStaticPublications(staticRes.data);
+        setBooks(booksRes.data);
+        setIntellectualProperties(ipRes.data);
+        setSettings(settingsRes.data);
       } catch (error) {
         console.error('Error fetching publications:', error);
       } finally {
@@ -32,6 +44,14 @@ const PublicationsPage = () => {
 
     fetchPublications();
   }, []);
+
+  // Sort static publications by year
+  const getSortedPublications = () => {
+    const sorted = [...staticPublications].sort((a, b) => {
+      return sortOrder === 'desc' ? b.year - a.year : a.year - b.year;
+    });
+    return sorted;
+  };
 
   const PublicationCard = ({ pub, isStatic = false }) => (
     <Card className="hover:shadow-lg transition-shadow">
