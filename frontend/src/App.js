@@ -2498,7 +2498,7 @@ const PublicationsManagementPanel = () => {
             <CardHeader>
               <CardTitle>Add Journal Manually</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent id="manual-journal-form" className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Title</Label>
@@ -2544,7 +2544,8 @@ const PublicationsManagementPanel = () => {
                 </div>
               </div>
               <Button onClick={async () => {
-                const inputs = document.querySelectorAll('#manual-journal-form input');
+                const form = document.getElementById('manual-journal-form');
+                const inputs = form.querySelectorAll('input');
                 const data = {
                   title: inputs[0].value,
                   authors: inputs[1].value,
