@@ -2308,6 +2308,269 @@ const PublicationsManagementPanel = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
+
+        {/* Books Tab */}
+        <TabsContent value="books" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>Books</CardTitle>
+                  <CardDescription>Manage published books</CardDescription>
+                </div>
+                <Dialog open={showBookDialog} onOpenChange={setShowBookDialog}>
+                  <DialogTrigger asChild>
+                    <Button onClick={() => {
+                      setEditingBook(null);
+                      setNewBook({ title: '', authors: '', year: new Date().getFullYear(), publisher: '', link: '', cover_image_url: '' });
+                    }}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Book
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>{editingBook ? 'Edit' : 'Add'} Book</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label>Book Title</Label>
+                        <Input
+                          value={newBook.title}
+                          onChange={(e) => setNewBook({...newBook, title: e.target.value})}
+                          placeholder="Enter book title"
+                        />
+                      </div>
+                      <div>
+                        <Label>Authors</Label>
+                        <Input
+                          value={newBook.authors}
+                          onChange={(e) => setNewBook({...newBook, authors: e.target.value})}
+                          placeholder="e.g., John Doe, Jane Smith"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Year</Label>
+                          <Input
+                            type="number"
+                            value={newBook.year}
+                            onChange={(e) => setNewBook({...newBook, year: parseInt(e.target.value)})}
+                          />
+                        </div>
+                        <div>
+                          <Label>Publisher</Label>
+                          <Input
+                            value={newBook.publisher}
+                            onChange={(e) => setNewBook({...newBook, publisher: e.target.value})}
+                            placeholder="Publisher name"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label>Link (Optional)</Label>
+                        <Input
+                          value={newBook.link}
+                          onChange={(e) => setNewBook({...newBook, link: e.target.value})}
+                          placeholder="https://..."
+                        />
+                      </div>
+                      <div>
+                        <Label>Cover Image (Optional)</Label>
+                        <ImageUpload 
+                          onUpload={(url) => setNewBook({...newBook, cover_image_url: url})}
+                          label="Upload book cover"
+                        />
+                        {newBook.cover_image_url && (
+                          <img src={newBook.cover_image_url} alt="Cover" className="w-24 h-32 object-cover mt-2 rounded" />
+                        )}
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowBookDialog(false)}>Cancel</Button>
+                        <Button onClick={handleSaveBook}>Save Book</Button>
+                      </DialogFooter>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {books.length > 0 ? (
+                <div className="space-y-4">
+                  {books.map((book) => (
+                    <div key={book.id} className="flex gap-4 p-4 border rounded-lg hover:bg-gray-50">
+                      {book.cover_image_url && (
+                        <img src={book.cover_image_url} alt="Cover" className="w-20 h-28 object-cover rounded" />
+                      )}
+                      <div className="flex-1">
+                        <h4 className="font-semibold mb-1">{book.title}</h4>
+                        <p className="text-sm text-gray-600 mb-1">{book.authors}</p>
+                        <p className="text-sm text-gray-500">{book.publisher}, {book.year}</p>
+                        {book.link && (
+                          <a href={book.link} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline flex items-center gap-1 mt-2">
+                            <ExternalLink className="w-3 h-3" />
+                            View Book
+                          </a>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setEditingBook(book);
+                            setNewBook(book);
+                            setShowBookDialog(true);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleDeleteBook(book.id)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <FileText className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <p className="text-gray-600">No books added yet</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Intellectual Properties Tab */}
+        <TabsContent value="ip" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>Intellectual Properties</CardTitle>
+                  <CardDescription>Manage patents, copyrights, and other IP</CardDescription>
+                </div>
+                <Dialog open={showIPDialog} onOpenChange={setShowIPDialog}>
+                  <DialogTrigger asChild>
+                    <Button onClick={() => {
+                      setEditingIP(null);
+                      setNewIP({ type: 'Patent', title: '', year: new Date().getFullYear(), synopsis: '' });
+                    }}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add IP
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>{editingIP ? 'Edit' : 'Add'} Intellectual Property</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label>Type of Invention</Label>
+                        <Select 
+                          value={newIP.type} 
+                          onValueChange={(value) => setNewIP({...newIP, type: value})}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Patent">Patent</SelectItem>
+                            <SelectItem value="Copyright">Copyright</SelectItem>
+                            <SelectItem value="Trademark">Trademark</SelectItem>
+                            <SelectItem value="Industrial Design">Industrial Design</SelectItem>
+                            <SelectItem value="Trade Secret">Trade Secret</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Title</Label>
+                        <Input
+                          value={newIP.title}
+                          onChange={(e) => setNewIP({...newIP, title: e.target.value})}
+                          placeholder="Enter IP title"
+                        />
+                      </div>
+                      <div>
+                        <Label>Year</Label>
+                        <Input
+                          type="number"
+                          value={newIP.year}
+                          onChange={(e) => setNewIP({...newIP, year: parseInt(e.target.value)})}
+                        />
+                      </div>
+                      <div>
+                        <Label>Synopsis</Label>
+                        <Textarea
+                          value={newIP.synopsis}
+                          onChange={(e) => setNewIP({...newIP, synopsis: e.target.value})}
+                          placeholder="Brief description of the intellectual property"
+                          rows={4}
+                        />
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowIPDialog(false)}>Cancel</Button>
+                        <Button onClick={handleSaveIP}>Save IP</Button>
+                      </DialogFooter>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {intellectualProperties.length > 0 ? (
+                <div className="space-y-4">
+                  {intellectualProperties.map((ip) => (
+                    <div key={ip.id} className="flex justify-between items-start p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="secondary">{ip.type}</Badge>
+                          <span className="text-sm text-gray-500">{ip.year}</span>
+                        </div>
+                        <h4 className="font-semibold mb-2">{ip.title}</h4>
+                        <p className="text-sm text-gray-600">{ip.synopsis}</p>
+                      </div>
+                      <div className="flex flex-col gap-2 ml-4">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setEditingIP(ip);
+                            setNewIP(ip);
+                            setShowIPDialog(true);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleDeleteIP(ip.id)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <FileText className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <p className="text-gray-600">No intellectual properties added yet</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
       </Tabs>
     </div>
   );
