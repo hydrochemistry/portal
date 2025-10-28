@@ -966,7 +966,7 @@ const SiteSettingsPanel = () => {
               </div>
               <Switch
                 id="show_menu_logo"
-                checked={settings.show_menu_logo !== false}
+                checked={settings.show_menu_logo === undefined || settings.show_menu_logo === true}
                 onCheckedChange={(checked) => setSettings({...settings, show_menu_logo: checked})}
               />
             </div>
@@ -978,12 +978,12 @@ const SiteSettingsPanel = () => {
               </div>
               <Switch
                 id="show_lab_name"
-                checked={settings.show_lab_name !== false}
+                checked={settings.show_lab_name === undefined || settings.show_lab_name === true}
                 onCheckedChange={(checked) => setSettings({...settings, show_lab_name: checked})}
               />
             </div>
             
-            {settings.show_menu_logo !== false && (
+            {(settings.show_menu_logo === undefined || settings.show_menu_logo === true) && (
               <>
                 {settings.menu_logo_url ? (
                   <div className="relative inline-block">
