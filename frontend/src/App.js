@@ -146,16 +146,18 @@ const Navigation = () => {
               <img 
                 src={settings.menu_logo_url || settings.logo_url} 
                 alt="Lab Logo" 
-                className="w-8 h-8 object-contain" 
+                className={settings.show_lab_name === false ? "h-12 object-contain" : "w-8 h-8 object-contain"}
               />
             ) : settings.show_menu_logo !== false ? (
               <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-lg flex items-center justify-center">
                 <Beaker className="w-5 h-5 text-white" />
               </div>
             ) : null}
-            <span className="font-semibold text-xl text-gray-900">
-              {settings.lab_name || 'Hydrochemistry Lab'}
-            </span>
+            {settings.show_lab_name !== false && (
+              <span className="font-semibold text-xl text-gray-900">
+                {settings.lab_name || 'Hydrochemistry Lab'}
+              </span>
+            )}
           </Link>
 
           {/* Desktop Navigation */}
