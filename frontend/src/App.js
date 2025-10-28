@@ -1620,8 +1620,10 @@ const ResearchManagementPanel = () => {
   const [awards, setAwards] = useState([]);
   const [showGrantDialog, setShowGrantDialog] = useState(false);
   const [showAwardDialog, setShowAwardDialog] = useState(false);
+  const [editingGrant, setEditingGrant] = useState(null);
+  const [editingAward, setEditingAward] = useState(null);
   const [newGrant, setNewGrant] = useState({
-    title: '', funding_amount: '', start_year: new Date().getFullYear(),
+    title: '', funding_amount: '', currency: 'USD', start_year: new Date().getFullYear(),
     end_year: new Date().getFullYear(), funding_agency: '', description: ''
   });
   const [newAward, setNewAward] = useState({
