@@ -1936,14 +1936,27 @@ const ResearchManagementPanel = () => {
                       </div>
                       <Badge>{award.year}</Badge>
                     </div>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => deleteAward(award.id)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setEditingAward(award);
+                          setNewAward(award);
+                          setShowAwardDialog(true);
+                        }}
+                      >
+                        Edit
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => deleteAward(award.id)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                   <h4 className="font-semibold mb-2">{award.title}</h4>
                   <p className="text-sm text-gray-600 mb-2">{award.awarding_organization}</p>
