@@ -970,6 +970,18 @@ const SiteSettingsPanel = () => {
                 onCheckedChange={(checked) => setSettings({...settings, show_menu_logo: checked})}
               />
             </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-base font-semibold">Show Lab Name</Label>
+                <p className="text-sm text-gray-500">Display lab name next to logo in menu</p>
+              </div>
+              <Switch
+                id="show_lab_name"
+                checked={settings.show_lab_name !== false}
+                onCheckedChange={(checked) => setSettings({...settings, show_lab_name: checked})}
+              />
+            </div>
             
             {settings.show_menu_logo !== false && (
               <>
