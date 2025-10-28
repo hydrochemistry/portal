@@ -152,9 +152,20 @@ const ResearchPage = () => {
           </TabsContent>
 
           <TabsContent value="grants">
+            <div className="mb-4 flex justify-end">
+              <Select value={grantSort} onValueChange={setGrantSort}>
+                <SelectTrigger className="w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="desc">Latest First</SelectItem>
+                  <SelectItem value="asc">Oldest First</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {grants.length > 0 ? (
-                grants.map((grant) => (
+              {sortedGrants.length > 0 ? (
+                sortedGrants.map((grant) => (
                   <Card key={grant.id} className="hover:shadow-lg transition-shadow">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -164,7 +175,7 @@ const ResearchPage = () => {
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm text-gray-600 mb-2">{grant.funding_agency}</p>
-                      <p className="text-sm text-gray-500 mb-2">Amount: ${grant.amount?.toLocaleString()}</p>
+                      {grant.funding_amount && <p className="text-sm text-gray-500 mb-2">Amount: {grant.currency || 'USD'} {grant.funding_amount}</p>}
                       <p className="text-sm text-gray-500">Period: {grant.start_year} - {grant.end_year}</p>
                       {grant.description && <p className="text-sm text-gray-600 mt-3">{grant.description}</p>}
                     </CardContent>
