@@ -523,11 +523,11 @@ const HomePage = () => {
                     </div>
                     <Card className="overflow-hidden h-full">
                       {randomPub.graphical_abstract && (
-                        <div className="aspect-video">
+                        <div className="aspect-video bg-gray-50 flex items-center justify-center">
                           <img 
                             src={randomPub.graphical_abstract} 
                             alt="Graphical Abstract"
-                            className="w-full h-full object-cover"
+                            className="max-w-full max-h-full object-contain"
                           />
                         </div>
                       )}
