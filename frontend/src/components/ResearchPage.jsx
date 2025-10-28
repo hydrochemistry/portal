@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Lightbulb, Award, DollarSign } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -32,6 +33,8 @@ const ResearchPage = () => {
   const [researchAreas, setResearchAreas] = useState([]);
   const [grants, setGrants] = useState([]);
   const [awards, setAwards] = useState([]);
+  const [grantSort, setGrantSort] = useState('desc');
+  const [awardSort, setAwardSort] = useState('desc');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -54,6 +57,14 @@ const ResearchPage = () => {
 
     fetchData();
   }, []);
+
+  const sortedGrants = [...grants].sort((a, b) => {
+    return grantSort === 'desc' ? b.start_year - a.start_year : a.start_year - b.start_year;
+  });
+
+  const sortedAwards = [...awards].sort((a, b) => {
+    return awardSort === 'desc' ? b.year - a.year : a.year - b.year;
+  });
 
   if (loading) {
     return (
