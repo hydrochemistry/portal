@@ -142,18 +142,18 @@ const Navigation = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            {settings.show_menu_logo !== false && (settings.menu_logo_url || settings.logo_url) ? (
+            {(settings.show_menu_logo === undefined || settings.show_menu_logo === true) && (settings.menu_logo_url || settings.logo_url) ? (
               <img 
                 src={settings.menu_logo_url || settings.logo_url} 
                 alt="Lab Logo" 
-                className={settings.show_lab_name === false ? "h-12 object-contain" : "w-8 h-8 object-contain"}
+                className={(settings.show_lab_name === false) ? "h-12 object-contain" : "w-8 h-8 object-contain"}
               />
-            ) : settings.show_menu_logo !== false ? (
+            ) : (settings.show_menu_logo === undefined || settings.show_menu_logo === true) ? (
               <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-lg flex items-center justify-center">
                 <Beaker className="w-5 h-5 text-white" />
               </div>
             ) : null}
-            {settings.show_lab_name !== false && (
+            {(settings.show_lab_name === undefined || settings.show_lab_name === true) && (
               <span className="font-semibold text-xl text-gray-900">
                 {settings.lab_name || 'Hydrochemistry Lab'}
               </span>
