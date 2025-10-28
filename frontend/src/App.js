@@ -3278,12 +3278,56 @@ const ResearchAreasManagementPanel = () => {
                   </div>
                   <div>
                     <Label>Image</Label>
-                    <ImageUpload 
-                      onUpload={(url) => setNewArea({...newArea, image_url: url})}
-                      label="Upload Research Area Image"
-                    />
-                    {newArea.image_url && (
-                      <img src={newArea.image_url} alt="Preview" className="w-full h-32 object-cover mt-2 rounded" />
+                    {newArea.image_url ? (
+                      <div className="relative inline-block">
+                        <img src={newArea.image_url} alt="Preview" className="w-full h-48 object-cover rounded" />
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            className="h-8 w-8 p-0 rounded-full"
+                            onClick={() => document.getElementById('replace-area-image').click()}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="h-8 w-8 p-0 rounded-full"
+                            onClick={() => setNewArea({...newArea, image_url: ''})}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <input
+                          id="replace-area-image"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              const formData = new FormData();
+                              formData.append('file', file);
+                              try {
+                                const response = await axios.post(`${API}/upload/image`, formData);
+                                setNewArea({...newArea, image_url: response.data.url});
+                                toast.success('Image updated!');
+                              } catch (error) {
+                                toast.error('Upload failed');
+                              }
+                            }
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <ImageUpload 
+                          onUpload={(url) => setNewArea({...newArea, image_url: url})}
+                          label="Upload Research Area Image"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Recommended: 1200 x 600 pixels</p>
+                      </>
                     )}
                   </div>
                   <div>
