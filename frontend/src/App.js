@@ -1724,7 +1724,7 @@ const ResearchManagementPanel = () => {
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Add Research Grant</DialogTitle>
+                  <DialogTitle>{editingGrant ? 'Edit' : 'Add'} Research Grant</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
                   <div>
