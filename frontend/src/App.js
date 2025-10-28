@@ -2772,7 +2772,7 @@ const PublicationsManagementPanel = () => {
                             const formData = new FormData();
                             formData.append('file', file);
                             try {
-                              const response = await axios.post(`${API}/upload/image`, formData);
+                              const response = await axios.post(`${API}/upload/featured-image`, formData);
                               setNewFeatured({...newFeatured, graphical_abstract: response.data.url});
                               toast.success('Graphic updated!');
                             } catch (error) {
@@ -2784,7 +2784,19 @@ const PublicationsManagementPanel = () => {
                     </div>
                   ) : (
                     <>
-                      <ImageUpload onUpload={(url) => setNewFeatured({...newFeatured, graphical_abstract: url})} label="Upload graphic" />
+                      <ImageUpload onUpload={async (url) => {
+                        // Re-upload through featured endpoint to ensure proper sizing
+                        const response = await fetch(url);
+                        const blob = await response.blob();
+                        const formData = new FormData();
+                        formData.append('file', blob, 'image.jpg');
+                        try {
+                          const res = await axios.post(`${API}/upload/featured-image`, formData);
+                          setNewFeatured({...newFeatured, graphical_abstract: res.data.url});
+                        } catch (error) {
+                          setNewFeatured({...newFeatured, graphical_abstract: url});
+                        }
+                      }} label="Upload graphic" />
                       <p className="text-xs text-gray-500 mt-1">Recommended: 800 x 600 pixels</p>
                     </>
                   )}
