@@ -1815,17 +1815,30 @@ const ResearchManagementPanel = () => {
                       <div className="flex items-center space-x-4 text-sm text-gray-500">
                         <span>Duration: {grant.start_year} - {grant.end_year}</span>
                         <span>Agency: {grant.funding_agency}</span>
-                        {grant.funding_amount && <span>Amount: {grant.funding_amount}</span>}
+                        {grant.funding_amount && <span>Amount: {grant.currency || 'USD'} {grant.funding_amount}</span>}
                       </div>
                     </div>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => deleteGrant(grant.id)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setEditingGrant(grant);
+                          setNewGrant(grant);
+                          setShowGrantDialog(true);
+                        }}
+                      >
+                        Edit
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => deleteGrant(grant.id)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
