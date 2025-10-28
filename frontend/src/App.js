@@ -2600,9 +2600,53 @@ const PublicationsManagementPanel = () => {
                 </div>
                 <div>
                   <Label>Graphical Abstract</Label>
-                  <ImageUpload onUpload={(url) => setNewFeatured({...newFeatured, graphical_abstract: url})} label="Upload graphic" />
-                  {newFeatured.graphical_abstract && (
-                    <img src={newFeatured.graphical_abstract} alt="Preview" className="w-32 h-32 object-cover rounded mt-2" />
+                  {newFeatured.graphical_abstract ? (
+                    <div className="relative inline-block">
+                      <img src={newFeatured.graphical_abstract} alt="Preview" className="w-48 h-48 object-cover rounded" />
+                      <div className="absolute top-2 right-2 flex gap-1">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className="h-8 w-8 p-0 rounded-full"
+                          onClick={() => document.getElementById('replace-graphical').click()}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="h-8 w-8 p-0 rounded-full"
+                          onClick={() => setNewFeatured({...newFeatured, graphical_abstract: ''})}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <input
+                        id="replace-graphical"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const formData = new FormData();
+                            formData.append('file', file);
+                            try {
+                              const response = await axios.post(`${API}/upload/image`, formData);
+                              setNewFeatured({...newFeatured, graphical_abstract: response.data.url});
+                              toast.success('Graphic updated!');
+                            } catch (error) {
+                              toast.error('Upload failed');
+                            }
+                          }
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <ImageUpload onUpload={(url) => setNewFeatured({...newFeatured, graphical_abstract: url})} label="Upload graphic" />
+                      <p className="text-xs text-gray-500 mt-1">Recommended: 800 x 600 pixels</p>
+                    </>
                   )}
                 </div>
                 <DialogFooter>
