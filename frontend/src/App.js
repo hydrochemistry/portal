@@ -146,7 +146,8 @@ const Navigation = () => {
               <img 
                 src={settings.menu_logo_url || settings.logo_url} 
                 alt="Lab Logo" 
-                className={(settings.show_lab_name === false) ? "h-12 object-contain" : "w-8 h-8 object-contain"}
+                className={(settings.show_lab_name === false) ? "h-12 object-contain bg-transparent" : "w-8 h-8 object-contain bg-transparent"}
+                style={{ mixBlendMode: 'multiply' }}
               />
             ) : (settings.show_menu_logo === undefined || settings.show_menu_logo === true) ? (
               <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-lg flex items-center justify-center">
