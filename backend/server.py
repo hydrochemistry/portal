@@ -991,6 +991,59 @@ async def upload_image(file: UploadFile = File(...), current_user: User = Depend
     
     return {"url": image_url, "file_id": file_id}
 
+@api_router.post("/upload/featured-image")
+async def upload_featured_image(file: UploadFile = File(...), current_user: User = Depends(get_admin_user)):
+    """Upload and resize image for featured publication (max 800x600)"""
+    if not file.content_type.startswith('image/'):
+        raise HTTPException(status_code=400, detail="File must be an image")
+    
+    from PIL import Image
+    import io
+    
+    # Read image
+    content = await file.read()
+    img = Image.open(io.BytesIO(content))
+    
+    # Get dimensions
+    width, height = img.size
+    target_width, target_height = 800, 600
+    
+    # Only resize if bigger than target
+    if width > target_width or height > target_height:
+        # Calculate aspect ratio
+        aspect = width / height
+        target_aspect = target_width / target_height
+        
+        if aspect > target_aspect:
+            # Width is the limiting factor
+            new_width = target_width
+            new_height = int(target_width / aspect)
+        else:
+            # Height is the limiting factor
+            new_height = target_height
+            new_width = int(target_height * aspect)
+        
+        img = img.resize((new_width, new_height), Image.LANCZOS)
+    
+    # Convert to JPEG
+    output = io.BytesIO()
+    if img.mode in ('RGBA', 'LA', 'P'):
+        img = img.convert('RGB')
+    img.save(output, format='JPEG', quality=85)
+    resized_content = output.getvalue()
+    
+    # Save file
+    file_id = str(uuid.uuid4())
+    file_path = uploads_dir / f"{file_id}.jpg"
+    with open(file_path, 'wb') as f:
+        f.write(resized_content)
+    
+    # Return base64 encoded image
+    image_base64 = base64.b64encode(resized_content).decode('utf-8')
+    image_url = f"data:image/jpeg;base64,{image_base64}"
+    
+    return {"url": image_url, "file_id": file_id}
+
 @api_router.post("/upload/ris")
 async def upload_ris_file(file: UploadFile = File(...), current_user: User = Depends(get_admin_user)):
     if not file.filename.endswith('.ris'):
