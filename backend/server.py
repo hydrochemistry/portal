@@ -130,6 +130,7 @@ class ResearchGrant(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str
     funding_amount: Optional[str] = None
+    currency: str = "USD"
     start_year: int
     end_year: int
     funding_agency: str
