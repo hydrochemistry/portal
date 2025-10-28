@@ -1504,12 +1504,53 @@ const TeamManagementPanel = () => {
               
               <div>
                 <Label>Photo</Label>
-                <ImageUpload 
-                  onUpload={(url) => setNewMember({...newMember, photo_url: url})}
-                  label="Upload member photo"
-                />
-                {newMember.photo_url && (
-                  <img src={newMember.photo_url} alt="Preview" className="w-20 h-20 rounded-full object-cover mt-2" />
+                {newMember.photo_url ? (
+                  <div className="relative inline-block">
+                    <img src={newMember.photo_url} alt="Preview" className="w-32 h-32 rounded-full object-cover" />
+                    <div className="absolute top-0 right-0 flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="h-8 w-8 p-0 rounded-full"
+                        onClick={() => document.getElementById('replace-photo').click()}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="h-8 w-8 p-0 rounded-full"
+                        onClick={() => setNewMember({...newMember, photo_url: ''})}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <input
+                      id="replace-photo"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          const formData = new FormData();
+                          formData.append('file', file);
+                          try {
+                            const response = await axios.post(`${API}/upload/image`, formData);
+                            setNewMember({...newMember, photo_url: response.data.url});
+                            toast.success('Photo updated!');
+                          } catch (error) {
+                            toast.error('Upload failed');
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <ImageUpload 
+                    onUpload={(url) => setNewMember({...newMember, photo_url: url})}
+                    label="Upload member photo"
+                  />
                 )}
               </div>
               
