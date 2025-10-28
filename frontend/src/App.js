@@ -1066,24 +1066,78 @@ const SiteSettingsPanel = () => {
 
           <div>
             <Label>Principal Investigator Photo</Label>
-            <ImageUpload 
-              onUpload={(url) => setSettings({
-                ...settings, 
-                supervisor_profile: {
-                  ...settings.supervisor_profile,
-                  photo_url: url
-                }
-              })}
-              label="Upload PI Photo"
-            />
-            {settings.supervisor_profile?.photo_url && (
-              <div className="mt-2">
+            {settings.supervisor_profile?.photo_url ? (
+              <div className="relative inline-block">
                 <img 
                   src={settings.supervisor_profile.photo_url} 
                   alt="PI Photo" 
-                  className="w-32 h-32 rounded-lg object-cover"
+                  className="w-40 h-40 rounded-lg object-cover"
+                />
+                <div className="absolute top-2 right-2 flex gap-1">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="h-8 w-8 p-0 rounded-full"
+                    onClick={() => document.getElementById('replace-pi-photo').click()}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="h-8 w-8 p-0 rounded-full"
+                    onClick={() => setSettings({
+                      ...settings,
+                      supervisor_profile: {
+                        ...settings.supervisor_profile,
+                        photo_url: ''
+                      }
+                    })}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+                <input
+                  id="replace-pi-photo"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      const formData = new FormData();
+                      formData.append('file', file);
+                      try {
+                        const response = await axios.post(`${API}/upload/image`, formData);
+                        setSettings({
+                          ...settings,
+                          supervisor_profile: {
+                            ...settings.supervisor_profile,
+                            photo_url: response.data.url
+                          }
+                        });
+                        toast.success('Photo updated!');
+                      } catch (error) {
+                        toast.error('Upload failed');
+                      }
+                    }
+                  }}
                 />
               </div>
+            ) : (
+              <>
+                <ImageUpload 
+                  onUpload={(url) => setSettings({
+                    ...settings, 
+                    supervisor_profile: {
+                      ...settings.supervisor_profile,
+                      photo_url: url
+                    }
+                  })}
+                  label="Upload PI Photo"
+                />
+                <p className="text-xs text-gray-500 mt-1">Recommended: 400 x 400 pixels</p>
+              </>
             )}
           </div>
 
