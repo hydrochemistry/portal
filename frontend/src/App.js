@@ -1675,16 +1675,22 @@ const ResearchManagementPanel = () => {
 
   const handleSaveAward = async () => {
     try {
-      await axios.post(`${API}/admin/awards`, newAward);
-      toast.success('Award added successfully!');
+      if (editingAward) {
+        await axios.put(`${API}/admin/awards/${editingAward.id}`, newAward);
+        toast.success('Award updated!');
+      } else {
+        await axios.post(`${API}/admin/awards`, newAward);
+        toast.success('Award added!');
+      }
       setNewAward({
         year: new Date().getFullYear(), title: '', awarding_organization: '', 
         description: '', recipient: 'Prof. Dr. Ahmad Zaharin Aris'
       });
+      setEditingAward(null);
       setShowAwardDialog(false);
       fetchAwards();
     } catch (error) {
-      toast.error('Error adding award');
+      toast.error('Error saving award');
     }
   };
 
