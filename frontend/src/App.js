@@ -2571,6 +2571,36 @@ const PublicationsManagementPanel = () => {
               </div>
             </DialogContent>
           </Dialog>
+
+          <Dialog open={showSelectFromListDialog} onOpenChange={setShowSelectFromListDialog}>
+            <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Select from EndNote Publications</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3">
+                {staticPublications.map((pub) => (
+                  <Card key={pub.id} className="cursor-pointer hover:bg-gray-50" onClick={() => {
+                    axios.post(`${API}/admin/featured-publications`, {...pub, graphical_abstract: ''})
+                      .then(() => {
+                        toast.success('Added to featured!');
+                        setShowSelectFromListDialog(false);
+                        fetchFeaturedPublications();
+                      })
+                      .catch(() => toast.error('Error adding'));
+                  }}>
+                    <CardContent className="p-4">
+                      <h4 className="font-semibold text-sm mb-1">{pub.title}</h4>
+                      <p className="text-xs text-gray-600">{pub.authors}</p>
+                      <p className="text-xs text-blue-600">{pub.journal} ({pub.year})</p>
+                    </CardContent>
+                  </Card>
+                ))}
+                {staticPublications.length === 0 && (
+                  <p className="text-center text-gray-500 py-8">No EndNote publications available. Upload RIS file first.</p>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
         </TabsContent>
 
         <TabsContent value="upload" className="space-y-6">
