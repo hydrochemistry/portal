@@ -2450,14 +2450,20 @@ const PublicationsManagementPanel = () => {
                   <CardDescription>Add up to 5 publications to feature on homepage</CardDescription>
                 </div>
                 {featuredPubs.length < 5 && (
-                  <Button onClick={() => {
-                    setEditingFeatured(null);
-                    setNewFeatured({ title: '', authors: '', journal: '', year: new Date().getFullYear(), volume: '', issue: '', pages: '', doi: '', link: '', graphical_abstract: '' });
-                    setShowFeaturedDialog(true);
-                  }}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Featured
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button onClick={() => {
+                      setEditingFeatured(null);
+                      setNewFeatured({ title: '', authors: '', journal: '', year: new Date().getFullYear(), volume: '', issue: '', pages: '', doi: '', link: '', graphical_abstract: '' });
+                      setShowFeaturedDialog(true);
+                    }}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Manual
+                    </Button>
+                    <Button variant="outline" onClick={() => setShowSelectFromListDialog(true)}>
+                      <FileText className="w-4 h-4 mr-2" />
+                      Select from EndNote
+                    </Button>
+                  </div>
                 )}
               </div>
             </CardHeader>
