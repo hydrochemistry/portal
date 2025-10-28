@@ -191,9 +191,20 @@ const ResearchPage = () => {
           </TabsContent>
 
           <TabsContent value="awards">
+            <div className="mb-4 flex justify-end">
+              <Select value={awardSort} onValueChange={setAwardSort}>
+                <SelectTrigger className="w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="desc">Latest First</SelectItem>
+                  <SelectItem value="asc">Oldest First</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {awards.length > 0 ? (
-                awards.map((award) => (
+              {sortedAwards.length > 0 ? (
+                sortedAwards.map((award) => (
                   <Card key={award.id} className="hover:shadow-lg transition-shadow">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
