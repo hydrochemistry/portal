@@ -1654,16 +1654,22 @@ const ResearchManagementPanel = () => {
 
   const handleSaveGrant = async () => {
     try {
-      await axios.post(`${API}/admin/research-grants`, newGrant);
-      toast.success('Research grant added successfully!');
+      if (editingGrant) {
+        await axios.put(`${API}/admin/research-grants/${editingGrant.id}`, newGrant);
+        toast.success('Research grant updated!');
+      } else {
+        await axios.post(`${API}/admin/research-grants`, newGrant);
+        toast.success('Research grant added!');
+      }
       setNewGrant({
-        title: '', funding_amount: '', start_year: new Date().getFullYear(),
+        title: '', funding_amount: '', currency: 'USD', start_year: new Date().getFullYear(),
         end_year: new Date().getFullYear(), funding_agency: '', description: ''
       });
+      setEditingGrant(null);
       setShowGrantDialog(false);
       fetchGrants();
     } catch (error) {
-      toast.error('Error adding research grant');
+      toast.error('Error saving research grant');
     }
   };
 
