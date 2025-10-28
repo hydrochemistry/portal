@@ -971,15 +971,56 @@ const SiteSettingsPanel = () => {
             
             {settings.show_menu_logo !== false && (
               <>
-                <ImageUpload 
-                  onUpload={(url) => setSettings({...settings, menu_logo_url: url})}
-                  label="Upload Menu Logo (optional - uses Lab Logo if not set)"
-                />
-                {settings.menu_logo_url && (
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-600 mb-2">Menu Logo Preview:</p>
-                    <img src={settings.menu_logo_url} alt="Menu Logo" className="h-12 object-contain" />
+                {settings.menu_logo_url ? (
+                  <div className="relative inline-block">
+                    <img src={settings.menu_logo_url} alt="Menu Logo" className="h-20 object-contain" />
+                    <div className="absolute top-0 right-0 flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="h-8 w-8 p-0 rounded-full"
+                        onClick={() => document.getElementById('replace-menu-logo').click()}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="h-8 w-8 p-0 rounded-full"
+                        onClick={() => setSettings({...settings, menu_logo_url: ''})}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <input
+                      id="replace-menu-logo"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          const formData = new FormData();
+                          formData.append('file', file);
+                          try {
+                            const response = await axios.post(`${API}/upload/image`, formData);
+                            setSettings({...settings, menu_logo_url: response.data.url});
+                            toast.success('Menu logo updated!');
+                          } catch (error) {
+                            toast.error('Upload failed');
+                          }
+                        }
+                      }}
+                    />
                   </div>
+                ) : (
+                  <>
+                    <ImageUpload 
+                      onUpload={(url) => setSettings({...settings, menu_logo_url: url})}
+                      label="Upload Menu Logo (optional - uses Lab Logo if not set)"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Recommended: 300 x 80 pixels (wide logo)</p>
+                  </>
                 )}
               </>
             )}
