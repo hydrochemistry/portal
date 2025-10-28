@@ -2230,6 +2230,7 @@ const PublicationsManagementPanel = () => {
   const [intellectualProperties, setIntellectualProperties] = useState([]);
   const [featuredPubs, setFeaturedPubs] = useState([]);
   const [showFeaturedDialog, setShowFeaturedDialog] = useState(false);
+  const [showSelectFromListDialog, setShowSelectFromListDialog] = useState(false);
   const [editingFeatured, setEditingFeatured] = useState(null);
   const [newFeatured, setNewFeatured] = useState({ title: '', authors: '', journal: '', year: new Date().getFullYear(), volume: '', issue: '', pages: '', doi: '', link: '', graphical_abstract: '' });
   const [showBookDialog, setShowBookDialog] = useState(false);
