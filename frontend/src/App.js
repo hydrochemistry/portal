@@ -1759,13 +1759,34 @@ const ResearchManagementPanel = () => {
                       onChange={(e) => setNewGrant({...newGrant, funding_agency: e.target.value})}
                     />
                   </div>
-                  <div>
-                    <Label>Funding Amount (Optional)</Label>
-                    <Input
-                      value={newGrant.funding_amount}
-                      onChange={(e) => setNewGrant({...newGrant, funding_amount: e.target.value})}
-                      placeholder="e.g., RM 500,000"
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Currency</Label>
+                      <Select 
+                        value={newGrant.currency || 'USD'} 
+                        onValueChange={(value) => setNewGrant({...newGrant, currency: value})}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="USD">USD</SelectItem>
+                          <SelectItem value="MYR">MYR</SelectItem>
+                          <SelectItem value="EUR">EUR</SelectItem>
+                          <SelectItem value="GBP">GBP</SelectItem>
+                          <SelectItem value="SGD">SGD</SelectItem>
+                          <SelectItem value="AUD">AUD</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Funding Amount (Optional)</Label>
+                      <Input
+                        value={newGrant.funding_amount}
+                        onChange={(e) => setNewGrant({...newGrant, funding_amount: e.target.value})}
+                        placeholder="e.g., 500,000"
+                      />
+                    </div>
                   </div>
                   <div>
                     <Label>Description</Label>
