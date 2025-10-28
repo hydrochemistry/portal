@@ -452,13 +452,13 @@ const HomePage = () => {
                 </div>
               )}
               
-              <h2 className="text-3xl font-bold mb-6">
+              <h2 className="text-2xl font-bold mb-6">
                 {settings.about_section_title || 'About Our Research Group'}
               </h2>
-              <p className="text-lg text-gray-600 mb-6">
+              <p className="text-base text-gray-600 mb-6">
                 {settings.about_content || 'The Hydrochemistry Research Group at Universiti Putra Malaysia is a leading center for environmental chemistry research. Under the direction of Professor Dr. Ahmad Zaharin Aris, we focus on cutting-edge research in water quality, environmental forensics, and emerging contaminants.'}
               </p>
-              <p className="text-lg text-gray-600 mb-6">
+              <p className="text-base text-gray-600 mb-6">
                 Our multidisciplinary approach combines analytical chemistry, environmental science, 
                 and sustainable technology to address critical environmental challenges facing our region and the world.
               </p>
