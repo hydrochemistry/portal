@@ -2930,12 +2930,56 @@ const PublicationsManagementPanel = () => {
                       </div>
                       <div>
                         <Label>Cover Image (Optional)</Label>
-                        <ImageUpload 
-                          onUpload={(url) => setNewBook({...newBook, cover_image_url: url})}
-                          label="Upload book cover"
-                        />
-                        {newBook.cover_image_url && (
-                          <img src={newBook.cover_image_url} alt="Cover" className="w-24 h-32 object-cover mt-2 rounded" />
+                        {newBook.cover_image_url ? (
+                          <div className="relative inline-block">
+                            <img src={newBook.cover_image_url} alt="Cover" className="w-32 h-44 object-cover rounded" />
+                            <div className="absolute top-2 right-2 flex gap-1">
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                className="h-8 w-8 p-0 rounded-full"
+                                onClick={() => document.getElementById('replace-book-cover').click()}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                className="h-8 w-8 p-0 rounded-full"
+                                onClick={() => setNewBook({...newBook, cover_image_url: ''})}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <input
+                              id="replace-book-cover"
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={async (e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                  const formData = new FormData();
+                                  formData.append('file', file);
+                                  try {
+                                    const response = await axios.post(`${API}/upload/image`, formData);
+                                    setNewBook({...newBook, cover_image_url: response.data.url});
+                                    toast.success('Cover updated!');
+                                  } catch (error) {
+                                    toast.error('Upload failed');
+                                  }
+                                }
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <>
+                            <ImageUpload 
+                              onUpload={(url) => setNewBook({...newBook, cover_image_url: url})}
+                              label="Upload book cover"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Recommended: 400 x 600 pixels</p>
+                          </>
                         )}
                       </div>
                       <DialogFooter>
