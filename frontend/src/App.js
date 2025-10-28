@@ -1642,10 +1642,13 @@ const TeamManagementPanel = () => {
                     />
                   </div>
                 ) : (
-                  <ImageUpload 
-                    onUpload={(url) => setNewMember({...newMember, photo_url: url})}
-                    label="Upload member photo"
-                  />
+                  <>
+                    <ImageUpload 
+                      onUpload={(url) => setNewMember({...newMember, photo_url: url})}
+                      label="Upload member photo"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Recommended: 400 x 400 pixels</p>
+                  </>
                 )}
               </div>
               
