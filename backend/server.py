@@ -595,8 +595,10 @@ def fetch_scopus_api_fallback(author_id: str, limit: int = 10) -> List[dict]:
                 publications.append(pub)
         
         if publications:
+            # Sort by year descending (newest first)
+            publications.sort(key=lambda x: x.get('year', 0), reverse=True)
             logging.info(f"Successfully fetched {len(publications)} publications from Scopus API")
-            return publications
+            return publications[:limit]  # Return only requested limit
         
     except Exception as e:
         logging.error(f"API fallback also failed: {e}")
