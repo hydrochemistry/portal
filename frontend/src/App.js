@@ -1796,8 +1796,11 @@ const ResearchManagementPanel = () => {
                     />
                   </div>
                   <div className="flex justify-end space-x-2">
-                    <Button variant="outline" onClick={() => setShowGrantDialog(false)}>Cancel</Button>
-                    <Button onClick={handleSaveGrant}>Add Grant</Button>
+                    <Button variant="outline" onClick={() => {
+                      setShowGrantDialog(false);
+                      setEditingGrant(null);
+                    }}>Cancel</Button>
+                    <Button onClick={handleSaveGrant}>{editingGrant ? 'Update' : 'Add'} Grant</Button>
                   </div>
                 </div>
               </DialogContent>
